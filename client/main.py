@@ -37,7 +37,12 @@ while game.running:
 
             # rotate clockwise
             elif event.key == pygame.K_RIGHT:
-                current.rotate('clockwise')
+                current.rotate(0)
+
+            # rotate counter-clockwise
+            elif event.key == pygame.K_LEFT:
+                current.rotate(1)
+
 
             # speed down
             elif event.key == pygame.K_s:

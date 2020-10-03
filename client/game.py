@@ -159,12 +159,7 @@ class Piece(Game):
     
     def render(self):
         # to render preview
-        x, y = self.x, self.y
-
-        while not self.check_floor():
-            self.move(0, 1)
-        self.move(0, -1)
-
+            
 
 
         # for actual piece

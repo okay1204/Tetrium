@@ -8,7 +8,7 @@ pieces = ["T", "L", "BL", "S", "BS", "I", "O"]
 bag = pieces.copy()
 
 
-fall_speed = 0.2 # means once per second
+fall_speed = 1 # means once per second
 last_fall = time.time() + fall_speed
 
 
@@ -16,6 +16,8 @@ current = Piece(5, 1, bag.pop(random.randint(0, len(bag)-1)))
 
 holding = ''
 holdCount = 0
+
+speedUp = False
 while game.running:
 
 
@@ -23,24 +25,43 @@ while game.running:
 
         if event.type == pygame.KEYDOWN:
 
+            # move left
             if event.key == pygame.K_a:
                 if not current.check_left():
                     current.move(-1, 0)
             
+            # move right
             elif event.key == pygame.K_d:
                 if not current.check_right():
                     current.move(1, 0)
 
+            # rotate clockwise
             elif event.key == pygame.K_RIGHT:
                 current.rotate('clockwise')
-                time.sleep(1)
+
+            # speed down
+            elif event.key == pygame.K_s:
+                if not speedUp:
+                    fall_speed /= 10
+                    speedUp = True
+                    last_fall -= 2
             
+            # force down
             elif event.key == pygame.K_DOWN:
                 
                 while not current.check_floor():
                     current.move(0, 1)
 
                 current.move(0,-1)
+                last_fall -= 2
+
+        elif event.type == pygame.KEYUP:
+
+            # stop speed down
+            if event.key == pygame.K_s:
+                if speedUp:
+                    fall_speed *= 10
+                    speedUp = False
                 
 
         elif event.type == pygame.QUIT:

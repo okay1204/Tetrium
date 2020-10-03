@@ -9,8 +9,8 @@ class Game:
     def __init__(self):
         pygame.init()
 
-        self.width = 400
-        self.height = 700
+        self.width = 500
+        self.height = 800
 
         self.running = True
 
@@ -30,7 +30,7 @@ class Game:
 
     def render(self):
         self.screen.fill((0, 0, 0))
-        pygame.draw.rect(self.screen, (93, 110, 105), (50, 50, 300, 600))
+        pygame.draw.rect(self.screen, (93, 110, 105), (100, 100, 300, 600))
 
         for block in self.resting:
             block.render()
@@ -51,6 +51,7 @@ color_key = {
 
 
 def darken(value):
+
     value -= 60
 
     if value < 0: return 0
@@ -73,9 +74,9 @@ class Block(Game):
     def render(self):
 
         darker = tuple(map(darken, self.color))
-        pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 50, (self.y-1)* self.size + 50, 30, 30))
+        pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
 
-        pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 55, (self.y-1)* self.size + 55, 20, 20))
+        pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
 
 
 
@@ -104,18 +105,9 @@ class Piece(Game):
         if self.piece_type == "O": return
 
         if dir == 'clockwise':
-        
-            xNew = self.x * cos(pi/2) - self.y * sin(pi/2)
-            yNew = self.x * sin(pi/2) + self.y * cos(pi/2)
-            self.x = xNew
-            self.y = yNew
-
 
             for block in self.blocks:
-                xNew = block.x * cos(pi/2) - block.y * sin(pi/2)
-                yNew = block.x * sin(pi/2) + block.y * cos(pi/2)
-                block.x = xNew
-                block.y = yNew
+                pass
 
     def check_floor(self):
 
@@ -166,8 +158,20 @@ class Piece(Game):
         
     
     def render(self):
+        # to render preview
+        x, y = self.x, self.y
+
+        while not self.check_floor():
+            self.move(0, 1)
+        self.move(0, -1)
+
+
+
+        # for actual piece
         for block in self.blocks:
             block.render()
+
+
 
 
 if __name__ == "__main__":

@@ -29,11 +29,24 @@ class Game:
     
 
     def render(self):
+        
         self.screen.fill((0, 0, 0))
         pygame.draw.rect(self.screen, (93, 110, 105), (100, 100, 300, 600))
 
         for block in self.resting:
             block.render()
+
+    def show_text(self):
+
+        font = pygame.font.Font('arial.ttf', 32) 
+
+        text = font.render('Whoah', True)
+        textRect = text.get_rect() 
+  
+        # set the center of the rectangular object. 
+        textRect.center = (self.width // 2, self.height // 2) 
+        
+        self.screen.blit(text, textRect)
 
 
 game = Game()
@@ -82,7 +95,12 @@ class Block(Game):
         pygame.draw.rect(game.screen, (255, 255, 255), ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
         pygame.draw.rect(game.screen, (93, 110, 105), ((self.x-1) * self.size + 103, (self.y-1)* self.size + 103, 24, 24))
 
-
+def block_exists(x, y):
+    for block in game.resting:
+        if x == block.x and y == block.y:
+            return True
+    
+    return False
 
 
 class Piece(Game):
@@ -111,22 +129,35 @@ class Piece(Game):
 
         if self.piece_type == "O": return
 
+        block_coords = []
+
         if direct == 0:
             #clockwise
-            
+
             for block in self.blocks:
                 temp_x, temp_y = block.x, block.y
+                block_coords.append((temp_x, temp_y))
+
                 block.x = (-1*(temp_y-self.y) + self.x)
                 block.y = ((temp_x - self.x) + self.y)
+            
 
         else:
             #counter-clockwise
-
+            
             for block in self.blocks:
                 temp_x, temp_y = block.x, block.y
+                block_coords.append((temp_x, temp_y))
                 block.x = (temp_y - self.y + self.x)
                 block.y = (-1*(temp_x - self.x) + self.y)
 
+
+        for block in self.blocks:
+
+            pass
+
+
+            
         
     def check_floor(self):
 
@@ -165,7 +196,7 @@ class Piece(Game):
         for block in self.blocks:
             
             # if hits wall
-            if block.x <= 1:
+            if block.x < 2:
                 return True
 
             # if hits another block

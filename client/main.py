@@ -5,10 +5,14 @@ import time
 import random
 
 pieces = ["T", "L", "BL", "S", "BS", "I", "O"]
+# pieces = ["T", "L", "BL"]
 bag = pieces.copy()
 
 
 fall_speed = 1 # means once per second
+speed_up_rate = 60 # every 60 seconds speed up
+
+
 last_fall = time.time() + fall_speed
 fall = True
 
@@ -16,8 +20,12 @@ current = Piece(5, 1, bag.pop(random.randint(0, len(bag)-1)))
 
 speedUp = False
 
-
 rotations = 0
+
+
+last_speed_up = time.time() + speed_up_rate
+speedLevel = 1
+display_until = 0
 while game.running:
 
     for event in pygame.event.get():
@@ -91,6 +99,13 @@ while game.running:
         
     game.render()
 
+    # speed up fall
+    if time.time() > last_speed_up:
+        last_speed_up = time.time() + speed_up_rate
+        fall_speed /= 1.2
+        speedLevel += 1
+        display_until = time.time() + 3
+
     # makes the piece fall by one
     if time.time() > last_fall:
         last_fall = time.time() + fall_speed
@@ -130,6 +145,15 @@ while game.running:
 
     
     current.render()
+
+    if display_until > time.time():
+        font = pygame.font.Font('arial.ttf', 32) 
+        text = font.render(f'Speed Level {speedLevel}', True, (0, 0 ,0))
+        textRect = text.get_rect() 
+        textRect.center = (game.width // 2, game.height // 2) 
+        game.screen.blit(text, textRect)
+
+
     pygame.display.update()
 
     game.clock.tick(60)

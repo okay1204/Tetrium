@@ -10,16 +10,15 @@ bag = pieces.copy()
 
 fall_speed = 1 # means once per second
 last_fall = time.time() + fall_speed
-
+fall = True
 
 current = Piece(5, 1, bag.pop(random.randint(0, len(bag)-1)))
 
-holding = ''
-holdCount = 0
-
 speedUp = False
-while game.running:
 
+
+rotations = 0
+while game.running:
 
     for event in pygame.event.get():
 
@@ -37,7 +36,15 @@ while game.running:
 
             # rotate clockwise
             elif event.key == pygame.K_RIGHT:
-                current.rotate('clockwise')
+                
+                current.move(0, 1)
+
+                if current.check_floor():
+                    if rotations < 15:
+                        fall = False
+                        rotations += 1
+
+                current.move(0, -1)
 
             # speed down
             elif event.key == pygame.K_s:
@@ -80,31 +87,38 @@ while game.running:
 
         if current.check_floor():
 
-            # turn piece into resting blocks
-            for block in current.blocks:
-                game.resting.append(Block(block.x, block.y-1, block.color, colorByName=False))
+            if fall:
+                # turn piece into resting blocks
+                for block in current.blocks:
+                    game.resting.append(Block(block.x, block.y-1, block.color, colorByName=False))
 
-            
-            # detect if a row was made
-            for y in range(1, 21):
-                row = list(filter(lambda block: block.y == y, game.resting))
+                
+                # detect if a row was made
+                for y in range(1, 21):
+                    row = list(filter(lambda block: block.y == y, game.resting))
 
-                if len(row) == 10:
-                    # remove the row
-                    for block in row:
-                        game.resting.remove(block)
+                    if len(row) == 10:
+                        # remove the row
+                        for block in row:
+                            game.resting.remove(block)
 
-                    for block in game.resting:
-                        if block.y < y:
-                            block.y += 1
-  
-            game.render()
+                        for block in game.resting:
+                            if block.y < y:
+                                block.y += 1
+    
+                game.render()
 
 
-            # make new falling piece
-            current = Piece(5, 1, bag.pop(random.randint(0, len(bag)-1)))
+                # make new falling piece
+                current = Piece(5, 1, bag.pop(random.randint(0, len(bag)-1)))
+                rotations = 0
 
-            
+            else:
+                fall = True
+                current.move(0, -1)
+
+    print(fall)
+    print(rotations)
 
     
     current.render()

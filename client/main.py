@@ -36,15 +36,26 @@ while game.running:
 
             # rotate clockwise
             elif event.key == pygame.K_RIGHT:
-                
-                current.move(0, 1)
+                current.rotate(0)
 
+                current.move(0, 1)
                 if current.check_floor():
                     if rotations < 15:
                         fall = False
                         rotations += 1
-
                 current.move(0, -1)
+
+            # rotate counter-clockwise
+            elif event.key == pygame.K_LEFT:
+                current.rotate(1)
+
+                current.move(0, 1)
+                if current.check_floor():
+                    if rotations < 15:
+                        fall = False
+                        rotations += 1
+                current.move(0, -1)
+
 
             # speed down
             elif event.key == pygame.K_s:
@@ -116,9 +127,6 @@ while game.running:
             else:
                 fall = True
                 current.move(0, -1)
-
-    print(fall)
-    print(rotations)
 
     
     current.render()

@@ -28,13 +28,27 @@ class Game:
         self.resting = []
     
 
-    def render(self):
+    def render(self, pieces):
         
         self.screen.fill((0, 0, 0))
         pygame.draw.rect(self.screen, (93, 110, 105), (100, 100, 300, 600))
 
         for block in self.resting:
             block.render()
+
+        # for piece order
+        for x in range(1, 4):
+            pygame.draw.circle(self.screen, (93, 110, 105), (450, 130*x), 40)
+
+        font = pygame.font.Font('arial.ttf', 32) 
+
+        text = font.render('Next', True, (255, 255 ,255))
+        textRect = text.get_rect()
+  
+        # set the center of the rectangular object. 
+        textRect.center = (450, 60) 
+        
+        self.screen.blit(text, textRect)
 
     def show_text(self):
 

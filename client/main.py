@@ -7,7 +7,9 @@ import random
 pieces = ["T", "L", "BL", "S", "BS", "I", "O"]
 # pieces = ["T", "L", "BL"]
 bag = pieces.copy()
-
+random.shuffle(bag)
+next_bag = pieces.copy()
+random.shuffle(next_bag)
 
 fall_speed = 1 # means once per second
 speed_up_rate = 60 # every 60 seconds speed up
@@ -16,7 +18,7 @@ speed_up_rate = 60 # every 60 seconds speed up
 last_fall = time.time() + fall_speed
 fall = True
 
-current = Piece(5, 1, bag.pop(random.randint(0, len(bag)-1)))
+current = Piece(5, 1, bag.pop(0))
 
 speedUp = False
 
@@ -94,10 +96,22 @@ while game.running:
             game.running = False
     
 
-    if not bag:
-        bag = pieces.copy()
-        
-    game.render()
+    # for getting the next three items
+    if len(bag) >= 3:
+        game.render(bag[:3])
+    elif len(bag) > 0:
+        amount = len(bag)
+
+        temp = bag.copy()
+        temp.extend(next_bag[:3 - amount])
+        game.render(temp)
+    else:
+        bag = next_bag.copy()
+        next_bag = pieces.copy()
+        random.shuffle(next_bag)
+        game.render(bag[:3])
+
+
 
     # speed up fall
     if time.time() > last_speed_up:
@@ -131,12 +145,27 @@ while game.running:
                         for block in game.resting:
                             if block.y < y:
                                 block.y += 1
+
+
     
-                game.render()
+                # for getting the next three items
+                if len(bag) >= 3:
+                    game.render(bag[:3])
+                elif len(bag) > 0:
+                    amount = len(bag)
+
+                    temp = bag.copy()
+                    temp.extend(next_bag[:3 - amount])
+                    game.render(temp)
+                else:
+                    bag = next_bag.copy()
+                    next_bag = pieces.copy()
+                    random.shuffle(next_bag)
+                    game.render(bag[:3])
 
 
                 # make new falling piece
-                current = Piece(5, 1, bag.pop(random.randint(0, len(bag)-1)))
+                current = Piece(5, 1, bag.pop(0))
                 rotations = 0
 
             else:

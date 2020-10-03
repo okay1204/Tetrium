@@ -2,7 +2,7 @@
 
 import pygame
 import pieces
-
+from math import sin, cos, pi
 
 class Game:
 
@@ -85,6 +85,8 @@ class Piece(Game):
 
         self.x, self.y = x, y
 
+        self.piece_type = piece
+
         self.blocks = list(map(lambda args: Block(*args), pieces.get_piece(x, y, piece)))
 
     
@@ -96,6 +98,24 @@ class Piece(Game):
         for block in self.blocks:
             block.x += x
             block.y += y
+
+    def rotate(self, dir):
+
+        if self.piece_type == "O": return
+
+        if dir == 'clockwise':
+        
+            xNew = self.x * cos(pi/2) - self.y * sin(pi/2)
+            yNew = self.x * sin(pi/2) + self.y * cos(pi/2)
+            self.x = xNew
+            self.y = yNew
+
+
+            for block in self.blocks:
+                xNew = block.x * cos(pi/2) - block.y * sin(pi/2)
+                yNew = block.x * sin(pi/2) + block.y * cos(pi/2)
+                block.x = xNew
+                block.y = yNew
 
     def check_floor(self):
 

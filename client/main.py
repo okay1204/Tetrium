@@ -8,7 +8,7 @@ pieces = ["T", "L", "BL", "S", "BS", "I", "O"]
 bag = pieces.copy()
 
 
-fall_speed = 1 # means once per second
+fall_speed = 0.2 # means once per second
 last_fall = time.time() + fall_speed
 
 
@@ -30,6 +30,10 @@ while game.running:
             elif event.key == pygame.K_d:
                 if not current.check_right():
                     current.move(1, 0)
+
+            elif event.key == pygame.K_RIGHT:
+                current.rotate('clockwise')
+                time.sleep(1)
             
             elif event.key == pygame.K_DOWN:
                 

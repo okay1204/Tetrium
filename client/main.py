@@ -58,6 +58,21 @@ while game.running:
             # turn piece into resting blocks
             for block in current.blocks:
                 game.resting.append(Block(block.x, block.y-1, block.color, colorByName=False))
+
+            
+            # detect if a row was made
+            for y in range(1, 21):
+                row = list(filter(lambda block: block.y == y, game.resting))
+
+                if len(row) == 10:
+                    # remove the row
+                    for block in row:
+                        game.resting.remove(block)
+
+                    for block in game.resting:
+                        if block.y < y:
+                            block.y += 1
+  
             game.render()
 
 

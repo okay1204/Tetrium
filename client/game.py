@@ -75,8 +75,13 @@ class Block(Game):
 
         darker = tuple(map(darken, self.color))
         pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-
         pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
+
+    def render_preview(self):
+                                        # white
+        pygame.draw.rect(game.screen, (255, 255, 255), ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
+        pygame.draw.rect(game.screen, (93, 110, 105), ((self.x-1) * self.size + 103, (self.y-1)* self.size + 103, 24, 24))
+
 
 
 
@@ -173,7 +178,22 @@ class Piece(Game):
     
     def render(self):
         # to render preview
-            
+        self.x, self.y
+        
+        downCount = 0
+        while not self.check_floor():
+            self.move(0, 1)
+            downCount += 1
+        self.move(0, -1)
+
+        for block in self.blocks:
+            block.render_preview()
+        
+        for x in range(downCount): # noqa pylint: disable=unused-variable
+            self.move(0, -1)
+
+        self.move(0, 1)
+        
 
 
         # for actual piece

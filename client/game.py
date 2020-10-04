@@ -4,10 +4,12 @@ import pygame
 import pieces
 from math import sin, cos, pi
 
+
 class Game:
 
     def __init__(self):
         pygame.init()
+        self.font = pygame.font.Font('arial.ttf', 32)
 
         self.width = 500
         self.height = 800
@@ -38,11 +40,9 @@ class Game:
 
         # for piece order
         for x in range(1, 4):
-            pygame.draw.circle(self.screen, (93, 110, 105), (450, 130*x), 40)
+            pygame.draw.circle(self.screen, (93, 110, 105), (450, 130*x), 40) 
 
-        font = pygame.font.Font('arial.ttf', 32) 
-
-        text = font.render('Next', True, (255, 255 ,255))
+        text = self.font.render('Next', True, (255, 255 ,255))
         textRect = text.get_rect()
   
         # set the center of the rectangular object. 
@@ -109,12 +109,6 @@ class Block(Game):
         pygame.draw.rect(game.screen, (255, 255, 255), ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
         pygame.draw.rect(game.screen, (93, 110, 105), ((self.x-1) * self.size + 103, (self.y-1)* self.size + 103, 24, 24))
 
-def block_exists(x, y):
-    for block in game.resting:
-        if x == block.x and y == block.y:
-            return True
-    
-    return False
 
 
 class Piece(Game):
@@ -145,6 +139,8 @@ class Piece(Game):
 
         block_coords = []
 
+        x, y = self.x, self.y
+
         if direct == 0:
             #clockwise
 
@@ -168,8 +164,116 @@ class Piece(Game):
 
         for block in self.blocks:
 
-            pass
+            if block.x < 1:
+                self.move(1, 0)
 
+            if block.x > 10:
+                self.move(-1, 0)
+            
+            if block.y > 20:
+                self.move(0, -1)
+
+
+        if self.check_overlap():
+            
+            # up
+            count = 0
+            while self.check_overlap and count < 3:
+                print('test')
+                self.move(0, -1)
+                count += 1
+
+            if not self.check_overlap: return
+
+            # reset
+            for index, block in enumerate(self.blocks):
+                block.x, block.y = block_coords[index]
+                self.x, self.y = x, y
+
+            # right first
+            if direct == 0:
+
+                # right
+                count = 0
+                while self.check_overlap and count < 3:
+                    self.move(1, 0)
+                    count += 1
+
+                if not self.check_overlap: return
+
+                # reset
+                for index, block in enumerate(self.blocks):
+                    block.x, block.y = block_coords[index]
+                    self.x, self.y = x, y
+
+
+                # left
+                count = 0
+                while self.check_overlap and count < 3:
+                    self.move(-1, 0)
+                    count += 1
+
+                if not self.check_overlap: return
+
+                # reset
+                for index, block in enumerate(self.blocks):
+                    block.x, block.y = block_coords[index]
+                    self.x, self.y = x, y
+
+            # left first
+            else:
+
+                # left
+                count = 0
+                while self.check_overlap and count < 3:
+                    self.move(-1, 0)
+                    count += 1
+
+                if not self.check_overlap: return
+
+                # reset
+                for index, block in enumerate(self.blocks):
+                    block.x, block.y = block_coords[index]
+                    self.x, self.y = x, y
+
+                # right
+                count = 0
+                while self.check_overlap and count < 3:
+                    self.move(1, 0)
+                    count += 1
+
+                if not self.check_overlap: return
+
+                # reset
+                for index, block in enumerate(self.blocks):
+                    block.x, block.y = block_coords[index]
+                    self.x, self.y = x, y
+            
+            
+
+        """
+        First move piece in bounds if it is out of bounds.
+        If there is any overlapping conflict, then do the following:
+
+        Check if the piece is ok if it moves two blocks up, if not,
+        Check if it can move right by two blocks if clockwise, or left if counterclockwise,
+        if not,
+        check the other direction.
+        
+        If all of these fail, then the rotation will not occur.
+        """
+
+    
+
+    def check_overlap(self):
+
+        for block in self.blocks:
+            for resting in game.resting:
+
+                if (block.x == resting.x and block.y == resting.y) or (block.y > 20 or block.x < 1 or block.x > 10):
+                    return True
+        
+        return False
 
             
         

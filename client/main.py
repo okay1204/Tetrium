@@ -4,6 +4,7 @@ from game import *
 import time
 import random
 
+
 pieces = ["T", "L", "BL", "S", "BS", "I", "O"]
 # pieces = ["T", "L", "BL"]
 bag = pieces.copy()
@@ -176,8 +177,7 @@ while game.running:
     current.render()
 
     if display_until > time.time():
-        font = pygame.font.Font('arial.ttf', 32) 
-        text = font.render(f'Speed Level {speedLevel}', True, (0, 0 ,0))
+        text = game.font.render(f'Speed Level {speedLevel}', True, (0, 0 ,0))
         textRect = text.get_rect() 
         textRect.center = (game.width // 2, game.height // 2) 
         game.screen.blit(text, textRect)

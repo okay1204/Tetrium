@@ -147,13 +147,14 @@ while game.running:
                     row = list(filter(lambda block: block.y == y, game.resting))
 
                     if len(row) == 10:
-                        # remove the row
+                        # set the fade increments for blocks
                         for block in row:
-                            game.resting.remove(block)
+                            
+                            fade_increments = []
+                            for color in block.color:
+                                fade_increments.append((255 - color) // 15)
 
-                        for block in game.resting:
-                            if block.y < y:
-                                block.y += 1
+                            block.fade_increments = tuple(fade_increments)
 
 
     

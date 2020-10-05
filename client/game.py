@@ -3,6 +3,7 @@
 import pygame
 import pieces as pieces_lib
 from math import sin, cos, pi
+import time
 
 from pieces import preview_piece
 
@@ -40,6 +41,10 @@ class Game:
         # 30px x 30px is one block
 
         self.resting = []
+
+
+        self.removing = [0 for x in range(22)]
+        self.last_removed = 0
     
 
     def render(self, pieces, held=None):
@@ -122,12 +127,44 @@ class Block(Game):
 
         self.size = 30
 
+
+        self.fade_increments = None
+        self.fade_stage = 0
     
     def render(self):
 
-        darker = tuple(map(darken, self.color))
-        pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-        pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
+        # normal
+        if not self.fade_increments:
+            darker = tuple(map(darken, self.color))
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
+            pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
+
+        # fading
+        else:
+
+            if self.fade_stage < 15:
+                color = list(self.color)
+
+                for index, add in enumerate(self.fade_increments):
+                    color[index] = color[index] + add
+                self.color = tuple(color)
+
+                pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
+                self.fade_stage += 1
+
+            elif self.fade_stage >= 15 and time.time() - game.last_removed > 0.1:
+                game.resting.remove(self)
+                game.removing[self.y] += 1
+
+                if game.removing[self.y] >= 10:
+
+                    for block in game.resting:
+                        if block.y < self.y:
+                            block.y += 1
+
+                    game.last_removed = time.time()
+                    game.removing[self.y] = 0
+
 
     def render_preview(self):
                                         # white

@@ -113,16 +113,16 @@ class Piece(Game):
 
         if direct == 0:
             #clockwise
-            
             for block in self.blocks:
+                #Math formula
                 temp_x, temp_y = block.x, block.y
                 block.x = (-1*(temp_y-self.y) + self.x)
                 block.y = ((temp_x - self.x) + self.y)
 
         else:
             #counter-clockwise
-
             for block in self.blocks:
+                #Math formula
                 temp_x, temp_y = block.x, block.y
                 block.x = (temp_y - self.y + self.x)
                 block.y = (-1*(temp_x - self.x) + self.y)

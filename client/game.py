@@ -42,7 +42,6 @@ class Game:
 
 
         self.removing = [0 for x in range(22)]
-        self.last_removed = 0
     
 
     def render(self, pieces, held=None):
@@ -80,7 +79,7 @@ class Game:
         self.screen.blit(text, textRect)
 
         if held:
-            for color, x, y, width, height in pieces_lib.preview_piece(50, 130, piece):
+            for color, x, y, width, height in pieces_lib.preview_piece(50, 130, held):
                 pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
 
 
@@ -146,7 +145,7 @@ class Block(Game):
                 pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
                 self.fade_stage += 1
 
-            elif self.fade_stage >= 15 and time.time() - game.last_removed > 0.1:
+            elif self.fade_stage >= 15:
                 game.resting.remove(self)
                 game.removing[self.y] += 1
 
@@ -156,7 +155,6 @@ class Block(Game):
                         if block.y < self.y:
                             block.y += 1
 
-                    game.last_removed = time.time()
                     game.removing[self.y] = 0
 
 

@@ -82,7 +82,7 @@ class Game:
         self.screen.blit(text, textRect)
 
         if held:
-            for color, x, y, width, height in pieces_lib.preview_piece(50, 130, piece):
+            for color, x, y, width, height in pieces_lib.preview_piece(50, 130, held):
                 pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
 
 

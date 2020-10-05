@@ -1,9 +1,19 @@
 # pylint: disable=no-member
 
 import pygame
-import pieces
+import pieces as pieces_lib
 from math import sin, cos, pi
 
+
+color_key = {
+    'green': (13, 252, 65),
+    'blue': (13, 29, 252),
+    'teal': (15, 246, 250),
+    'red': (250, 15, 15),
+    'orange': (255, 128, 43),
+    'purple': (168, 24, 245),
+    'yellow': (255, 223, 13)
+}
 
 class Game:
 
@@ -45,8 +55,16 @@ class Game:
         text = self.font.render('Next', True, (255, 255 ,255))
         textRect = text.get_rect()
   
-        # set the center of the rectangular object. 
-        textRect.center = (450, 60) 
+        # set the center of the rectangular object
+        textRect.center = (450, 60)
+
+        position = 1
+
+        for piece in pieces:
+            for color, x, y, width, height in pieces_lib.preview_piece(450, position*130, piece):
+                pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
+            
+            position += 1
         
         self.screen.blit(text, textRect)
 
@@ -65,16 +83,6 @@ class Game:
 
 game = Game()
 
-
-color_key = {
-    'green': (13, 252, 65),
-    'blue': (13, 29, 252),
-    'teal': (15, 246, 250),
-    'red': (250, 15, 15),
-    'orange': (255, 128, 43),
-    'purple': (168, 24, 245),
-    'yellow': (255, 223, 13)
-}
 
 
 def darken(value):
@@ -119,7 +127,7 @@ class Piece(Game):
 
         self.piece_type = piece
 
-        self.blocks = list(map(lambda args: Block(*args), pieces.get_piece(x, y, piece)))
+        self.blocks = list(map(lambda args: Block(*args), pieces_lib.get_piece(x, y, piece)))
 
     
     def move(self, x, y):
@@ -132,6 +140,22 @@ class Piece(Game):
             block.y += y
 
 
+    def _path_check(self, block_coords, x, y, maxcount):
+
+        count = 0
+        while self.check_overlap and count < maxcount:
+            self.move(x, y)
+            count += 1
+
+        if not self.check_overlap: return True
+
+        # reset
+        for index, block in enumerate(self.blocks):
+            block.x, block.y = block_coords[index]
+            self.x, self.y = x, y
+
+        return False
+
     #0 means clockwise, 1 means counterclockwise
     def rotate(self, direct: int):
 
@@ -139,7 +163,7 @@ class Piece(Game):
 
         block_coords = []
 
-        x, y = self.x, self.y
+        x, y = self.x, self.y # noqa pylint: disable=unused-variable
 
         if direct == 0:
             #clockwise
@@ -176,79 +200,29 @@ class Piece(Game):
 
         if self.check_overlap():
             
-            # up
-            count = 0
-            while self.check_overlap and count < 3:
-                print('test')
-                self.move(0, -1)
-                count += 1
-
-            if not self.check_overlap: return
-
-            # reset
-            for index, block in enumerate(self.blocks):
-                block.x, block.y = block_coords[index]
-                self.x, self.y = x, y
+            if self._path_check(block_coords, 0, -1, 3): return
 
             # right first
             if direct == 0:
 
-                # right
-                count = 0
-                while self.check_overlap and count < 3:
-                    self.move(1, 0)
-                    count += 1
+                if self._path_check(block_coords, 1, 0, 3): return
 
-                if not self.check_overlap: return
+                if self._path_check(block_coords, 1, -1, 2): return
 
-                # reset
-                for index, block in enumerate(self.blocks):
-                    block.x, block.y = block_coords[index]
-                    self.x, self.y = x, y
+                if self._path_check(block_coords, -1, 0, 3): return
 
-
-                # left
-                count = 0
-                while self.check_overlap and count < 3:
-                    self.move(-1, 0)
-                    count += 1
-
-                if not self.check_overlap: return
-
-                # reset
-                for index, block in enumerate(self.blocks):
-                    block.x, block.y = block_coords[index]
-                    self.x, self.y = x, y
+                if self._path_check(block_coords, -1, -1, 2): return
 
             # left first
             else:
 
-                # left
-                count = 0
-                while self.check_overlap and count < 3:
-                    self.move(-1, 0)
-                    count += 1
+                if self._path_check(block_coords, -1, 0, 3): return
 
-                if not self.check_overlap: return
+                if self._path_check(block_coords, -1, -1, 2): return
 
-                # reset
-                for index, block in enumerate(self.blocks):
-                    block.x, block.y = block_coords[index]
-                    self.x, self.y = x, y
-
-                # right
-                count = 0
-                while self.check_overlap and count < 3:
-                    self.move(1, 0)
-                    count += 1
-
-                if not self.check_overlap: return
-
-                # reset
-                for index, block in enumerate(self.blocks):
-                    block.x, block.y = block_coords[index]
-                    self.x, self.y = x, y
+                if self._path_check(block_coords, 1, 0, 3): return
             
+                if self._path_check(block_coords, 1, 1, 2): return
             
 
         """

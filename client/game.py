@@ -40,7 +40,7 @@ class Game:
         self.resting = []
     
 
-    def render(self, pieces):
+    def render(self, pieces, held=None):
         
         self.screen.fill((0, 0, 0))
         pygame.draw.rect(self.screen, (93, 110, 105), (100, 100, 300, 600))
@@ -50,23 +50,34 @@ class Game:
 
         # for piece order
         for x in range(1, 4):
-            pygame.draw.circle(self.screen, (93, 110, 105), (450, 130*x), 40) 
+            pygame.draw.circle(self.screen, (93, 110, 105), (450, 130*x), 40)
 
         text = self.font.render('Next', True, (255, 255 ,255))
         textRect = text.get_rect()
-  
-        # set the center of the rectangular object
         textRect.center = (450, 60)
+        self.screen.blit(text, textRect)
 
+        # putting pieces in the circles
         position = 1
-
         for piece in pieces:
             for color, x, y, width, height in pieces_lib.preview_piece(450, position*130, piece):
                 pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
             
             position += 1
-        
+    
+
+
+        # for hold area
+        pygame.draw.circle(self.screen, (93, 110, 105), (50, 130), 40)
+        text = self.font.render('Hold', True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (50, 60)
         self.screen.blit(text, textRect)
+
+        if held:
+            for color, x, y, width, height in pieces_lib.preview_piece(50, 130, piece):
+                pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
+
 
     def show_text(self):
 

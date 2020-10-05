@@ -13,7 +13,7 @@ next_bag = pieces.copy()
 random.shuffle(next_bag)
 
 fall_speed = 1 # means once per second
-speed_up_rate = 60 # every 60 seconds speed up
+speed_up_rate = 30 # every 30 seconds speed up
 
 
 last_fall = time.time() + fall_speed
@@ -29,6 +29,8 @@ rotations = 0
 last_speed_up = time.time() + speed_up_rate
 speedLevel = 1
 display_until = 0
+
+canSwitch = True
 while game.running:
 
     for event in pygame.event.get():
@@ -67,6 +69,11 @@ while game.running:
                         rotations += 1
                 current.move(0, -1)
 
+            elif event.key == pygame.K_UP:
+                if canSwitch:
+                    canSwitch = False
+                    
+
 
             # speed down
             elif event.key == pygame.K_s:
@@ -100,6 +107,7 @@ while game.running:
     # for getting the next three items
     if len(bag) >= 3:
         game.render(bag[:3])
+
     elif len(bag) > 0:
         amount = len(bag)
 
@@ -168,6 +176,8 @@ while game.running:
                 # make new falling piece
                 current = Piece(5, 1, bag.pop(0))
                 rotations = 0
+
+                canSwitch = True
 
             else:
                 fall = True

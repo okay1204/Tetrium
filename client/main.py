@@ -4,22 +4,34 @@ from game import *
 import time
 import random
 
-pieces = ["T", "L", "BL", "S", "BS", "I", "O"]
-bag = pieces.copy()
 
+pieces = ["T", "L", "BL", "S", "BS", "I", "O"]
+# pieces = ["T", "L", "BL"]
+bag = pieces.copy()
+random.shuffle(bag)
+next_bag = pieces.copy()
+random.shuffle(next_bag)
 
 fall_speed = 1 # means once per second
+speed_up_rate = 30 # every 30 seconds speed up
+
+
 last_fall = time.time() + fall_speed
+fall = True
 
-
-current = Piece(5, 1, bag.pop(random.randint(0, len(bag)-1)))
-
-holding = ''
-holdCount = 0
+current = Piece(5, 1, bag.pop(0))
 
 speedUp = False
-while game.running:
 
+rotations = 0
+
+
+last_speed_up = time.time() + speed_up_rate
+speedLevel = 1
+display_until = 0
+
+canSwitch = True
+while game.running:
 
     for event in pygame.event.get():
 
@@ -39,9 +51,28 @@ while game.running:
             elif event.key == pygame.K_RIGHT:
                 current.rotate(0)
 
+                current.move(0, 1)
+                if current.check_floor():
+                    if rotations < 15:
+                        fall = False
+                        rotations += 1
+                current.move(0, -1)
+
             # rotate counter-clockwise
             elif event.key == pygame.K_LEFT:
                 current.rotate(1)
+
+                current.move(0, 1)
+                if current.check_floor():
+                    if rotations < 15:
+                        fall = False
+                        rotations += 1
+                current.move(0, -1)
+
+            elif event.key == pygame.K_UP:
+                if canSwitch:
+                    canSwitch = False
+                    
 
 
             # speed down
@@ -73,10 +104,30 @@ while game.running:
             game.running = False
     
 
-    if not bag:
-        bag = pieces.copy()
-        
-    game.render()
+    # for getting the next three items
+    if len(bag) >= 3:
+        game.render(bag[:3])
+
+    elif len(bag) > 0:
+        amount = len(bag)
+
+        temp = bag.copy()
+        temp.extend(next_bag[:3 - amount])
+        game.render(temp)
+    else:
+        bag = next_bag.copy()
+        next_bag = pieces.copy()
+        random.shuffle(next_bag)
+        game.render(bag[:3])
+
+
+
+    # speed up fall
+    if time.time() > last_speed_up:
+        last_speed_up = time.time() + speed_up_rate
+        fall_speed /= 1.2
+        speedLevel += 1
+        display_until = time.time() + 3
 
     # makes the piece fall by one
     if time.time() > last_fall:
@@ -85,34 +136,63 @@ while game.running:
 
         if current.check_floor():
 
-            # turn piece into resting blocks
-            for block in current.blocks:
-                game.resting.append(Block(block.x, block.y-1, block.color, colorByName=False))
+            if fall:
+                # turn piece into resting blocks
+                for block in current.blocks:
+                    game.resting.append(Block(block.x, block.y-1, block.color, colorByName=False))
 
-            
-            # detect if a row was made
-            for y in range(1, 21):
-                row = list(filter(lambda block: block.y == y, game.resting))
+                
+                # detect if a row was made
+                for y in range(1, 21):
+                    row = list(filter(lambda block: block.y == y, game.resting))
 
-                if len(row) == 10:
-                    # remove the row
-                    for block in row:
-                        game.resting.remove(block)
+                    if len(row) == 10:
+                        # remove the row
+                        for block in row:
+                            game.resting.remove(block)
 
-                    for block in game.resting:
-                        if block.y < y:
-                            block.y += 1
-  
-            game.render()
+                        for block in game.resting:
+                            if block.y < y:
+                                block.y += 1
 
 
-            # make new falling piece
-            current = Piece(5, 1, bag.pop(random.randint(0, len(bag)-1)))
+    
+                # for getting the next three items
+                if len(bag) >= 3:
+                    game.render(bag[:3])
+                elif len(bag) > 0:
+                    amount = len(bag)
 
-            
+                    temp = bag.copy()
+                    temp.extend(next_bag[:3 - amount])
+                    game.render(temp)
+                else:
+                    bag = next_bag.copy()
+                    next_bag = pieces.copy()
+                    random.shuffle(next_bag)
+                    game.render(bag[:3])
+
+
+                # make new falling piece
+                current = Piece(5, 1, bag.pop(0))
+                rotations = 0
+
+                canSwitch = True
+
+            else:
+                fall = True
+                current.move(0, -1)
 
     
     current.render()
+
+    if display_until > time.time():
+        text = game.font.render(f'Speed Level {speedLevel}', True, (0, 0 ,0))
+        textRect = text.get_rect() 
+        textRect.center = (game.width // 2, game.height // 2) 
+        game.screen.blit(text, textRect)
+
+
     pygame.display.update()
 
-    game.clock.tick(60)
+    game.clock.tick(5)

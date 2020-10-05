@@ -1,13 +1,27 @@
 # pylint: disable=no-member
 
 import pygame
-import pieces
+import pieces as pieces_lib
 from math import sin, cos, pi
+
+from pieces import preview_piece
+
+
+color_key = {
+    'green': (13, 252, 65),
+    'blue': (13, 29, 252),
+    'teal': (15, 246, 250),
+    'red': (250, 15, 15),
+    'orange': (255, 128, 43),
+    'purple': (168, 24, 245),
+    'yellow': (255, 223, 13)
+}
 
 class Game:
 
     def __init__(self):
         pygame.init()
+        self.font = pygame.font.Font('arial.ttf', 32)
 
         self.width = 500
         self.height = 800
@@ -28,26 +42,64 @@ class Game:
         self.resting = []
     
 
-    def render(self):
+    def render(self, pieces, held=None):
+        
         self.screen.fill((0, 0, 0))
         pygame.draw.rect(self.screen, (93, 110, 105), (100, 100, 300, 600))
 
         for block in self.resting:
             block.render()
 
+        # for piece order
+        for x in range(1, 4):
+            pygame.draw.circle(self.screen, (93, 110, 105), (450, 130*x), 40)
+
+        text = self.font.render('Next', True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (450, 60)
+        self.screen.blit(text, textRect)
+
+        # putting pieces in the circles
+        position = 1
+        for piece in pieces:
+            for color, x, y, width, height in pieces_lib.preview_piece(450, position*130, piece):
+                pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
+            
+            position += 1
+    
+
+
+        # for hold area
+        pygame.draw.circle(self.screen, (93, 110, 105), (50, 130), 40)
+        text = self.font.render('Hold', True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (50, 60)
+        self.screen.blit(text, textRect)
+
+        if held:
+            for color, x, y, width, height in pieces_lib.preview_piece(50, 130, piece):
+                pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
+
+
+    def show_text(self):
+
+        font = pygame.font.Font('arial.ttf', 32) 
+
+        text = font.render('Whoah', True)
+        textRect = text.get_rect() 
+  
+        # set the center of the rectangular object. 
+        textRect.center = (self.width // 2, self.height // 2) 
+        
+        self.screen.blit(text, textRect)
+
+
+    def add_to_hold(self):
+        preview_piece
+
 
 game = Game()
 
-
-color_key = {
-    'green': (13, 252, 65),
-    'blue': (13, 29, 252),
-    'teal': (15, 246, 250),
-    'red': (250, 15, 15),
-    'orange': (255, 128, 43),
-    'purple': (168, 24, 245),
-    'yellow': (255, 223, 13)
-}
 
 
 def darken(value):
@@ -84,7 +136,6 @@ class Block(Game):
 
 
 
-
 class Piece(Game):
 
     def __init__(self, x, y, piece):
@@ -93,7 +144,7 @@ class Piece(Game):
 
         self.piece_type = piece
 
-        self.blocks = list(map(lambda args: Block(*args), pieces.get_piece(x, y, piece)))
+        self.blocks = list(map(lambda args: Block(*args), pieces_lib.get_piece(x, y, piece)))
 
     
     def move(self, x, y):
@@ -106,27 +157,117 @@ class Piece(Game):
             block.y += y
 
 
+    def _path_check(self, block_coords, x, y, maxcount):
+
+        count = 0
+        while self.check_overlap and count < maxcount:
+            self.move(x, y)
+            count += 1
+
+        if not self.check_overlap: return True
+
+        # reset
+        for index, block in enumerate(self.blocks):
+            block.x, block.y = block_coords[index]
+            self.x, self.y = x, y
+
+        return False
+
     #0 means clockwise, 1 means counterclockwise
     def rotate(self, direct: int):
 
         if self.piece_type == "O": return
+
+        block_coords = []
+
+        x, y = self.x, self.y # noqa pylint: disable=unused-variable
 
         if direct == 0:
             #clockwise
             for block in self.blocks:
                 #Math formula
                 temp_x, temp_y = block.x, block.y
+                block_coords.append((temp_x, temp_y))
+
                 block.x = (-1*(temp_y-self.y) + self.x)
                 block.y = ((temp_x - self.x) + self.y)
+            
 
         else:
             #counter-clockwise
+            
             for block in self.blocks:
                 #Math formula
                 temp_x, temp_y = block.x, block.y
+                block_coords.append((temp_x, temp_y))
                 block.x = (temp_y - self.y + self.x)
                 block.y = (-1*(temp_x - self.x) + self.y)
 
+
+        for block in self.blocks:
+
+            if block.x < 1:
+                self.move(1, 0)
+
+            if block.x > 10:
+                self.move(-1, 0)
+            
+            if block.y > 20:
+                self.move(0, -1)
+
+
+        if self.check_overlap():
+            
+            if self._path_check(block_coords, 0, -1, 3): return
+
+            # right first
+            if direct == 0:
+
+                if self._path_check(block_coords, 1, 0, 3): return
+
+                if self._path_check(block_coords, 1, -1, 2): return
+
+                if self._path_check(block_coords, -1, 0, 3): return
+
+                if self._path_check(block_coords, -1, -1, 2): return
+
+            # left first
+            else:
+
+                if self._path_check(block_coords, -1, 0, 3): return
+
+                if self._path_check(block_coords, -1, -1, 2): return
+
+                if self._path_check(block_coords, 1, 0, 3): return
+            
+                if self._path_check(block_coords, 1, 1, 2): return
+            
+
+        """
+        First move piece in bounds if it is out of bounds.
+        If there is any overlapping conflict, then do the following:
+
+        Check if the piece is ok if it moves two blocks up, if not,
+        Check if it can move right by two blocks if clockwise, or left if counterclockwise,
+        if not,
+        check the other direction.
+        
+        If all of these fail, then the rotation will not occur.
+        """
+
+    
+
+    def check_overlap(self):
+
+        for block in self.blocks:
+            for resting in game.resting:
+
+                if (block.x == resting.x and block.y == resting.y) or (block.y > 20 or block.x < 1 or block.x > 10):
+                    return True
+        
+        return False
+
+            
         
     def check_floor(self):
 
@@ -165,7 +306,7 @@ class Piece(Game):
         for block in self.blocks:
             
             # if hits wall
-            if block.x <= 1:
+            if block.x < 2:
                 return True
 
             # if hits another block

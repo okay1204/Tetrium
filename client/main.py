@@ -35,7 +35,7 @@ canSwitch = True
 gameOver = False
 
 def game_over():
-    global GameOver
+
     gameOver = True
     
     while gameOver:
@@ -43,6 +43,7 @@ def game_over():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+                game.running = False
 
         s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         s.fill((255,255,255, 2))      
@@ -151,6 +152,9 @@ while game.running:
 
                             if current.overlapping_blocks():
                                 game_over()
+
+                    if current.y <= -2:
+                        game_over()
 
 
             # speed down
@@ -293,6 +297,10 @@ while game.running:
 
                         if current.overlapping_blocks():
                             game_over()
+
+                if current.y <= -2:
+                    game_over()
+
 
             else:
                 fall = True

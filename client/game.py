@@ -241,13 +241,14 @@ class Piece(Game):
             self.move(x, y)
             count += 1
 
-        game.correct_rotateSFX.play()
-        if not self.check_overlap: return True
+        if not self.check_overlap: 
+            game.correct_rotateSFX.play()
+            return True
 
         # reset
         for index, block in enumerate(self.blocks):
             block.x, block.y = block_coords[index]
-        self.x, self.y = x, y
+        self.x, self.y = orgx, orgy
 
         return False
 

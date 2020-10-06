@@ -238,6 +238,7 @@ class Piece(Game):
             self.move(x, y)
             count += 1
 
+        game.rotateSFX.play()
         if not self.check_overlap: return True
 
         # reset
@@ -251,7 +252,7 @@ class Piece(Game):
     def rotate(self, direct: int):
        
 
-        if self.piece_type == "O": return game.rotateSFX.play()
+        if self.piece_type == "O": return
 
         block_coords = []
 
@@ -293,29 +294,29 @@ class Piece(Game):
 
         if self.check_overlap():
             
-            if self._path_check(x, y, block_coords, 0, -1, 3): return game.rotateSFX.play()
+            if self._path_check(x, y, block_coords, 0, -1, 3): return
 
             # right first
             if direct == 0:
 
-                if self._path_check(x, y, block_coords, 1, 0, 3): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, 1, 0, 3): return
 
-                if self._path_check(x, y, block_coords, 1, -1, 1): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, 1, -1, 1): return
 
-                if self._path_check(x, y, block_coords, -1, 0, 3): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, -1, 0, 3): return
 
-                if self._path_check(x, y, block_coords, -1, -1, 1): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, -1, -1, 1): return
 
             # left first
             else:
 
-                if self._path_check(x, y, block_coords, -1, 0, 3): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, -1, 0, 3): return
 
-                if self._path_check(x, y, block_coords, -1, -1, 1): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, -1, -1, 1): return
 
-                if self._path_check(x, y, block_coords, 1, 0, 3): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, 1, 0, 3): return
             
-                if self._path_check(x, y, block_coords, 1, 1, 1): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, 1, 1, 1): return
         
             #TODO reject sound effect here
 

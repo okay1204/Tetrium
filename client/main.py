@@ -36,7 +36,11 @@ canSwitch = True
 
 def game_over():
 
+    global bag, next_bag, rotations, speedLevel, current
+
     gameOver = True
+
+    pygame.mixer.music.set_volume(0.03)
     
     while gameOver:
         #Game over loop
@@ -44,6 +48,23 @@ def game_over():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+
+            if event.type == pygame.KEYDOWN:
+
+                if event.key == pygame.K_d:
+                    gameOver = False
+                    game.resting.clear()
+                    game.removing.clear()
+                    speedLevel = 0
+                    bag = pieces.copy()
+                    random.shuffle(bag)
+                    next_bag = pieces.copy()
+                    random.shuffle(next_bag)
+                    rotations = 0
+                    current = Piece(5, 1, bag.pop(0))
+                    pygame.mixer.music.set_volume(0.15)
+
+
             
 
         s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
@@ -53,9 +74,10 @@ def game_over():
         text = game_over_font.render(f'Game Over', True, (0, 0 ,0), game.screen)
         textRect = text.get_rect() 
         textRect.center = (game.width // 2, game.height // 2) 
-        pygame.mixer.music.set_volume(0.03)
         game.screen.blit(text, textRect)
         pygame.display.update()
+
+        game.clock.tick(60)
        
 
 

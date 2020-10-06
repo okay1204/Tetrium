@@ -75,6 +75,7 @@ while game.running:
                 
                 
                 if canSwitch:
+                    game.holdSFX.play()
                     
                     if not held:
                         held = current.piece_type

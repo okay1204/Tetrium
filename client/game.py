@@ -56,7 +56,7 @@ class Game:
         self.removing = []
     
 
-        self.hold_mode = True
+        self.continuous = True
         
         
 
@@ -99,13 +99,13 @@ class Game:
                 pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
 
 
-        # for hold mode indication
-        if game.hold_mode: text = "On"
+        # for continuous movement indication
+        if game.continuous: text = "On"
         else: text = "Off"
 
-        text = self.font.render(f"Hold Mode: {text}", True, (255, 255 ,255))
+        text = self.font.render(f"Continuous Movement: {text}", True, (255, 255 ,255))
         textRect = text.get_rect()
-        textRect.center = (370, 780)
+        textRect.center = (300, 780)
         self.screen.blit(text, textRect)
 
 
@@ -241,6 +241,7 @@ class Piece(Game):
             self.move(x, y)
             count += 1
 
+        game.rotateSFX.play()
         if not self.check_overlap: return True
 
         # reset
@@ -254,7 +255,7 @@ class Piece(Game):
     def rotate(self, direct: int):
        
 
-        if self.piece_type == "O": return game.correct_rotateSFX.play()
+        if self.piece_type == "O": return
 
         block_coords = []
 
@@ -296,29 +297,29 @@ class Piece(Game):
 
         if self.check_overlap():
             
-            if self._path_check(x, y, block_coords, 0, -1, 3): return game.rotateSFX.play()
+            if self._path_check(x, y, block_coords, 0, -1, 3): return
 
             # right first
             if direct == 0:
 
-                if self._path_check(x, y, block_coords, 1, 0, 3): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, 1, 0, 3): return
 
-                if self._path_check(x, y, block_coords, 1, -1, 1): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, 1, -1, 1): return
 
-                if self._path_check(x, y, block_coords, -1, 0, 3): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, -1, 0, 3): return
 
-                if self._path_check(x, y, block_coords, -1, -1, 1): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, -1, -1, 1): return
 
             # left first
             else:
 
-                if self._path_check(x, y, block_coords, -1, 0, 3): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, -1, 0, 3): return
 
-                if self._path_check(x, y, block_coords, -1, -1, 1): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, -1, -1, 1): return
 
-                if self._path_check(x, y, block_coords, 1, 0, 3): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, 1, 0, 3): return
             
-                if self._path_check(x, y, block_coords, 1, 1, 1): return game.rotateSFX.play()
+                if self._path_check(x, y, block_coords, 1, 1, 1): return
         
             
 

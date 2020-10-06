@@ -81,7 +81,7 @@ while game.running:
             # move left
             if event.key == pygame.K_a:
 
-                if not game.hold_mode:
+                if not game.continuous:
                     if not current.check_left():
                         current.move(-1, 0)
 
@@ -91,7 +91,7 @@ while game.running:
             # move right
             elif event.key == pygame.K_d:
 
-                if not game.hold_mode:
+                if not game.continuous:
                     if not current.check_right():
                         current.move(1, 0)
 
@@ -165,7 +165,7 @@ while game.running:
                 last_fall -= 2
 
             elif event.key == pygame.K_g:
-                game.hold_mode = not game.hold_mode
+                game.continuous = not game.continuous
                 moving = 0
 
         elif event.type == pygame.KEYUP:

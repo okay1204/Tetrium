@@ -53,7 +53,7 @@ class Game:
         self.removing = []
     
 
-        self.hold_mode = True
+        self.continuous = True
         
         
 
@@ -96,13 +96,13 @@ class Game:
                 pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
 
 
-        # for hold mode indication
-        if game.hold_mode: text = "On"
+        # for continuous movement indication
+        if game.continuous: text = "On"
         else: text = "Off"
 
-        text = self.font.render(f"Hold Mode: {text}", True, (255, 255 ,255))
+        text = self.font.render(f"Continuous Movement: {text}", True, (255, 255 ,255))
         textRect = text.get_rect()
-        textRect.center = (370, 780)
+        textRect.center = (300, 780)
         self.screen.blit(text, textRect)
 
 

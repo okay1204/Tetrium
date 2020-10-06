@@ -12,7 +12,7 @@ random.shuffle(bag)
 next_bag = pieces.copy()
 random.shuffle(next_bag)
 
-fall_speed = 0.1 # means once per second
+fall_speed = 1 # means once per second
 speed_up_rate = 30 # every 30 seconds speed up
 
 

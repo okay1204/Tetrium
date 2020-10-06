@@ -71,6 +71,7 @@ while game.running:
                 current.move(0, -1)
 
           
+            # hold block
             elif event.key == pygame.K_UP:
                 
                 
@@ -85,9 +86,8 @@ while game.running:
                         past_held = held
                         held = current.piece_type
                         current = Piece(5, 1, past_held)
-                        
-                        
-                        
+
+                    rotations = 0
                     canSwitch = False
                         
 

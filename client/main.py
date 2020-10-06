@@ -216,9 +216,11 @@ while game.running:
         textRect.center = (game.width // 2, game.height // 2) 
         game.screen.blit(text, textRect)
 
-    print(list(map(lambda block: (block.x, block.y), game.resting)))
+    """
+    FIXME
+    THE BLOCKS ABOVE THE ROW ARE GETTING STACKED ON TOP OF EACH OTHER AT THE BOTTOM
 
-    print(len(list(filter(lambda block: block.y == 20, game.resting))))
+    """
     pygame.display.update()
 
     game.clock.tick(60)

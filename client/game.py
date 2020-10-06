@@ -24,6 +24,10 @@ class Game:
         pygame.init()
         self.font = pygame.font.Font('arial.ttf', 32)
 
+        # pygame.mixer.music.load('assets/background_audio.wav')
+        # pygame.mixer.music.set_volume(0.25)
+        # pygame.mixer.music.play(-1)
+
         self.width = 500
         self.height = 800
 
@@ -44,6 +48,12 @@ class Game:
 
         self.removing = []
     
+
+
+        
+        
+
+
 
     def render(self, pieces, held=None):
         
@@ -159,10 +169,14 @@ class Block(Game):
                     
                     # if in that row
                     if self in remove_row:
+
+                        print(list(map(lambda block: block.fade_stage, remove_row)))
                         # check if all are ready to remove
                         for block in remove_row:
                             if block.fade_stage < 15:
                                 return
+
+                #FIXME everything below here is getting called multiple times
 
                 for block in game.resting:
                     if block.y < self.y:
@@ -170,6 +184,7 @@ class Block(Game):
 
                 for remove_row in game.removing:
                     if self in remove_row:
+                        print("cancel")
                         game.removing.remove(remove_row)
                         break
 

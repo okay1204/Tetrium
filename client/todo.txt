@@ -1,3 +1,4 @@
-[] Fade effect when clearing rows
-[] Sound effects
-[] Score system
+Game Over detection
+Start menu
+Land block, rotation failed sound effects,
+"Hold to fast move" toggle option

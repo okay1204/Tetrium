@@ -202,6 +202,8 @@ while game.running:
                 current = Piece(5, 1, bag.pop(0))
                 rotations = 0
 
+                #TODO play land sound here
+
                 canSwitch = True
 
             else:

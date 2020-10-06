@@ -164,6 +164,8 @@ while game.running:
                     row = list(filter(lambda block: block.y == y, game.resting))
 
                     if len(row) == 10:
+
+                        removed_blocks = []
                         # set the fade increments for blocks
                         for block in row:
                             
@@ -172,6 +174,9 @@ while game.running:
                                 fade_increments.append((255 - color) // 15)
 
                             block.fade_increments = tuple(fade_increments)
+                            removed_blocks.append(block)
+                        
+                        game.removing.append(removed_blocks)
 
 
     
@@ -212,8 +217,11 @@ while game.running:
         textRect.center = (game.width // 2, game.height // 2) 
         game.screen.blit(text, textRect)
 
+    """
+    FIXME
+    THE BLOCKS ABOVE THE ROW ARE GETTING STACKED ON TOP OF EACH OTHER AT THE BOTTOM
 
-
+    """
     pygame.display.update()
 
     game.clock.tick(60)

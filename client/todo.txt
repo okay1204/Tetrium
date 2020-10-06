@@ -1,4 +1,3 @@
-[] Hold feature to save tetris pieces for later
 [] Fade effect when clearing rows
 [] Sound effects
 [] Score system

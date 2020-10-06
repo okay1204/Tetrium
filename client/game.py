@@ -50,9 +50,7 @@ class Game:
 
         self.resting = []
 
-
-        self.removing = [0 for x in range(22)]
-        self.last_removed = 0
+        self.removing = []
     
 
 
@@ -166,19 +164,37 @@ class Block(Game):
                 pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
                 self.fade_stage += 1
 
-            #Is done fading
-            elif self.fade_stage >= 15 and time.time() - game.last_removed > 0.1:
+            elif self.fade_stage >= 15:
+                
                 game.resting.remove(self)
-                game.removing[self.y] += 1
 
-                if game.removing[self.y] >= 10:
+                # going through each row
+                for remove_row in game.removing:
+        
+                    # if in that row
+                    if self in remove_row:
+                        # check if all are ready to remove
+                        for block in remove_row:
+                            if block.fade_stage < 15:
+                                return
+                        break
+                else:
+                    return
 
-                    for block in game.resting:
-                        if block.y < self.y:
-                            block.y += 1
+                
 
-                    game.last_removed = time.time()
-                    game.removing[self.y] = 0
+                #FIXME everything below here is getting called multiple times
+
+                for block in game.resting:
+                    if block.y < self.y:
+                        block.y += 1
+
+                for remove_row in game.removing:
+                    if self in remove_row:
+                        game.removing.remove(remove_row)
+                        break
+
+                    
 
 
     def render_preview(self):

@@ -141,11 +141,16 @@ while game.running:
                     rotations = 0
                     canSwitch = False
 
-                    for block in current.blocks:
-                        for resting in game.resting:
-                            if (block.x, block.y) == (resting.x, resting.y):
+                    # checking if game is over
+                    if current.overlapping_blocks():
+                        current.rotate(1)
+
+                        if current.overlapping_blocks():
+                            current.rotate(-1)
+                            current.rotate(-1)
+
+                            if current.overlapping_blocks():
                                 game_over()
-                                break
 
 
             # speed down
@@ -278,12 +283,16 @@ while game.running:
                 rotations = 0
 
 
-                for block in current.blocks:
-                    for resting in game.resting:
-                        if (block.x, block.y) == (resting.x, resting.y):
-                            
+                # checking if game is over
+                if current.overlapping_blocks():
+                    current.rotate(1)
+
+                    if current.overlapping_blocks():
+                        current.rotate(-1)
+                        current.rotate(-1)
+
+                        if current.overlapping_blocks():
                             game_over()
-                            break
 
             else:
                 fall = True

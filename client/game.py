@@ -26,7 +26,7 @@ class Game:
 
         pygame.mixer.music.load('assets/background_audio.wav')
         #FIXME set volume to 0.15 in final version
-        pygame.mixer.music.set_volume(0)
+        pygame.mixer.music.set_volume(0.25)
         pygame.mixer.music.play(-1)
 
 
@@ -241,7 +241,7 @@ class Piece(Game):
             self.move(x, y)
             count += 1
 
-        game.rotateSFX.play()
+        game.correct_rotateSFX.play()
         if not self.check_overlap: return True
 
         # reset
@@ -324,7 +324,8 @@ class Piece(Game):
             
 
         else:
-            game.correct_rotateSFX.play()
+            #TODO rejected rotation effect here
+            pass
             
             
         """
@@ -351,6 +352,14 @@ class Piece(Game):
         
         return False
 
+    def overlapping_blocks(self):
+
+        for block in self.blocks:
+            for resting in game.resting:
+                if (block.x == resting.x and block.y == resting.y):
+                    return True
+        
+        return False
             
         
     def check_floor(self):

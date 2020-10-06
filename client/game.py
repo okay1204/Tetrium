@@ -28,6 +28,10 @@ class Game:
         pygame.mixer.music.set_volume(0.25)
         pygame.mixer.music.play(-1)
 
+
+        self.rotateSFX = pygame.mixer.Sound('assets/move_effect.wav')
+        self.holdSFX = pygame.mixer.Sound('assets/hold_effect.wav')
+
         self.width = 500
         self.height = 800
 
@@ -223,7 +227,8 @@ class Piece(Game):
 
     #0 means clockwise, 1 means counterclockwise
     def rotate(self, direct: int):
-
+       
+        game.rotateSFX.play()
         if self.piece_type == "O": return
 
         block_coords = []

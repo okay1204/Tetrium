@@ -22,11 +22,11 @@ class Game:
 
     def __init__(self):
         pygame.init()
-        self.font = pygame.font.Font('arial.ttf', 32)
+        self.font = pygame.font.Font('assets/arial.ttf', 32)
 
         pygame.mixer.music.load('assets/background_audio.wav')
         #FIXME set volume to 0.15 in final version
-        pygame.mixer.music.set_volume(0)
+        pygame.mixer.music.set_volume(0.15)
         pygame.mixer.music.play(-1)
 
 

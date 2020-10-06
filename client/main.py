@@ -32,24 +32,28 @@ speedLevel = 1
 display_until = 0
 
 canSwitch = True
-gameOver = False
+
 
 def game_over():
-    global GameOver
+
     gameOver = True
     
     while gameOver:
+        #Game over loop
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+            
 
         s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         s.fill((255,255,255, 2))      
         game.screen.blit(s, (0,0))
-        text = game.font.render(f'Game Over', True, (0, 0 ,0))
+        game_over_font = pygame.font.Font('assets/arial.ttf', 60)
+        text = game_over_font.render(f'Game Over', True, (0, 0 ,0), game.screen)
         textRect = text.get_rect() 
         textRect.center = (game.width // 2, game.height // 2) 
+        pygame.mixer.music.set_volume(0.03)
         game.screen.blit(text, textRect)
         pygame.display.update()
        

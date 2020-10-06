@@ -32,6 +32,7 @@ speedLevel = 1
 display_until = 0
 
 canSwitch = True
+gameOver = False
 while game.running:
 
     for event in pygame.event.get():
@@ -119,7 +120,10 @@ while game.running:
 
         elif event.type == pygame.QUIT:
             game.running = False
-    
+
+
+    if gameOver:
+        continue
 
     # for getting the next three items
     if len(bag) >= 3:
@@ -198,13 +202,16 @@ while game.running:
                     game.render(bag[:3], held)
 
 
+                #TODO play land sound here
+                canSwitch = True
+
                 # make new falling piece
                 current = Piece(5, 1, bag.pop(0))
                 rotations = 0
-
-                #TODO play land sound here
-
-                canSwitch = True
+                for block in current.blocks:
+                    for resting in game.resting:
+                        if (block.x, block.y) == (resting.x, resting.y):
+                            gameOver = True
 
             else:
                 fall = True
@@ -215,6 +222,17 @@ while game.running:
 
     if display_until > time.time():
         text = game.font.render(f'Speed Level {speedLevel}', True, (0, 0 ,0))
+        textRect = text.get_rect() 
+        textRect.center = (game.width // 2, game.height // 2) 
+        game.screen.blit(text, textRect)
+
+
+    if gameOver:
+        s = pygame.Surface((500,800), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
+        s.fill((255,255,255,128))      
+        game.screen.blit(s, (0,0))
+
+        text = game.font.render(f'Game Over', True, (0, 0 ,0))
         textRect = text.get_rect() 
         textRect.center = (game.width // 2, game.height // 2) 
         game.screen.blit(text, textRect)

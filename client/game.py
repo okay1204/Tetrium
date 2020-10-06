@@ -241,13 +241,14 @@ class Piece(Game):
             self.move(x, y)
             count += 1
 
-        game.rotateSFX.play()
-        if not self.check_overlap: return True
+        if not self.check_overlap: 
+            game.correct_rotateSFX.play()
+            return True
 
         # reset
         for index, block in enumerate(self.blocks):
             block.x, block.y = block_coords[index]
-        self.x, self.y = x, y
+        self.x, self.y = orgx, orgy
 
         return False
 
@@ -324,7 +325,8 @@ class Piece(Game):
             
 
         else:
-            game.correct_rotateSFX.play()
+            #TODO rejected rotation effect here
+            pass
             
             
         """
@@ -351,6 +353,14 @@ class Piece(Game):
         
         return False
 
+    def overlapping_blocks(self):
+
+        for block in self.blocks:
+            for resting in game.resting:
+                if (block.x == resting.x and block.y == resting.y):
+                    return True
+        
+        return False
             
         
     def check_floor(self):

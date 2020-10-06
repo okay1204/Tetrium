@@ -12,12 +12,12 @@ random.shuffle(bag)
 next_bag = pieces.copy()
 random.shuffle(next_bag)
 
-fall_speed = 1 # means once per second
+fall_speed = 0.1 # means once per second
 speed_up_rate = 30 # every 30 seconds speed up
 
 
 last_fall = time.time() + fall_speed
-fall = True
+fall = 0
 
 current = Piece(5, 1, bag.pop(0))
 
@@ -61,6 +61,9 @@ def game_over():
 
 moving = 0
 last_moved = 0
+
+
+last_rotation_fall = 0
 
 while game.running:
 
@@ -109,7 +112,7 @@ while game.running:
                 current.move(0, 1)
                 if current.check_floor():
                     if rotations < 15:
-                        fall = False
+                        fall = time.time() + 1
                         rotations += 1
                 current.move(0, -1)
 
@@ -120,7 +123,7 @@ while game.running:
                 current.move(0, 1)
                 if current.check_floor():
                     if rotations < 15:
-                        fall = False
+                        fall = time.time() + 1
                         rotations += 1
                 
                 current.move(0, -1)
@@ -237,7 +240,7 @@ while game.running:
 
         if current.check_floor():
 
-            if fall:
+            if time.time() > fall:
                 # turn piece into resting blocks
                 for block in current.blocks:
                     game.resting.append(Block(block.x, block.y-1, block.color, colorByName=False))
@@ -306,7 +309,6 @@ while game.running:
 
 
             else:
-                fall = True
                 current.move(0, -1)
 
     

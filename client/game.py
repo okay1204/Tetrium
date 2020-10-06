@@ -25,7 +25,7 @@ class Game:
         self.font = pygame.font.Font('assets/arial.ttf', 32)
 
         pygame.mixer.music.load('assets/background_audio.wav')
-        #FIXME set volume to 0.15 in final version
+        #NOTE set volume to 0.15 in final version
         pygame.mixer.music.set_volume(0.15)
         pygame.mixer.music.play(-1)
 
@@ -237,11 +237,11 @@ class Piece(Game):
     def _path_check(self, orgx, orgy, block_coords, x, y, maxcount):
 
         count = 0
-        while self.check_overlap and count < maxcount:
+        while self.check_overlap() and count < maxcount:
             self.move(x, y)
             count += 1
 
-        if not self.check_overlap: 
+        if not self.check_overlap():
             game.correct_rotateSFX.play()
             return True
 
@@ -256,7 +256,7 @@ class Piece(Game):
     def rotate(self, direct: int):
        
 
-        if self.piece_type == "O": return
+        if self.piece_type == "O": return game.correct_rotateSFX.play()
 
         block_coords = []
 
@@ -322,11 +322,10 @@ class Piece(Game):
             
                 if self._path_check(x, y, block_coords, 1, 1, 1): return
         
-            
+            #TODO put reject rotation here
 
         else:
-            #TODO rejected rotation effect here
-            pass
+            game.correct_rotateSFX.play()
             
             
         """

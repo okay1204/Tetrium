@@ -292,22 +292,22 @@ class Piece(Game):
 
                 if self._path_check(block_coords, 1, 0, 3): return game.rotateSFX.play()
 
-                if self._path_check(block_coords, 1, -1, 2): return game.rotateSFX.play()
+                if self._path_check(block_coords, 1, -1, 1): return game.rotateSFX.play()
 
                 if self._path_check(block_coords, -1, 0, 3): return game.rotateSFX.play()
 
-                if self._path_check(block_coords, -1, -1, 2): return game.rotateSFX.play()
+                if self._path_check(block_coords, -1, -1, 1): return game.rotateSFX.play()
 
             # left first
             else:
 
                 if self._path_check(block_coords, -1, 0, 3): return game.rotateSFX.play()
 
-                if self._path_check(block_coords, -1, -1, 2): return game.rotateSFX.play()
+                if self._path_check(block_coords, -1, -1, 1): return game.rotateSFX.play()
 
                 if self._path_check(block_coords, 1, 0, 3): return game.rotateSFX.play()
             
-                if self._path_check(block_coords, 1, 1, 2): return game.rotateSFX.play()
+                if self._path_check(block_coords, 1, 1, 1): return game.rotateSFX.play()
         
             #TODO reject sound effect here
 

@@ -212,6 +212,7 @@ while game.running:
         game.screen.blit(text, textRect)
 
 
+
     pygame.display.update()
 
-    game.clock.tick(5)
+    game.clock.tick(60)

@@ -24,6 +24,10 @@ class Game:
         pygame.init()
         self.font = pygame.font.Font('arial.ttf', 32)
 
+        pygame.mixer.music.load('assets/background_audio.wav')
+        pygame.mixer.music.set_volume(0.25)
+        pygame.mixer.music.play(-1)
+
         self.width = 500
         self.height = 800
 
@@ -46,6 +50,12 @@ class Game:
         self.removing = [0 for x in range(22)]
         self.last_removed = 0
     
+
+
+        
+        
+
+
 
     def render(self, pieces, held=None):
         
@@ -152,6 +162,7 @@ class Block(Game):
                 pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
                 self.fade_stage += 1
 
+            #Is done fading
             elif self.fade_stage >= 15 and time.time() - game.last_removed > 0.1:
                 game.resting.remove(self)
                 game.removing[self.y] += 1

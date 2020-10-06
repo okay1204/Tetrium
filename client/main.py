@@ -32,7 +32,47 @@ speedLevel = 1
 display_until = 0
 
 canSwitch = True
+gameOver = False
+
+def game_over():
+    global GameOver
+    gameOver = True
+    
+    while gameOver:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
+        s.fill((255,255,255, 2))      
+        game.screen.blit(s, (0,0))
+        text = game.font.render(f'Game Over', True, (0, 0 ,0))
+        textRect = text.get_rect() 
+        textRect.center = (game.width // 2, game.height // 2) 
+        game.screen.blit(text, textRect)
+        pygame.display.update()
+       
+
+
+moving = 0
+last_moved = 0
+
 while game.running:
+
+    if moving:
+
+        if moving == -1:
+            if time.time() - last_moved > 0.1:
+                if not current.check_left():
+                    current.move(-1, 0)
+                    last_moved = time.time()
+
+        if moving == 1:
+            if time.time() - last_moved > 0.1:
+                if not current.check_right():
+                    current.move(1, 0)
+                    last_moved = time.time()
 
     for event in pygame.event.get():
 
@@ -40,13 +80,23 @@ while game.running:
 
             # move left
             if event.key == pygame.K_a:
-                if not current.check_left():
-                    current.move(-1, 0)
+
+                if not game.hold_mode:
+                    if not current.check_left():
+                        current.move(-1, 0)
+
+                else:
+                    moving = -1
             
             # move right
             elif event.key == pygame.K_d:
-                if not current.check_right():
-                    current.move(1, 0)
+
+                if not game.hold_mode:
+                    if not current.check_right():
+                        current.move(1, 0)
+
+                else:
+                    moving = 1
 
             # rotate clockwise
             elif event.key == pygame.K_RIGHT:
@@ -72,6 +122,7 @@ while game.running:
                 current.move(0, -1)
 
           
+            # hold block
             elif event.key == pygame.K_UP:
                 
                 
@@ -86,11 +137,15 @@ while game.running:
                         past_held = held
                         held = current.piece_type
                         current = Piece(5, 1, past_held)
-                        
-                        
-                        
+
+                    rotations = 0
                     canSwitch = False
-                        
+
+                    for block in current.blocks:
+                        for resting in game.resting:
+                            if (block.x, block.y) == (resting.x, resting.y):
+                                game_over()
+                                break
 
 
             # speed down
@@ -109,6 +164,10 @@ while game.running:
                 current.move(0,-1)
                 last_fall -= 2
 
+            elif event.key == pygame.K_g:
+                game.hold_mode = not game.hold_mode
+                moving = 0
+
         elif event.type == pygame.KEYUP:
 
             # stop speed down
@@ -116,11 +175,23 @@ while game.running:
                 if speedUp:
                     fall_speed *= 10
                     speedUp = False
+
+            
+            # stop hold moving
+            if event.key == pygame.K_a:
+                if moving == -1:
+                    moving = 0
+
+            if event.key == pygame.K_d:
+                if moving == 1:
+                    moving = 0
                 
 
         elif event.type == pygame.QUIT:
             game.running = False
-    
+
+
+
 
     # for getting the next three items
     if len(bag) >= 3:
@@ -199,11 +270,20 @@ while game.running:
                     game.render(bag[:3], held)
 
 
+                #TODO play land sound here
+                canSwitch = True
+
                 # make new falling piece
                 current = Piece(5, 1, bag.pop(0))
                 rotations = 0
 
-                canSwitch = True
+
+                for block in current.blocks:
+                    for resting in game.resting:
+                        if (block.x, block.y) == (resting.x, resting.y):
+                            
+                            game_over()
+                            break
 
             else:
                 fall = True
@@ -218,6 +298,7 @@ while game.running:
         textRect.center = (game.width // 2, game.height // 2) 
         game.screen.blit(text, textRect)
 
+    
     pygame.display.update()
 
     game.clock.tick(60)

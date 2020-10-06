@@ -25,14 +25,15 @@ class Game:
         self.font = pygame.font.Font('arial.ttf', 32)
 
         pygame.mixer.music.load('assets/background_audio.wav')
-        pygame.mixer.music.set_volume(0.25)
+        #FIXME set volume to 0.15 in final version
+        pygame.mixer.music.set_volume(0)
         pygame.mixer.music.play(-1)
 
 
         self.correct_rotateSFX = pygame.mixer.Sound('assets/move_effect_success.wav')
         self.holdSFX = pygame.mixer.Sound('assets/hold_effect.wav')
-        self.row_clearedSFX = pygame.mixer.Sound()
-        self.wrong_rotateSFX = pygame.mixer.Sound()
+        # self.row_clearedSFX = pygame.mixer.Sound()
+        # self.wrong_rotateSFX = pygame.mixer.Sound()
 
         self.width = 500
         self.height = 800
@@ -55,7 +56,7 @@ class Game:
         self.removing = []
     
 
-
+        self.hold_mode = True
         
         
 
@@ -86,8 +87,6 @@ class Game:
             
             position += 1
     
-
-
         # for hold area
         pygame.draw.circle(self.screen, (93, 110, 105), (50, 130), 40)
         text = self.font.render('Hold', True, (255, 255 ,255))
@@ -98,6 +97,16 @@ class Game:
         if held:
             for color, x, y, width, height in pieces_lib.preview_piece(50, 130, held):
                 pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
+
+
+        # for hold mode indication
+        if game.hold_mode: text = "On"
+        else: text = "Off"
+
+        text = self.font.render(f"Hold Mode: {text}", True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (370, 780)
+        self.screen.blit(text, textRect)
 
 
     def show_text(self):
@@ -191,7 +200,7 @@ class Block(Game):
                 for remove_row in game.removing:
                     if self in remove_row:
                         game.removing.remove(remove_row)
-                        game.row_clearedSFX.play()
+                        # game.row_clearedSFX.play()
                         break
 
                     
@@ -225,7 +234,7 @@ class Piece(Game):
             block.y += y
 
 
-    def _path_check(self, block_coords, x, y, maxcount):
+    def _path_check(self, orgx, orgy, block_coords, x, y, maxcount):
 
         count = 0
         while self.check_overlap and count < maxcount:
@@ -237,7 +246,7 @@ class Piece(Game):
         # reset
         for index, block in enumerate(self.blocks):
             block.x, block.y = block_coords[index]
-            self.x, self.y = x, y
+        self.x, self.y = x, y
 
         return False
 
@@ -287,31 +296,29 @@ class Piece(Game):
 
         if self.check_overlap():
             
-            game.wrong_rotateSFX.play()
-            
-            if self._path_check(block_coords, 0, -1, 3): return 
+            if self._path_check(x, y, block_coords, 0, -1, 3): return game.rotateSFX.play()
 
             # right first
             if direct == 0:
 
-                if self._path_check(block_coords, 1, 0, 3): return 
+                if self._path_check(x, y, block_coords, 1, 0, 3): return game.rotateSFX.play()
 
-                if self._path_check(block_coords, 1, -1, 2): return 
+                if self._path_check(x, y, block_coords, 1, -1, 1): return game.rotateSFX.play()
 
-                if self._path_check(block_coords, -1, 0, 3): return 
+                if self._path_check(x, y, block_coords, -1, 0, 3): return game.rotateSFX.play()
 
-                if self._path_check(block_coords, -1, -1, 2): return 
+                if self._path_check(x, y, block_coords, -1, -1, 1): return game.rotateSFX.play()
 
             # left first
             else:
 
-                if self._path_check(block_coords, -1, 0, 3): return
+                if self._path_check(x, y, block_coords, -1, 0, 3): return game.rotateSFX.play()
 
-                if self._path_check(block_coords, -1, -1, 2): return 
+                if self._path_check(x, y, block_coords, -1, -1, 1): return game.rotateSFX.play()
 
-                if self._path_check(block_coords, 1, 0, 3): return 
+                if self._path_check(x, y, block_coords, 1, 0, 3): return game.rotateSFX.play()
             
-                if self._path_check(block_coords, 1, 1, 2): return 
+                if self._path_check(x, y, block_coords, 1, 1, 1): return game.rotateSFX.play()
         
             
 

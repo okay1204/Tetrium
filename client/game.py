@@ -183,8 +183,6 @@ class Block(Game):
 
                 
 
-                #FIXME everything below here is getting called multiple times
-
                 for block in game.resting:
                     if block.y < self.y:
                         block.y += 1
@@ -311,7 +309,7 @@ class Piece(Game):
             
                 if self._path_check(block_coords, 1, 1, 2): return
             
-
+            game.wrong_moveSFX.play()
         """
         First move piece in bounds if it is out of bounds.
         If there is any overlapping conflict, then do the following:

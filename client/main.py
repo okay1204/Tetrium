@@ -68,6 +68,7 @@ while game.running:
                     if rotations < 15:
                         fall = False
                         rotations += 1
+                
                 current.move(0, -1)
 
           

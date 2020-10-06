@@ -53,7 +53,7 @@ class Game:
         self.removing = []
     
 
-
+        self.hold_mode = True
         
         
 
@@ -84,8 +84,6 @@ class Game:
             
             position += 1
     
-
-
         # for hold area
         pygame.draw.circle(self.screen, (93, 110, 105), (50, 130), 40)
         text = self.font.render('Hold', True, (255, 255 ,255))
@@ -96,6 +94,16 @@ class Game:
         if held:
             for color, x, y, width, height in pieces_lib.preview_piece(50, 130, held):
                 pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
+
+
+        # for hold mode indication
+        if game.hold_mode: text = "On"
+        else: text = "Off"
+
+        text = self.font.render(f"Hold Mode: {text}", True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (370, 780)
+        self.screen.blit(text, textRect)
 
 
     def show_text(self):

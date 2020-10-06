@@ -1,3 +1,3 @@
+Game Over Restart Button
 Start menu
 Land block, rotation failed sound effects,
-"Hold to fast move" toggle option

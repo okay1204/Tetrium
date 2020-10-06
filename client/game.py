@@ -5,6 +5,8 @@ import pieces as pieces_lib
 from math import sin, cos, pi
 import time
 
+from pieces import preview_piece
+
 
 color_key = {
     'green': (13, 252, 65),
@@ -40,8 +42,7 @@ class Game:
 
         self.resting = []
 
-
-        self.removing = [0 for x in range(22)]
+        self.removing = []
     
 
     def render(self, pieces, held=None):
@@ -96,6 +97,10 @@ class Game:
         self.screen.blit(text, textRect)
 
 
+    def add_to_hold(self):
+        preview_piece
+
+
 game = Game()
 
 
@@ -146,16 +151,29 @@ class Block(Game):
                 self.fade_stage += 1
 
             elif self.fade_stage >= 15:
+                
                 game.resting.remove(self)
-                game.removing[self.y] += 1
 
-                if game.removing[self.y] >= 10:
+                # going through each row
+                for remove_row in game.removing:
+                    
+                    # if in that row
+                    if self in remove_row:
+                        # check if all are ready to remove
+                        for block in remove_row:
+                            if block.fade_stage < 15:
+                                return
 
-                    for block in game.resting:
-                        if block.y < self.y:
-                            block.y += 1
+                for block in game.resting:
+                    if block.y < self.y:
+                        block.y += 1
 
-                    game.removing[self.y] = 0
+                for remove_row in game.removing:
+                    if self in remove_row:
+                        game.removing.remove(remove_row)
+                        break
+
+                    
 
 
     def render_preview(self):
@@ -213,8 +231,8 @@ class Piece(Game):
 
         if direct == 0:
             #clockwise
-
             for block in self.blocks:
+                #Math formula
                 temp_x, temp_y = block.x, block.y
                 block_coords.append((temp_x, temp_y))
 
@@ -226,6 +244,7 @@ class Piece(Game):
             #counter-clockwise
             
             for block in self.blocks:
+                #Math formula
                 temp_x, temp_y = block.x, block.y
                 block_coords.append((temp_x, temp_y))
                 block.x = (temp_y - self.y + self.x)

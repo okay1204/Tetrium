@@ -25,6 +25,7 @@ speedUp = False
 
 rotations = 0
 
+held = ''
 
 last_speed_up = time.time() + speed_up_rate
 speedLevel = 1
@@ -69,10 +70,25 @@ while game.running:
                         rotations += 1
                 current.move(0, -1)
 
+          
             elif event.key == pygame.K_UP:
+                
+                
                 if canSwitch:
-                    canSwitch = False
                     
+                    if not held:
+                        held = current.piece_type
+                        current = Piece(5, 1, bag.pop(0))
+                    
+                    else:
+                        past_held = held
+                        held = current.piece_type
+                        current = Piece(5, 1, past_held)
+                        
+                        
+                        
+                    canSwitch = False
+                        
 
 
             # speed down
@@ -106,19 +122,19 @@ while game.running:
 
     # for getting the next three items
     if len(bag) >= 3:
-        game.render(bag[:3])
+        game.render(bag[:3], held)
 
     elif len(bag) > 0:
         amount = len(bag)
 
         temp = bag.copy()
         temp.extend(next_bag[:3 - amount])
-        game.render(temp)
+        game.render(temp, held)
     else:
         bag = next_bag.copy()
         next_bag = pieces.copy()
         random.shuffle(next_bag)
-        game.render(bag[:3])
+        game.render(bag[:3], held)
 
 
 
@@ -147,6 +163,8 @@ while game.running:
                     row = list(filter(lambda block: block.y == y, game.resting))
 
                     if len(row) == 10:
+
+                        removed_blocks = []
                         # set the fade increments for blocks
                         for block in row:
                             
@@ -155,23 +173,28 @@ while game.running:
                                 fade_increments.append((255 - color) // 15)
 
                             block.fade_increments = tuple(fade_increments)
+                            removed_blocks.append(block)
+                        
+                        game.removing.append(removed_blocks)
 
 
     
                 # for getting the next three items
                 if len(bag) >= 3:
-                    game.render(bag[:3])
+                    game.render(bag[:3], held)
+
+
+
                 elif len(bag) > 0:
                     amount = len(bag)
-
                     temp = bag.copy()
                     temp.extend(next_bag[:3 - amount])
-                    game.render(temp)
+                    game.render(temp, held)
                 else:
                     bag = next_bag.copy()
                     next_bag = pieces.copy()
                     random.shuffle(next_bag)
-                    game.render(bag[:3])
+                    game.render(bag[:3], held)
 
 
                 # make new falling piece
@@ -193,7 +216,9 @@ while game.running:
         textRect.center = (game.width // 2, game.height // 2) 
         game.screen.blit(text, textRect)
 
+    print(list(map(lambda block: (block.x, block.y), game.resting)))
 
+    print(len(list(filter(lambda block: block.y == 20, game.resting))))
     pygame.display.update()
 
     game.clock.tick(60)

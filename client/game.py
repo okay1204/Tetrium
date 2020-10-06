@@ -29,7 +29,7 @@ class Game:
         pygame.mixer.music.play(-1)
 
 
-        self.rotateSFX = pygame.mixer.Sound('assets/move_effect.wav')
+        self.rotateSFX = pygame.mixer.Sound('assets/move_effect_success.wav')
         self.holdSFX = pygame.mixer.Sound('assets/hold_effect.wav')
 
         self.width = 500

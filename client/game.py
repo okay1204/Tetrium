@@ -29,8 +29,10 @@ class Game:
         pygame.mixer.music.play(-1)
 
 
-        self.rotateSFX = pygame.mixer.Sound('assets/move_effect_success.wav')
+        self.correct_rotateSFX = pygame.mixer.Sound('assets/move_effect_success.wav')
         self.holdSFX = pygame.mixer.Sound('assets/hold_effect.wav')
+        self.row_clearedSFX = pygame.mixer.Sound()
+        self.wrong_rotateSFX = pygame.mixer.Sound()
 
         self.width = 500
         self.height = 800
@@ -181,7 +183,6 @@ class Block(Game):
                 else:
                     return
 
-                
 
                 for block in game.resting:
                     if block.y < self.y:
@@ -190,6 +191,7 @@ class Block(Game):
                 for remove_row in game.removing:
                     if self in remove_row:
                         game.removing.remove(remove_row)
+                        game.row_clearedSFX.play()
                         break
 
                     
@@ -242,8 +244,8 @@ class Piece(Game):
     #0 means clockwise, 1 means counterclockwise
     def rotate(self, direct: int):
        
-        game.rotateSFX.play()
-        if self.piece_type == "O": return
+
+        if self.piece_type == "O": return game.correct_rotateSFX.play()
 
         block_coords = []
 
@@ -285,31 +287,38 @@ class Piece(Game):
 
         if self.check_overlap():
             
-            if self._path_check(block_coords, 0, -1, 3): return
+            game.wrong_rotateSFX.play()
+            
+            if self._path_check(block_coords, 0, -1, 3): return 
 
             # right first
             if direct == 0:
 
-                if self._path_check(block_coords, 1, 0, 3): return
+                if self._path_check(block_coords, 1, 0, 3): return 
 
-                if self._path_check(block_coords, 1, -1, 2): return
+                if self._path_check(block_coords, 1, -1, 2): return 
 
-                if self._path_check(block_coords, -1, 0, 3): return
+                if self._path_check(block_coords, -1, 0, 3): return 
 
-                if self._path_check(block_coords, -1, -1, 2): return
+                if self._path_check(block_coords, -1, -1, 2): return 
 
             # left first
             else:
 
                 if self._path_check(block_coords, -1, 0, 3): return
 
-                if self._path_check(block_coords, -1, -1, 2): return
+                if self._path_check(block_coords, -1, -1, 2): return 
 
-                if self._path_check(block_coords, 1, 0, 3): return
+                if self._path_check(block_coords, 1, 0, 3): return 
             
-                if self._path_check(block_coords, 1, 1, 2): return
+                if self._path_check(block_coords, 1, 1, 2): return 
+        
             
-            game.wrong_moveSFX.play()
+
+        else:
+            game.correct_rotateSFX.play()
+            
+            
         """
         First move piece in bounds if it is out of bounds.
         If there is any overlapping conflict, then do the following:

@@ -181,9 +181,6 @@ class Block(Game):
                 else:
                     return
 
-                
-
-                #FIXME everything below here is getting called multiple times
 
                 for block in game.resting:
                     if block.y < self.y:

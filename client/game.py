@@ -24,9 +24,9 @@ class Game:
         pygame.init()
         self.font = pygame.font.Font('arial.ttf', 32)
 
-        # pygame.mixer.music.load('assets/background_audio.wav')
-        # pygame.mixer.music.set_volume(0.25)
-        # pygame.mixer.music.play(-1)
+        pygame.mixer.music.load('assets/background_audio.wav')
+        pygame.mixer.music.set_volume(0.25)
+        pygame.mixer.music.play(-1)
 
 
         self.rotateSFX = pygame.mixer.Sound('assets/move_effect.wav')
@@ -170,15 +170,18 @@ class Block(Game):
 
                 # going through each row
                 for remove_row in game.removing:
-                    
+        
                     # if in that row
                     if self in remove_row:
-
-                        print(list(map(lambda block: block.fade_stage, remove_row)))
                         # check if all are ready to remove
                         for block in remove_row:
                             if block.fade_stage < 15:
                                 return
+                        break
+                else:
+                    return
+
+                
 
                 #FIXME everything below here is getting called multiple times
 
@@ -188,7 +191,6 @@ class Block(Game):
 
                 for remove_row in game.removing:
                     if self in remove_row:
-                        print("cancel")
                         game.removing.remove(remove_row)
                         break
 

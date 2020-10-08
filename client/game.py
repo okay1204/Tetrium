@@ -4,6 +4,7 @@ import pygame
 import pieces as pieces_lib
 from math import sin, cos, pi
 import time
+import sys
 
 from pieces import preview_piece
 
@@ -62,7 +63,7 @@ class Game:
 
 
 
-    def render(self, pieces, held=None):
+    def render(self, pieces = None, held=None):
         
         self.screen.fill((0, 0, 0))
         pygame.draw.rect(self.screen, (93, 110, 105), (100, 100, 300, 600))
@@ -80,12 +81,14 @@ class Game:
         self.screen.blit(text, textRect)
 
         # putting pieces in the circles
-        position = 1
-        for piece in pieces:
-            for color, x, y, width, height in pieces_lib.preview_piece(450, position*130, piece):
-                pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
+        if pieces:
+            position = 1
             
-            position += 1
+            for piece in pieces:
+                for color, x, y, width, height in pieces_lib.preview_piece(450, position*130, piece):
+                    pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
+                
+                position += 1
     
         # for hold area
         pygame.draw.circle(self.screen, (93, 110, 105), (50, 130), 40)
@@ -126,6 +129,93 @@ class Game:
         preview_piece
 
 
+    def game_over(self):
+
+        global bag, next_bag, rotations, speedLevel, current
+
+        gameOver = True
+
+        pygame.mixer.music.set_volume(0.03)
+        
+        while gameOver:
+            #Game over loop
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+
+                if event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_d:
+                        gameOver = False
+                        game.resting.clear()
+                        game.removing.clear()
+                        speedLevel = 0
+                        bag = pieces.copy()
+                        random.shuffle(bag)
+                        next_bag = pieces.copy()
+                        random.shuffle(next_bag)
+                        rotations = 0
+                        current = Piece(5, 1, bag.pop(0))
+                        pygame.mixer.music.set_volume(0.15)
+
+
+                
+
+            s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
+            s.fill((255,255,255, 2))      
+            game.screen.blit(s, (0,0))
+            game_over_font = pygame.font.Font('assets/arial.ttf', 60)
+            text = game_over_font.render(f'Game Over', True, (0, 0 ,0), game.screen)
+            textRect = text.get_rect() 
+            textRect.center = (game.width // 2, game.height // 2) 
+            game.screen.blit(text, textRect)
+            pygame.display.update()
+
+            game.clock.tick(60)
+        
+    
+    def start_screen(self):
+        pygame.init()
+        
+        game_started = False
+
+        pygame.mixer.music.set_volume(0.03)
+        
+        last_fall = time.time()
+        new_piece = Piece(5,2, 'T')
+        while not(game_started):
+            #Game over loop
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                    
+
+                if event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_s:
+                        game_started = True
+                        
+            self.screen.fill((0,0,0))
+            
+            if new_piece.y >= 28:
+                new_piece.y = 1
+
+            new_piece.render(False)
+            if time.time() > last_fall:
+                new_piece.move(0, 1)
+                last_fall = time.time() + 1
+                print(new_piece.y)
+
+            pygame.display.update()
+
+            game.clock.tick(60)
+
+
+
+
 game = Game()
 
 
@@ -162,6 +252,7 @@ class Block(Game):
             pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
             pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
 
+      
         # fading
         else:
 
@@ -221,7 +312,7 @@ class Piece(Game):
 
         self.piece_type = piece
 
-        self.blocks = list(map(lambda args: Block(*args), pieces_lib.get_piece(x, y, piece)))
+        self.blocks = list(map(lambda args: Block(*args), pieces_lib.get_piece(self.x, self.y, piece)))
 
     
     def move(self, x, y):
@@ -410,24 +501,26 @@ class Piece(Game):
         return False
         
     
-    def render(self):
+    def render(self, preview = True):
         # to render preview
         self.x, self.y
         
-        downCount = 0
-        while not self.check_floor():
-            self.move(0, 1)
-            downCount += 1
-        self.move(0, -1)
-
-        for block in self.blocks:
-            block.render_preview()
-        
-        for x in range(downCount): # noqa pylint: disable=unused-variable
+        if preview:
+            downCount = 0
+            while not self.check_floor():
+                self.move(0, 1)
+                downCount += 1
             self.move(0, -1)
-
-        self.move(0, 1)
+            
+            for block in self.blocks:
+                block.render_preview()
+            
         
+            for x in range(downCount): # noqa pylint: disable=unused-variable
+                self.move(0, -1)
+
+            self.move(0, 1)
+            
 
 
         # for actual piece

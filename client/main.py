@@ -64,6 +64,10 @@ def game_over():
                     current = Piece(5, 1, bag.pop(0))
                     pygame.mixer.music.set_volume(0.15)
 
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == pygame.BUTTON_LEFT:
+
+                print(pygame.mouse.get_pos())
+
 
             
 

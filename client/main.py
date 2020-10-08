@@ -3,6 +3,7 @@ import pygame
 from game import *
 import time
 import random
+import sys
 
 
 pieces = ["T", "L", "BL", "S", "BS", "I", "O"]
@@ -17,7 +18,7 @@ speed_up_rate = 30 # every 30 seconds speed up
 
 
 last_fall = time.time() + fall_speed
-fall = True
+fall = 0
 
 current = Piece(5, 1, bag.pop(0))
 
@@ -34,35 +35,23 @@ display_until = 0
 canSwitch = True
 
 
-def game_over():
 
-    gameOver = True
-    
-    while gameOver:
-        #Game over loop
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            
-
-        s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
-        s.fill((255,255,255, 2))      
-        game.screen.blit(s, (0,0))
-        game_over_font = pygame.font.Font('assets/arial.ttf', 60)
-        text = game_over_font.render(f'Game Over', True, (0, 0 ,0), game.screen)
-        textRect = text.get_rect() 
-        textRect.center = (game.width // 2, game.height // 2) 
-        pygame.mixer.music.set_volume(0.03)
-        game.screen.blit(text, textRect)
-        pygame.display.update()
-       
 
 
 moving = 0
 last_moved = 0
 
+
+last_rotation_fall = 0
+
+#This runs the start screen loop, it cant be in the main loop or it will mess things up
+game.start_screen()
+
 while game.running:
+
+
+    
 
     if moving:
 
@@ -109,7 +98,7 @@ while game.running:
                 current.move(0, 1)
                 if current.check_floor():
                     if rotations < 15:
-                        fall = False
+                        fall = time.time() + 1
                         rotations += 1
                 current.move(0, -1)
 
@@ -120,7 +109,7 @@ while game.running:
                 current.move(0, 1)
                 if current.check_floor():
                     if rotations < 15:
-                        fall = False
+                        fall = time.time() + 1
                         rotations += 1
                 
                 current.move(0, -1)
@@ -154,10 +143,10 @@ while game.running:
                             current.rotate(-1)
 
                             if current.overlapping_blocks():
-                                game_over()
+                                game.game_over()
 
                     if current.y <= -2:
-                        game_over()
+                        game.game_over()
 
 
             # speed down
@@ -201,6 +190,7 @@ while game.running:
 
         elif event.type == pygame.QUIT:
             game.running = False
+            sys.exit()
 
 
 
@@ -237,7 +227,7 @@ while game.running:
 
         if current.check_floor():
 
-            if fall:
+            if time.time() > fall:
                 # turn piece into resting blocks
                 for block in current.blocks:
                     game.resting.append(Block(block.x, block.y-1, block.color, colorByName=False))
@@ -299,14 +289,13 @@ while game.running:
                         current.rotate(-1)
 
                         if current.overlapping_blocks():
-                            game_over()
+                            game.game_over()
 
                 if current.y <= -2:
-                    game_over()
+                    game.game_over()
 
 
             else:
-                fall = True
                 current.move(0, -1)
 
     

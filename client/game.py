@@ -188,8 +188,6 @@ class Game:
                         game_started = True
 
    
-            
-          
            
 
             s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args

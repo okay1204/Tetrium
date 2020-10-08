@@ -126,19 +126,15 @@ class Game:
         self.screen.blit(text, textRect)
 
 
-    def add_to_hold(self):
-        preview_piece
-
-        
-    
     def start_screen(self):
 
         def draw_button():
             nonlocal button_text_color
             #if mouse hovering make it lighter
             if self.width/2 <= mouse[0] <= self.width/2 + button_dimensions[0] and self.height/2 <= mouse[1] <= self.height/2 + button_dimensions[1]: 
-                pygame.draw.rect(self.screen,(255,255,255), (button_pos, button_dimensions)) 
+                pygame.draw.rect(self.screen, (255,255,255), (button_pos, button_dimensions)) 
                 button_text_color = (0, 0, 0)
+            
             else: 
                 pygame.draw.rect(self.screen, (0,0,0), (button_pos, button_dimensions))
                 button_text_color = (255, 255, 255)

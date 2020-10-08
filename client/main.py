@@ -7,7 +7,7 @@ import sys
 
 
 pieces = ["T", "L", "BL", "S", "BS", "I", "O"]
-# pieces = ["T", "L", "BL"]
+
 bag = pieces.copy()
 random.shuffle(bag)
 next_bag = pieces.copy()

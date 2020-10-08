@@ -5,6 +5,7 @@ import pieces as pieces_lib
 from math import sin, cos, pi
 import time
 import sys
+from random import shuffle, randint
 
 from pieces import preview_piece
 
@@ -176,15 +177,30 @@ class Game:
         
     
     def start_screen(self):
-        pygame.init()
         
+        bkg_img = pygame.image.load('assets/bkg_img.png')
         game_started = False
 
         pygame.mixer.music.set_volume(0.03)
         
-        last_fall = time.time()
-        new_piece = Piece(5,2, 'T')
-        while not(game_started):
+        #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
+        x_pos = [0, 4, 8, 12, 0, 4, 8]
+        shuffle(x_pos)
+
+        pieces = [
+
+            Piece(x_pos[0], randint(-9, -6), 'T'), 
+            Piece(x_pos[1], randint(-6, -3), 'L'), 
+            Piece(x_pos[2], randint(-3, 0), 'BL'), 
+            Piece(x_pos[3], randint(0, 3), 'S'), 
+            Piece(x_pos[4], randint(3, 6), 'BS'), 
+            Piece(x_pos[5], randint(6, 9), 'I'),
+            Piece(x_pos[6], randint(9, 15), 'O')
+        ]
+        
+        
+        last_falls = [time.time() for i in pieces]
+        while not game_started:
             #Game over loop
 
             for event in pygame.event.get():
@@ -198,16 +214,22 @@ class Game:
                     if event.key == pygame.K_s:
                         game_started = True
                         
-            self.screen.fill((0,0,0))
-            
-            if new_piece.y >= 28:
-                new_piece.y = 1
+            s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
+            s.fill((255,255,255, 2))      
+            self.screen.blit(s, (0,0))   
+    
 
-            new_piece.render(False)
-            if time.time() > last_fall:
-                new_piece.move(0, 1)
-                last_fall = time.time() + 1
-                print(new_piece.y)
+            for i, piece in enumerate(pieces):
+                #means piece is off the screen
+                if piece.y >= 28:
+                    #Moves it back up
+                    piece.move(0, randint(-35, -30))
+
+                piece.render(False)
+                if time.time() > last_falls[i]:
+                    piece.move(0, 1)
+                    last_falls[i] = time.time() + 0.75
+                   
 
             pygame.display.update()
 
@@ -312,7 +334,7 @@ class Piece(Game):
 
         self.piece_type = piece
 
-        self.blocks = list(map(lambda args: Block(*args), pieces_lib.get_piece(self.x, self.y, piece)))
+        self.blocks = list(map(lambda args: Block(*args), pieces_lib.get_piece(x, y, piece)))
 
     
     def move(self, x, y):

@@ -132,6 +132,18 @@ class Game:
         
     
     def start_screen(self):
+
+        def draw_button():
+            nonlocal button_text_color
+            #if mouse hovering make it lighter
+            if self.width/2 <= mouse[0] <= self.width/2 + button_dimensions[0] and self.height/2 <= mouse[1] <= self.height/2 + button_dimensions[1]: 
+                pygame.draw.rect(self.screen,(255,255,255), (button_pos, button_dimensions)) 
+                button_text_color = (0, 0, 0)
+            else: 
+                pygame.draw.rect(self.screen, (0,0,0), (button_pos, button_dimensions))
+                button_text_color = (255, 255, 255)
+
+            self.screen.blit(text, (button_pos[0] + 20, button_pos[1] + 3))
         
         bkg_img = pygame.image.load('assets/bkg_img.png')
         game_started = False
@@ -153,26 +165,40 @@ class Game:
             Piece(x_pos[6], randint(9, 15), 'O')
         ]
         
+
         
         last_falls = [time.time() for i in pieces]
+        button_dimensions = (140 ,40)
+        button_pos = (self.width/2 - 70, self.height/2)
+        button_text_color = (255, 255, 255)
+        
+        
         while not game_started:
-            #Game over loop
+            mouse = pygame.mouse.get_pos() 
 
+            #Game over loop
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                     
-
-                if event.type == pygame.KEYDOWN:
-
-                    if event.key == pygame.K_s:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                   
+                    if self.width/2 <= mouse[0] <= self.width/2 + button_dimensions[0] and self.height/2 <= mouse[1] <= self.height/2+button_dimensions[1]: 
                         game_started = True
-                        
+
+   
+            
+          
+           
+
             s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
+          
             s.fill((255,255,255, 2))      
-            self.screen.blit(s, (0,0))   
+            self.screen.blit(s, (0, 0))   
+            text = game.font.render('START', True, button_text_color) 
     
+         
 
             for i, piece in enumerate(pieces):
                 #means piece is off the screen
@@ -184,8 +210,10 @@ class Game:
                 if time.time() > last_falls[i]:
                     piece.move(0, 1)
                     last_falls[i] = time.time() + 0.75
-                   
 
+            
+            draw_button()
+                
             pygame.display.update()
 
             game.clock.tick(60)

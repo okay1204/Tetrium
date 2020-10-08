@@ -237,12 +237,11 @@ class Piece(Game):
     def _path_check(self, orgx, orgy, block_coords, x, y, maxcount):
 
         count = 0
-        while self.check_overlap and count < maxcount:
+        while self.check_overlap() and count < maxcount:
             self.move(x, y)
             count += 1
 
-        if not self.check_overlap: 
-            game.correct_rotateSFX.play()
+        if not self.check_overlap(): 
             return True
 
         # reset
@@ -325,8 +324,7 @@ class Piece(Game):
             
 
         else:
-            #TODO rejected rotation effect here
-            pass
+            game.correct_rotateSFX.play()
             
             
         """

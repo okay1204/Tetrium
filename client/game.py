@@ -182,6 +182,7 @@ class Game:
                    
                     if self.width/2 <= mouse[0] <= self.width/2 + button_dimensions[0] and self.height/2 <= mouse[1] <= self.height/2+button_dimensions[1]: 
                         game_started = True
+                        pygame.mixer.music.set_volume(0.15)
 
    
            

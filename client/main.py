@@ -24,7 +24,7 @@ current = Piece(5, 1, bag.pop(0))
 
 speedUp = False
 
-rotations = 0
+avoids = 0
 
 held = ''
 
@@ -37,7 +37,7 @@ canSwitch = True
 
 def game_over():
 
-    global bag, next_bag, rotations, speedLevel, current
+    global bag, next_bag, avoids, speedLevel, current
 
     gameOver = True
 
@@ -67,7 +67,7 @@ def game_over():
                     random.shuffle(bag)
                     next_bag = pieces.copy()
                     random.shuffle(next_bag)
-                    rotations = 0
+                    avoids = 0
                     current = Piece(5, 1, bag.pop(0))
                     pygame.mixer.music.set_volume(0.15)
 
@@ -79,7 +79,7 @@ def game_over():
         game.screen.blit(s, (0,0))
         game_over_font = pygame.font.Font('assets/arial.ttf', 60)
         button_font  = pygame.font.Font('assets/arial.ttf', 32)
-        game_over_text = game_over_font.render(f'Game Over', True, (0, 0 ,0), game.screen)
+        game_over_text = game.font.render(f'Game Over', True, (0, 0 ,0), game.screen)
         button_text = button_font.render(f'RESTART', True, (255, 255 , 255), game.screen)
         textRect = game_over_text.get_rect() 
         textRect.center = (game.width // 2, 200) 
@@ -113,11 +113,27 @@ while game.running:
                     current.move(-1, 0)
                     last_moved = time.time()
 
+                    current.move(0, 1)
+                    if current.check_floor():
+                        if avoids < 15:
+                            fall = time.time() + 0.3
+                            avoids += 1
+                    current.move(0, -1)
+
+
         if moving == 1:
             if time.time() - last_moved > 0.1:
                 if not current.check_right():
                     current.move(1, 0)
                     last_moved = time.time()
+
+                    current.move(0, 1)
+                    if current.check_floor():
+                        if avoids < 15:
+                            fall = time.time() + 0.3
+                            avoids += 1
+                    current.move(0, -1)
+
 
     for event in pygame.event.get():
 
@@ -130,6 +146,13 @@ while game.running:
                     if not current.check_left():
                         current.move(-1, 0)
 
+                        current.move(0, 1)
+                        if current.check_floor():
+                            if avoids < 15:
+                                fall = time.time() + 0.3
+                                avoids += 1
+                        current.move(0, -1)
+
                 else:
                     moving = -1
             
@@ -140,6 +163,15 @@ while game.running:
                     if not current.check_right():
                         current.move(1, 0)
 
+                        current.move(0, 1)
+                        if current.check_floor():
+                            if avoids < 15:
+                                fall = time.time() + 0.3
+                                avoids += 1
+                        current.move(0, -1)
+
+
+
                 else:
                     moving = 1
 
@@ -149,9 +181,9 @@ while game.running:
 
                 current.move(0, 1)
                 if current.check_floor():
-                    if rotations < 15:
+                    if avoids < 15:
                         fall = time.time() + 1
-                        rotations += 1
+                        avoids += 1
                 current.move(0, -1)
 
             # rotate counter-clockwise
@@ -160,9 +192,9 @@ while game.running:
 
                 current.move(0, 1)
                 if current.check_floor():
-                    if rotations < 15:
+                    if avoids < 15:
                         fall = time.time() + 1
-                        rotations += 1
+                        avoids += 1
                 
                 current.move(0, -1)
 
@@ -183,7 +215,7 @@ while game.running:
                         held = current.piece_type
                         current = Piece(5, 1, past_held)
 
-                    rotations = 0
+                    avoids = 0
                     canSwitch = False
 
                     # checking if game is over
@@ -329,7 +361,7 @@ while game.running:
 
                 # make new falling piece
                 current = Piece(5, 1, bag.pop(0))
-                rotations = 0
+                avoids = 0
 
 
                 # checking if game is over

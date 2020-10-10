@@ -64,7 +64,7 @@ class Game:
 
 
 
-    def render(self, pieces = None, held=None):
+    def render(self, pieces=None, held=None, score=0):
         
         self.screen.fill((0, 0, 0))
         pygame.draw.rect(self.screen, (93, 110, 105), (100, 100, 300, 600))
@@ -110,6 +110,12 @@ class Game:
         text = self.font.render(f"Continuous Movement: {text}", True, (255, 255 ,255))
         textRect = text.get_rect()
         textRect.center = (300, 780)
+        self.screen.blit(text, textRect)
+
+
+        text = self.font.render(f"Score: {score}", True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (250, 725)
         self.screen.blit(text, textRect)
 
 

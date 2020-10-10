@@ -79,7 +79,7 @@ def game_over():
         game.screen.blit(s, (0,0))
         game_over_font = pygame.font.Font('assets/arial.ttf', 60)
         button_font  = pygame.font.Font('assets/arial.ttf', 32)
-        game_over_text = game.font.render(f'Game Over', True, (0, 0 ,0), game.screen)
+        game_over_text = game_over_font.render(f'Game Over', True, (0, 0 ,0), game.screen)
         button_text = button_font.render(f'RESTART', True, (255, 255 , 255), game.screen)
         textRect = game_over_text.get_rect() 
         textRect.center = (game.width // 2, 200) 
@@ -97,13 +97,17 @@ last_moved = 0
 
 last_rotation_fall = 0
 
+score = 0
+combo = -1
+score_key = [100, 300, 500, 800]
+difficult_before = False
+
 #This runs the start screen loop, it cant be in the main loop or it will mess things up
-game.start_screen()
+#NOTE uncomment start screen in final version
+# game.start_screen()
 
 while game.running:
 
-
-    
 
     if moving:
 
@@ -243,11 +247,17 @@ while game.running:
             # force down
             elif event.key == pygame.K_DOWN:
                 
+                downCount = 0
                 while not current.check_floor():
                     current.move(0, 1)
+                    downCount += 1
 
                 current.move(0,-1)
+                downCount -= 1
+
                 last_fall -= 2
+
+                score += downCount*2
 
             elif event.key == pygame.K_g:
                 game.continuous = not game.continuous
@@ -281,19 +291,19 @@ while game.running:
 
     # for getting the next three items
     if len(bag) >= 3:
-        game.render(bag[:3], held)
+        game.render(bag[:3], held, score)
 
     elif len(bag) > 0:
         amount = len(bag)
 
         temp = bag.copy()
         temp.extend(next_bag[:3 - amount])
-        game.render(temp, held)
+        game.render(temp, held, score)
     else:
         bag = next_bag.copy()
         next_bag = pieces.copy()
         random.shuffle(next_bag)
-        game.render(bag[:3], held)
+        game.render(bag[:3], held, score)
 
 
 
@@ -308,6 +318,9 @@ while game.running:
     if time.time() > last_fall:
         last_fall = time.time() + fall_speed
         current.move(0, 1)
+        
+        if speedUp and not current.check_floor():
+            score += 1
 
         if current.check_floor():
 
@@ -315,12 +328,14 @@ while game.running:
                 # turn piece into resting blocks
                 for block in current.blocks:
                     game.resting.append(Block(block.x, block.y-1, block.color, colorByName=False))
-
                 
                 # detect if a row was made
+                lines_cleared = 0
+                lowest_y = 0
                 for y in range(1, 21):
                     row = list(filter(lambda block: block.y == y, game.resting))
 
+                    # line clear
                     if len(row) == 10:
 
                         removed_blocks = []
@@ -336,11 +351,39 @@ while game.running:
                         
                         game.removing.append(removed_blocks)
 
+                        lines_cleared += 1
+                        if lowest_y < y:
+                            lowest_y = y
+
+                if lines_cleared:
+                    combo += 1
+
+                    # for adding normal value
+                    line_clear_value = (21 - lowest_y) * score_key[lines_cleared-1]
+
+                    # calcualting combos
+                    score += 50 * combo * (21 - lowest_y)
+
+                    # checking for back-to-back difficult line clear
+                    if lines_cleared == 4:
+                        if difficult_before:
+                            line_clear_value *= 1.5
+                            line_clear_value = int(line_clear_value)
+                        else:
+                            difficult_before = True
+                    else:
+                        difficult_before = False
+                    
+                    score += line_clear_value
+                    
+                else:
+                    combo = -1
+
 
     
                 # for getting the next three items
                 if len(bag) >= 3:
-                    game.render(bag[:3], held)
+                    game.render(bag[:3], held, score)
 
 
 
@@ -348,12 +391,12 @@ while game.running:
                     amount = len(bag)
                     temp = bag.copy()
                     temp.extend(next_bag[:3 - amount])
-                    game.render(temp, held)
+                    game.render(temp, held, score)
                 else:
                     bag = next_bag.copy()
                     next_bag = pieces.copy()
                     random.shuffle(next_bag)
-                    game.render(bag[:3], held)
+                    game.render(bag[:3], held, score)
 
 
                 #TODO play land sound here

@@ -134,7 +134,6 @@ class Game:
 
             self.screen.blit(text, (button_pos[0] + 20, button_pos[1] + 3))
         
-        bkg_img = pygame.image.load('assets/bkg_img.png')
         game_started = False
 
         pygame.mixer.music.set_volume(0.03)

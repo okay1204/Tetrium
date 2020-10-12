@@ -78,24 +78,20 @@ def get_piece(x, y, piece):
 
     if piece == 'L':
 
-        
-
         return [
+            (x, y, color),
             (x, y+1, color),
-            (x-1, y-1, color),
-            (x-1, y, color),
-            (x-1, y+1, color)
+            (x, y-1, color),
+            (x+1, y+1, color)
         ]
     
     elif piece == 'BL':
 
-        
-
         return [
+            (x, y, color),
             (x, y+1, color),
-            (x+1, y-1, color),
-            (x+1, y, color),
-            (x+1, y+1, color)
+            (x, y-1, color),
+            (x-1, y+1, color)
         ]
 
     elif piece == 'S':

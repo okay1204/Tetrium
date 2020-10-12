@@ -184,6 +184,10 @@ while game.running:
 
             # rotate clockwise
             elif event.key == pygame.K_RIGHT:
+                
+                
+
+
                 current.rotate(0)
 
                 current.move(0, 1)
@@ -192,6 +196,8 @@ while game.running:
                         fall = time.time() + 1
                         avoids += 1
                 current.move(0, -1)
+
+
 
             # rotate counter-clockwise
             elif event.key == pygame.K_LEFT:
@@ -378,6 +384,7 @@ while game.running:
                         if difficult_before:
                             line_clear_value *= 1.5
                             line_clear_value = int(line_clear_value)
+                            texts.append((f"Back to Back", time.time() + 3, 15))
                         else:
                             difficult_before = True
                     else:

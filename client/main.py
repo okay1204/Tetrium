@@ -106,6 +106,9 @@ difficult_before = False
 #NOTE uncomment start screen in final version
 # game.start_screen()
 
+
+texts = []
+
 while game.running:
 
 
@@ -358,6 +361,9 @@ while game.running:
                 if lines_cleared:
                     combo += 1
 
+                    if combo > 0:
+                        texts.append((f"{combo+1} Combo", time.time() + 3, 20))
+
                     # for adding normal value
                     line_clear_value = (21 - lowest_y) * score_key[lines_cleared-1]
 
@@ -366,6 +372,9 @@ while game.running:
 
                     # checking for back-to-back difficult line clear
                     if lines_cleared == 4:
+
+                        texts.append(('Tetris', time.time() + 3, 30))
+
                         if difficult_before:
                             line_clear_value *= 1.5
                             line_clear_value = int(line_clear_value)
@@ -433,6 +442,29 @@ while game.running:
         textRect = text.get_rect() 
         textRect.center = (game.width // 2, game.height // 2) 
         game.screen.blit(text, textRect)
+
+
+    # queing up special texts
+    removed_texts = []
+    for text, display_until, size in texts:
+
+        if display_until > time.time():
+
+            font = pygame.font.Font('assets/arial.ttf', size)
+
+            textElement = font.render(text, True, (255, 255, 255))
+            textRect = textElement.get_rect() 
+
+            textRect.center = (450, 500 + texts.index((text, display_until, size)) * 50)
+
+            game.screen.blit(textElement, textRect)
+        else:
+            removed_texts.append((text, display_until, size))
+    
+    for item in removed_texts:
+        texts.remove(item)
+
+    removed_texts.clear()
 
     
     pygame.display.update()

@@ -119,19 +119,6 @@ class Game:
         self.screen.blit(text, textRect)
 
 
-    def show_text(self):
-
-        font = pygame.font.Font('arial.ttf', 32) 
-
-        text = font.render('Whoah', True)
-        textRect = text.get_rect() 
-  
-        # set the center of the rectangular object. 
-        textRect.center = (self.width // 2, self.height // 2) 
-        
-        self.screen.blit(text, textRect)
-
-
     def start_screen(self):
 
         def draw_button():

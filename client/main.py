@@ -444,7 +444,6 @@ while game.running:
 
     
     current.render()
-    print(current.rotation)
 
     if display_until > time.time():
         text = game.font.render(f'Speed Level {speedLevel}', True, (0, 0 ,0))

@@ -326,25 +326,6 @@ class Piece(Game):
             block.y += y
 
 
-    def _path_check(self, orgx, orgy, block_coords, direct, x, y):
-
-        # invert y direction
-        y *= -1
-
-        self.move(x, y)
-
-        if not self.check_overlap():
-            game.correct_rotateSFX.play()
-            self._set_rotation_value(direct)
-            return True
-
-        # reset
-        for index, block in enumerate(self.blocks):
-            block.x, block.y = block_coords[index]
-        self.x, self.y = orgx, orgy
-
-        return False
-
     def _set_rotation_value(self, direct):
 
         if direct == 0:
@@ -375,6 +356,23 @@ class Piece(Game):
                 self.rotation = '0'
 
 
+    def _path_check(self, direct, x, y):
+
+        # invert y direction
+        y *= -1
+
+        self.move(x, y)
+
+        if not self.check_overlap():
+            game.correct_rotateSFX.play()
+            return True
+
+        # reset
+        self.move(-1*x, -1*y)
+        
+        return False
+
+
 
     #0 means clockwise, 1 means counterclockwise
     def rotate(self, direct: int):
@@ -382,7 +380,7 @@ class Piece(Game):
 
         if self.piece_type == "O": return game.correct_rotateSFX.play()
 
-        block_coords = []
+        org_block_coords = []
 
         x, y = self.x, self.y # noqa pylint: disable=unused-variable
 
@@ -391,7 +389,7 @@ class Piece(Game):
             for block in self.blocks:
                 #Math formula
                 temp_x, temp_y = block.x, block.y
-                block_coords.append((temp_x, temp_y))
+                org_block_coords.append((temp_x, temp_y))
 
                 block.x = (-1*(temp_y-self.y) + self.x)
                 block.y = ((temp_x - self.x) + self.y)
@@ -403,10 +401,14 @@ class Piece(Game):
             for block in self.blocks:
                 #Math formula
                 temp_x, temp_y = block.x, block.y
-                block_coords.append((temp_x, temp_y))
+                org_block_coords.append((temp_x, temp_y))
                 block.x = (temp_y - self.y + self.x)
                 block.y = (-1*(temp_x - self.x) + self.y)
 
+
+        old_rotation = self.rotation
+
+        self._set_rotation_value(direct)
 
         if self.check_overlap():
 
@@ -418,65 +420,65 @@ class Piece(Game):
                 if direct == 0:
                     
                     # 0 -> R
-                    if self.rotation == "0":
-                        if self._path_check(x, y, block_coords, direct, -2, 0): return
-                        if self._path_check(x, y, block_coords, direct, 1, 0): return
-                        if self._path_check(x, y, block_coords, direct, -2, -1): return
-                        if self._path_check(x, y, block_coords, direct, 1, 2): return
+                    if old_rotation == "0":
+                        if self._path_check(direct, -2, 0): return
+                        if self._path_check(direct, 1, 0): return
+                        if self._path_check(direct, -2, -1): return
+                        if self._path_check(direct, 1, 2): return
 
 
                     # R -> 2
-                    elif self.rotation == 'R':
-                        if self._path_check(x, y, block_coords, direct, -1, 0): return
-                        if self._path_check(x, y, block_coords, direct, 2, 0): return
-                        if self._path_check(x, y, block_coords, direct, -1, 2): return
-                        if self._path_check(x, y, block_coords, direct, 2, -1): return
+                    elif old_rotation == 'R':
+                        if self._path_check(direct, -1, 0): return
+                        if self._path_check(direct, 2, 0): return
+                        if self._path_check(direct, -1, 2): return
+                        if self._path_check(direct, 2, -1): return
                     
                     # 2 -> L
-                    elif self.rotation == '2':
-                        if self._path_check(x, y, block_coords, direct, 2, 0): return
-                        if self._path_check(x, y, block_coords, direct, -1, 0): return
-                        if self._path_check(x, y, block_coords, direct, 2, 1): return
-                        if self._path_check(x, y, block_coords, direct, -1, -2): return
+                    elif old_rotation == '2':
+                        if self._path_check(direct, 2, 0): return
+                        if self._path_check(direct, -1, 0): return
+                        if self._path_check(direct, 2, 1): return
+                        if self._path_check(direct, -1, -2): return
 
                     # L -> 0
-                    elif self.rotation == "L":
-                        if self._path_check(x, y, block_coords, direct, 1, 0): return
-                        if self._path_check(x, y, block_coords, direct, -2, 0): return
-                        if self._path_check(x, y, block_coords, direct, 1, -2): return
-                        if self._path_check(x, y, block_coords, direct, -2, 1): return
+                    elif old_rotation == "L":
+                        if self._path_check(direct, 1, 0): return
+                        if self._path_check(direct, -2, 0): return
+                        if self._path_check(direct, 1, -2): return
+                        if self._path_check(direct, -2, 1): return
 
 
                 # counterclockwise
                 else:
 
                     # R -> 0
-                    if self.rotation == "R":
-                        if self._path_check(x, y, block_coords, direct, 2, 0): return
-                        if self._path_check(x, y, block_coords, direct, -1, 0): return
-                        if self._path_check(x, y, block_coords, direct, 2, 1): return
-                        if self._path_check(x, y, block_coords, direct, -1, -2): return
+                    if old_rotation == "R":
+                        if self._path_check(direct, 2, 0): return
+                        if self._path_check(direct, -1, 0): return
+                        if self._path_check(direct, 2, 1): return
+                        if self._path_check(direct, -1, -2): return
 
                     # 2 -> R
-                    elif self.rotation == "2":
-                        if self._path_check(x, y, block_coords, direct, 1, 0): return
-                        if self._path_check(x, y, block_coords, direct, -2, 0): return
-                        if self._path_check(x, y, block_coords, direct, 1, -2): return
-                        if self._path_check(x, y, block_coords, direct, -2, 1): return
+                    elif old_rotation == "2":
+                        if self._path_check(direct, 1, 0): return
+                        if self._path_check(direct, -2, 0): return
+                        if self._path_check(direct, 1, -2): return
+                        if self._path_check(direct, -2, 1): return
 
                     # L -> 2
-                    elif self.rotation == "L":
-                        if self._path_check(x, y, block_coords, direct, -2, 0): return
-                        if self._path_check(x, y, block_coords, direct, 1, 0): return
-                        if self._path_check(x, y, block_coords, direct, -2, -1): return
-                        if self._path_check(x, y, block_coords, direct, 1, 2): return
+                    elif old_rotation == "L":
+                        if self._path_check(direct, -2, 0): return
+                        if self._path_check(direct, 1, 0): return
+                        if self._path_check(direct, -2, -1): return
+                        if self._path_check(direct, 1, 2): return
                     
                     # 0 -> L
-                    elif self.rotation == "0":
-                        if self._path_check(x, y, block_coords, direct, -1, 0): return
-                        if self._path_check(x, y, block_coords, direct, 2, 0): return
-                        if self._path_check(x, y, block_coords, direct, -1, 2): return
-                        if self._path_check(x, y, block_coords, direct, 2, -1): return
+                    elif old_rotation == "0":
+                        if self._path_check(direct, -1, 0): return
+                        if self._path_check(direct, 2, 0): return
+                        if self._path_check(direct, -1, 2): return
+                        if self._path_check(direct, 2, -1): return
 
 
 
@@ -484,79 +486,79 @@ class Piece(Game):
 
                 # clockwise
                 if direct == 0:
+
                     
                     # 0 -> R
-                    if self.rotation == "0":
-                        if self._path_check(x, y, block_coords, direct, -1, 0): return
-                        if self._path_check(x, y, block_coords, direct, -1, 1): return
-                        if self._path_check(x, y, block_coords, direct, 0, -2): return
-                        if self._path_check(x, y, block_coords, direct, -1, -2): return
+                    if old_rotation == "0":
+                        if self._path_check(direct, -1, 0): return
+                        if self._path_check(direct, -1, 1): return
+                        if self._path_check(direct, 0, -2): return
+                        if self._path_check(direct, -1, -2): return
 
 
                     # R -> 2
-                    elif self.rotation == 'R':
-                        if self._path_check(x, y, block_coords, direct, 1, 0): return
-                        if self._path_check(x, y, block_coords, direct, 1, -1): return
-                        if self._path_check(x, y, block_coords, direct, 0, 2): return
-                        if self._path_check(x, y, block_coords, direct, 1, 2): return
+                    elif old_rotation == 'R':
+                        if self._path_check(direct, 1, 0): return
+                        if self._path_check(direct, 1, -1): return
+                        if self._path_check(direct, 0, 2): return
+                        if self._path_check(direct, 1, 2): return
                     
                     # 2 -> L
-                    elif self.rotation == '2':
-                        if self._path_check(x, y, block_coords, direct, 1, 0): return
-                        if self._path_check(x, y, block_coords, direct, 1, 1): return
-                        if self._path_check(x, y, block_coords, direct, 0, -2): return
-                        if self._path_check(x, y, block_coords, direct, 1, -2): return
+                    elif old_rotation == '2':
+                        if self._path_check(direct, 1, 0): return
+                        if self._path_check(direct, 1, 1): return
+                        if self._path_check(direct, 0, -2): return
+                        if self._path_check(direct, 1, -2): return
 
                     # L -> 0
-                    elif self.rotation == "L":
-                        if self._path_check(x, y, block_coords, direct, -1, 0): return
-                        if self._path_check(x, y, block_coords, direct, -1, -1): return
-                        if self._path_check(x, y, block_coords, direct, 0, 2): return
-                        if self._path_check(x, y, block_coords, direct, -1, 2): return
+                    elif old_rotation == "L":
+                        if self._path_check(direct, -1, 0): return
+                        if self._path_check(direct, -1, -1): return
+                        if self._path_check(direct, 0, 2): return
+                        if self._path_check(direct, -1, 2): return
 
 
                 # counterclockwise
                 else:
 
                     # R -> 0
-                    if self.rotation == "R":
-                        if self._path_check(x, y, block_coords, direct, 1, 0): return
-                        if self._path_check(x, y, block_coords, direct, 1, -1): return
-                        if self._path_check(x, y, block_coords, direct, 0, 2): return
-                        if self._path_check(x, y, block_coords, direct, 1, 2): return
+                    if old_rotation == "R":
+                        if self._path_check(direct, 1, 0): return
+                        if self._path_check(direct, 1, -1): return
+                        if self._path_check(direct, 0, 2): return
+                        if self._path_check(direct, 1, 2): return
 
                     # 2 -> R
-                    elif self.rotation == "2":
-                        if self._path_check(x, y, block_coords, direct, -1, 0): return
-                        if self._path_check(x, y, block_coords, direct, -1, 1): return
-                        if self._path_check(x, y, block_coords, direct, 0, -2): return
-                        if self._path_check(x, y, block_coords, direct, -1, -2): return
+                    elif old_rotation == "2":
+                        if self._path_check(direct, -1, 0): return
+                        if self._path_check(direct, -1, 1): return
+                        if self._path_check(direct, 0, -2): return
+                        if self._path_check(direct, -1, -2): return
 
                     # L -> 2
-                    elif self.rotation == "L":
-                        if self._path_check(x, y, block_coords, direct, -1, 0): return
-                        if self._path_check(x, y, block_coords, direct, -1, -1): return
-                        if self._path_check(x, y, block_coords, direct, 0, 2): return
-                        if self._path_check(x, y, block_coords, direct, -1, 2): return
+                    elif old_rotation == "L":
+                        if self._path_check(direct, -1, 0): return
+                        if self._path_check(direct, -1, -1): return
+                        if self._path_check(direct, 0, 2): return
+                        if self._path_check(direct, -1, 2): return
                     
                     # 0 -> L
-                    elif self.rotation == "0":
-                        if self._path_check(x, y, block_coords, direct, 1, 0): return
-                        if self._path_check(x, y, block_coords, direct, 1, 1): return
-                        if self._path_check(x, y, block_coords, direct, 0, -2): return
-                        if self._path_check(x, y, block_coords, direct, 1, -2): return
+                    elif old_rotation == "0":
+                        if self._path_check(direct, 1, 0): return
+                        if self._path_check(direct, 1, 1): return
+                        if self._path_check(direct, 0, -2): return
+                        if self._path_check(direct, 1, -2): return
+            
 
-
-
-
-
-
-
-
+            # if all tests fail
+            self.rotation = old_rotation
+            
+            # reset
+            for index, block in enumerate(self.blocks):
+                block.x, block.y = org_block_coords[index]
 
 
         else:
-            self._set_rotation_value(direct)
             game.correct_rotateSFX.play()
             
             
@@ -577,9 +579,14 @@ class Piece(Game):
     def check_overlap(self):
 
         for block in self.blocks:
+
+            if block.y > 20 or block.x < 1 or block.x > 10:
+                return True
+
+
             for resting in game.resting:
 
-                if (block.x == resting.x and block.y == resting.y) or (block.y > 20 or block.x < 1 or block.x > 10):
+                if block.x == resting.x and block.y == resting.y:
                     return True
         
         return False

@@ -6,7 +6,7 @@ import random
 import sys
 
 
-pieces = ["T", "L", "BL", "S", "BS", "I", "O"]
+pieces = ["T", "L", "J", "S", "Z", "I", "O"]
 
 bag = pieces.copy()
 random.shuffle(bag)
@@ -37,7 +37,7 @@ canSwitch = True
 
 def game_over():
 
-    global bag, next_bag, avoids, speedLevel, current
+    global bag, next_bag, avoids, speedLevel, current, held
 
     gameOver = True
 
@@ -70,6 +70,7 @@ def game_over():
                     avoids = 0
                     current = Piece(5, 1, bag.pop(0))
                     pygame.mixer.music.set_volume(0.15)
+                    held = None
 
 
         pygame.draw.rect(game.screen, (0,0,0), (button_pos, button_dimensions))
@@ -443,6 +444,7 @@ while game.running:
 
     
     current.render()
+    print(current.rotation)
 
     if display_until > time.time():
         text = game.font.render(f'Speed Level {speedLevel}', True, (0, 0 ,0))

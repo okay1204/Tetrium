@@ -1,3 +1,5 @@
 Game Over Restart Button
 Sound Effects
 Score
+New Rotation System (SRS)
+Algorithm for I piece rotation

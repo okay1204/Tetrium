@@ -1,9 +1,9 @@
 piece_colors = {
     'T': 'purple',
     'L': 'orange',
-    'BL': 'blue',
+    'J': 'blue',
     'S': 'green',
-    'BS': 'red',
+    'Z': 'red',
     'I': 'teal',
     'O': 'yellow'
 }
@@ -28,7 +28,7 @@ def preview_piece(x, y, piece):
             (color, x-15, y+10, 30, 15)
         ]
 
-    elif piece == "BL":
+    elif piece == "J":
 
         return [
             (color, x, y-30, 15, 45),
@@ -42,7 +42,7 @@ def preview_piece(x, y, piece):
             (color, x-22, y, 30, 15)
         ]
 
-    elif piece == "BS":
+    elif piece == "Z":
 
         return [
             (color, x-22, y-15, 30, 15),
@@ -85,7 +85,7 @@ def get_piece(x, y, piece):
             (x+1, y+1, color)
         ]
     
-    elif piece == 'BL':
+    elif piece == 'J':
 
         return [
             (x, y, color),
@@ -103,7 +103,7 @@ def get_piece(x, y, piece):
             (x+1, y, color)
         ]
 
-    elif piece == 'BS':
+    elif piece == 'Z':
 
         
 

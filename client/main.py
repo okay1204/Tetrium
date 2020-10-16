@@ -29,7 +29,6 @@ avoids = 0
 held = ''
 
 last_speed_up = time.time() + speed_up_rate
-speedLevel = 1
 display_until = 0
 
 canSwitch = True
@@ -37,7 +36,7 @@ canSwitch = True
 
 def game_over():
 
-    global bag, next_bag, avoids, speedLevel, current, held
+    global bag, next_bag, avoids, current, held
 
     gameOver = True
 
@@ -62,7 +61,7 @@ def game_over():
                     gameOver = False
                     game.resting.clear()
                     game.removing.clear()
-                    speedLevel = 0
+                    game.level = 0
                     bag = pieces.copy()
                     random.shuffle(bag)
                     next_bag = pieces.copy()
@@ -98,7 +97,6 @@ last_moved = 0
 
 last_rotation_fall = 0
 
-score = 0
 combo = -1
 score_key = [100, 300, 500, 800]
 difficult_before = False
@@ -273,7 +271,7 @@ while game.running:
                 touched_floor = True
                 last_touched -= 5
 
-                score += downCount*2
+                game.score += downCount*2
 
             elif event.key == pygame.K_g:
                 game.continuous = not game.continuous
@@ -307,19 +305,19 @@ while game.running:
 
     # for getting the next three items
     if len(bag) >= 3:
-        game.render(bag[:3], held, score)
+        game.render(bag[:3], held)
 
     elif len(bag) > 0:
         amount = len(bag)
 
         temp = bag.copy()
         temp.extend(next_bag[:3 - amount])
-        game.render(temp, held, score)
+        game.render(temp, held)
     else:
         bag = next_bag.copy()
         next_bag = pieces.copy()
         random.shuffle(next_bag)
-        game.render(bag[:3], held, score)
+        game.render(bag[:3], held)
 
 
 
@@ -327,8 +325,17 @@ while game.running:
     if time.time() > last_speed_up:
         last_speed_up = time.time() + speed_up_rate
         fall_speed /= 1.2
-        speedLevel += 1
+        game.level += 1
         display_until = time.time() + 3
+
+
+    current.move(0, 1)
+    if current.check_floor() and not touched_floor:
+        last_touched = time.time() + 0.95
+        touched_floor = True
+    elif not current.check_floor():
+        touched_floor = False
+    current.move(0, -1)
 
 
 
@@ -338,7 +345,7 @@ while game.running:
         current.move(0, 1)
         
         if speedUp and not current.check_floor():
-            score += 1
+            game.score += 1
 
         if current.check_floor():
 
@@ -391,6 +398,8 @@ while game.running:
                             lowest_y = y
 
                 if lines_cleared:
+                    game.lines += lines_cleared
+
                     combo += 1
 
                     if combo > 0:
@@ -400,7 +409,7 @@ while game.running:
                     line_clear_value = (21 - lowest_y) * score_key[lines_cleared-1]
 
                     # calcualting combos
-                    score += 50 * combo * (21 - lowest_y)
+                    game.score += 50 * combo * (21 - lowest_y)
 
                     # checking for back-to-back difficult line clear
                     if lines_cleared == 4:
@@ -416,7 +425,7 @@ while game.running:
                     else:
                         difficult_before = False
                     
-                    score += line_clear_value
+                    game.score += line_clear_value
                     
                 else:
                     combo = -1
@@ -425,7 +434,7 @@ while game.running:
     
                 # for getting the next three items
                 if len(bag) >= 3:
-                    game.render(bag[:3], held, score)
+                    game.render(bag[:3], held)
 
 
 
@@ -433,12 +442,12 @@ while game.running:
                     amount = len(bag)
                     temp = bag.copy()
                     temp.extend(next_bag[:3 - amount])
-                    game.render(temp, held, score)
+                    game.render(temp, held)
                 else:
                     bag = next_bag.copy()
                     next_bag = pieces.copy()
                     random.shuffle(next_bag)
-                    game.render(bag[:3], held, score)
+                    game.render(bag[:3], held)
 
 
                 #TODO play land sound here
@@ -471,7 +480,7 @@ while game.running:
     current.render()
 
     if display_until > time.time():
-        text = game.font.render(f'Speed Level {speedLevel}', True, (0, 0 ,0))
+        text = game.font.render(f'Speed Level {game.level}', True, (0, 0 ,0))
         textRect = text.get_rect() 
         textRect.center = (game.width // 2, game.height // 2) 
         game.screen.blit(text, textRect)

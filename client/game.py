@@ -28,7 +28,7 @@ class Game:
 
         pygame.mixer.music.load('assets/background_audio.wav')
         #NOTE set volume to 0.15 in final version
-        pygame.mixer.music.set_volume(0)
+        pygame.mixer.music.set_volume(0.15)
         pygame.mixer.music.play(-1)
 
 
@@ -59,12 +59,17 @@ class Game:
     
 
         self.continuous = True
+
+
+        self.level = 1
+        self.score = 0
+        self.lines = 0
         
         
 
 
 
-    def render(self, pieces=None, held=None, score=0):
+    def render(self, pieces=None, held=None):
         
         self.screen.fill((0, 0, 0))
         pygame.draw.rect(self.screen, (93, 110, 105), (100, 100, 300, 600))
@@ -112,10 +117,21 @@ class Game:
         textRect.center = (300, 780)
         self.screen.blit(text, textRect)
 
-
-        text = self.font.render(f"Score: {score}", True, (255, 255 ,255))
+        text = self.font.render(f"Score: {self.score}", True, (255, 255 ,255))
         textRect = text.get_rect()
         textRect.center = (250, 725)
+        self.screen.blit(text, textRect)
+
+        font = pygame.font.Font('assets/arial.ttf', 25)
+
+        text = font.render(f"Level: {self.level}", True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (420, 725)
+        self.screen.blit(text, textRect)
+
+        text = font.render(f"Lines: {self.lines}", True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (75, 725)
         self.screen.blit(text, textRect)
 
 

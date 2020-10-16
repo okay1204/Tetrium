@@ -235,18 +235,23 @@ class Block(Game):
 
         self.fade_increments = None
         self.fade_stage = 0
+
+
+        self.flash_color = None
+        self.flash_stage = 0
+        self.flash_increments = None
     
     def render(self):
 
         # normal
-        if not self.fade_increments:
+        if not self.fade_increments and not self.flash_color:
+    
             darker = tuple(map(darken, self.color))
             pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
             pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
-
       
         # fading
-        else:
+        elif self.fade_increments:
 
             if self.fade_stage < 15:
                 color = list(self.color)
@@ -285,6 +290,38 @@ class Block(Game):
                         game.removing.remove(remove_row)
                         # game.row_clearedSFX.play()
                         break
+
+        # flashing
+        else:
+
+            if self.flash_stage < 7:
+
+                # increasing brightness
+                for index, additive in enumerate(self.flash_increments):
+                    
+                    self.flash_color[index] += additive # noqa pylint: disable=unsupported-assignment-operation
+
+            elif self.flash_stage < 14:
+
+                # decreasing brightness
+                for index, additive in enumerate(self.flash_increments):
+                    
+                    self.flash_color[index] -= additive # noqa pylint: disable=unsupported-assignment-operation
+
+
+            
+            self.flash_stage += 1
+
+            # drawing the rect
+            darker = tuple(map(darken, self.flash_color))
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
+            pygame.draw.rect(game.screen, tuple(self.flash_color), ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
+            
+
+            if self.flash_stage >= 14:
+                self.flash_stage = 0
+                self.flash_color = None
+
 
                     
 

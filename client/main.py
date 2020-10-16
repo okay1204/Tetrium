@@ -103,6 +103,10 @@ combo = -1
 score_key = [100, 300, 500, 800]
 difficult_before = False
 
+
+last_touched = 0
+touched_floor = False
+
 #This runs the start screen loop, it cant be in the main loop or it will mess things up
 #NOTE uncomment start screen in final version
 # game.start_screen()
@@ -111,7 +115,6 @@ difficult_before = False
 texts = []
 
 while game.running:
-
 
     if moving:
 
@@ -265,7 +268,10 @@ while game.running:
                 current.move(0,-1)
                 downCount -= 1
 
-                last_fall -= 2
+                last_fall -= 5
+                fall -= 5
+                touched_floor = True
+                last_touched -= 5
 
                 score += downCount*2
 
@@ -324,6 +330,8 @@ while game.running:
         speedLevel += 1
         display_until = time.time() + 3
 
+
+
     # makes the piece fall by one
     if time.time() > last_fall:
         last_fall = time.time() + fall_speed
@@ -334,11 +342,28 @@ while game.running:
 
         if current.check_floor():
 
-            if time.time() > fall:
+            if time.time() > fall and time.time() > last_touched:
                 # turn piece into resting blocks
                 for block in current.blocks:
-                    game.resting.append(Block(block.x, block.y-1, block.color, colorByName=False))
-                
+                    block = Block(block.x, block.y-1, block.color, colorByName=False)
+                    block.flash_color = list(block.color)
+    
+                    flash_increments = []
+                    for color in block.flash_color:
+
+                        target = color + 200
+                        if target > 255: target = 255
+
+                        color = (target-color) // 14
+
+                        flash_increments.append(color)
+                    
+                    block.flash_increments = tuple(flash_increments)
+                    
+                    game.resting.append(block)
+
+                touched_floor = False
+
                 # detect if a row was made
                 lines_cleared = 0
                 lowest_y = 0

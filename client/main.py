@@ -16,6 +16,8 @@ random.shuffle(next_bag)
 fall_speed = 1 # means once per second
 speed_up_rate = 30 # every 30 seconds speed up
 
+speed_up_lines_cleared = 0
+
 
 last_fall = time.time() + fall_speed
 fall = 0
@@ -321,12 +323,14 @@ while game.running:
 
 
 
-    # speed up fall
-    if time.time() > last_speed_up:
-        last_speed_up = time.time() + speed_up_rate
-        fall_speed /= 1.2
-        game.level += 1
-        display_until = time.time() + 3
+    # #NOTE speed up fall FOR MULTIPLAYER
+    # if time.time() > last_speed_up:
+    #     last_speed_up = time.time() + speed_up_rate
+
+    #     fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
+
+    #     game.level += 1
+    #     display_until = time.time() + 3
 
 
     current.move(0, 1)
@@ -399,6 +403,12 @@ while game.running:
 
                 if lines_cleared:
                     game.lines += lines_cleared
+                    
+                    speed_up_lines_cleared += lines_cleared
+                    if speed_up_lines_cleared >= 10:
+                        speed_up_lines_cleared -= 10
+                        game.level += 1
+                        display_until = time.time() + 3
 
                     combo += 1
 
@@ -479,9 +489,9 @@ while game.running:
     
     current.render()
 
-    if display_until > time.time():
+    if display_until > time.time() and game.level < 15:
         text = game.font.render(f'Speed Level {game.level}', True, (0, 0 ,0))
-        textRect = text.get_rect() 
+        textRect = text.get_rect()
         textRect.center = (game.width // 2, game.height // 2) 
         game.screen.blit(text, textRect)
 

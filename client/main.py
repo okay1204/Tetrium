@@ -43,14 +43,18 @@ def game_over():
     gameOver = True
 
     pygame.mixer.music.set_volume(0.03)
-    button_dimensions = (140 ,40)
-    button_pos = (game.width/2 - 70, game.height/2)
+    button_dimensions = (165 , 40)
+    button_pos = (int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
+
+   
 
     while gameOver:
 
         mouse = pygame.mouse.get_pos()
         #Game over loop
 
+        button_color = (0, 0, 0)
+        button_text_color = (255, 255, 255)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -73,22 +77,26 @@ def game_over():
                     pygame.mixer.music.set_volume(0.15)
                     held = None
 
+        if (game.width/2 <= mouse[0] <= game.width/2 + button_dimensions[0] and game.height/2 <= mouse[1] <= game.height/2 + button_dimensions[1]): 
+            
+            button_text_color = (0, 0, 0)
+            button_color = (255, 255, 255)
 
-        pygame.draw.rect(game.screen, (0,0,0), (button_pos, button_dimensions))
 
+
+        pygame.draw.rect(game.screen, button_color, (button_pos, button_dimensions))
         s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         s.fill((255,255,255, 2))      
         game.screen.blit(s, (0,0))
         game_over_font = pygame.font.Font('assets/arial.ttf', 60)
         button_font  = pygame.font.Font('assets/arial.ttf', 32)
-        game_over_text = game_over_font.render(f'Game Over', True, (0, 0 ,0), game.screen)
-        button_text = button_font.render(f'RESTART', True, (255, 255 , 255), game.screen)
+        game_over_text = game_over_font.render(f'Game Over', True, (0, 0, 0), game.screen)
+        button_text = button_font.render(f'RESTART', True, button_text_color, game.screen)
         textRect = game_over_text.get_rect() 
         textRect.center = (game.width // 2, 200) 
         game.screen.blit(game_over_text, textRect)
         game.screen.blit(button_text, (button_pos[0] + 10, button_pos[1] + 3))
         pygame.display.update()
-
         game.clock.tick(60)
 
 

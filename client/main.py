@@ -383,14 +383,19 @@ while game.running:
                     block.flash_color = list(block.color)
     
                     flash_increments = []
-                    for color in block.flash_color:
 
-                        target = color + 200
-                        if target > 255: target = 255
-
-                        color = (target-color) // 14
-
-                        flash_increments.append(color)
+                    if current.piece_type in ('L', 'J', 'Z', 'T'):
+                        for color in block.flash_color:
+                            target = color + 200
+                            if target > 255: target = 255
+                            color = (target-color) // 14
+                            flash_increments.append(color)
+                    else:
+                        for color in block.flash_color:
+                            target = color - 150
+                            if target < 0: target = 0
+                            color = (color-target) // 14
+                            flash_increments.append(color*-1)
                     
                     block.flash_increments = tuple(flash_increments)
                     

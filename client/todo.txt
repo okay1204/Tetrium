@@ -1,4 +1,3 @@
 Sound Effects
 Algorithm for I piece rotation
-Make dark flash for I, O, S
 Add stopwatch

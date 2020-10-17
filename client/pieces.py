@@ -105,8 +105,6 @@ def get_piece(x, y, piece):
 
     elif piece == 'Z':
 
-        
-
         return [
             (x, y, color),
             (x, y+1, color),

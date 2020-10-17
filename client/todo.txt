@@ -1,4 +1,4 @@
-Game Over Restart Button
 Sound Effects
-Score
 Algorithm for I piece rotation
+Make dark flash for I, O, S
+Add stopwatch

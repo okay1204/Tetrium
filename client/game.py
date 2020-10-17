@@ -28,7 +28,7 @@ class Game:
 
         pygame.mixer.music.load('assets/background_audio.wav')
         #NOTE set volume to 0.15 in final version
-        pygame.mixer.music.set_volume(0.15)
+        pygame.mixer.music.set_volume(0)
         pygame.mixer.music.play(-1)
 
 
@@ -368,6 +368,10 @@ class Piece(Game):
         elif piece in ("O", "S", "Z", "T"):
             self.rotation = "0"
 
+        
+        if piece == "T":
+            self.corners = {"point left": [x-1, y-1], "point right": [x+1, y-1], "flat left": [x-1, y+1], "flat right": [x+1, y+1]}
+
     
     def move(self, x, y):
 
@@ -377,6 +381,11 @@ class Piece(Game):
         for block in self.blocks:
             block.x += x
             block.y += y
+
+        if self.piece_type == "T":
+            for coords in self.corners.values():
+                coords[0] += x 
+                coords[1] += y
 
 
     def _set_rotation_value(self, direct):
@@ -446,6 +455,17 @@ class Piece(Game):
 
                 block.x = (-1*(temp_y-self.y) + self.x)
                 block.y = ((temp_x - self.x) + self.y)
+
+            if self.piece_type == "T":
+
+                org_corner_coords = []
+                for coords in self.corners.values():
+                    temp_x, temp_y = coords
+                    org_corner_coords.append([temp_x, temp_y])
+
+                    coords[0] = (-1*(temp_y-self.y) + self.x)
+                    coords[1] = ((temp_x - self.x) + self.y)
+
             
 
         else:
@@ -457,6 +477,16 @@ class Piece(Game):
                 org_block_coords.append((temp_x, temp_y))
                 block.x = (temp_y - self.y + self.x)
                 block.y = (-1*(temp_x - self.x) + self.y)
+
+            if self.piece_type == "T":
+
+                org_corner_coords = []
+                for coords in self.corners.values():
+                    temp_x, temp_y = coords
+                    org_corner_coords.append([temp_x, temp_y])
+
+                    coords[0] = (temp_y - self.y + self.x)
+                    coords[1] = (-1*(temp_x - self.x) + self.y)
 
 
         old_rotation = self.rotation
@@ -609,6 +639,10 @@ class Piece(Game):
             # reset
             for index, block in enumerate(self.blocks):
                 block.x, block.y = org_block_coords[index]
+
+            if self.piece_type == "T":
+                for index, coords in enumerate(self.corners.values()):
+                    coords = org_corner_coords[index]
 
 
         else:

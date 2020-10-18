@@ -2,7 +2,7 @@
 
 import pygame
 import pieces as pieces_lib
-from math import sin, cos, pi
+import math
 import time
 import sys
 from random import shuffle, randint
@@ -23,12 +23,16 @@ color_key = {
 class Game:
 
     def __init__(self):
+
+        self.volume = 0.1
+        self.lowered_volume = 0.03
+
         pygame.init()
         self.font = pygame.font.Font('assets/arial.ttf', 32)
 
         pygame.mixer.music.load('assets/background_audio.wav')
         #NOTE set volume to 0.15 in final version
-        pygame.mixer.music.set_volume(0.15)
+        pygame.mixer.music.set_volume(self.lowered_volume)
         pygame.mixer.music.play(-1)
 
 
@@ -64,7 +68,9 @@ class Game:
         self.level = 1
         self.score = 0
         self.lines = 0
-        self.volume = 0.1
+
+
+        self.time_started = 0
         
         
 
@@ -135,13 +141,27 @@ class Game:
         textRect.center = (75, 725)
         self.screen.blit(text, textRect)
 
+        font = pygame.font.Font('assets/arial.ttf', 20)
+
+        time_elapsed = math.floor(time.time() - self.time_started)
+
+        minutes = time_elapsed // 60
+        remaining_seconds = time_elapsed % 60
+
+        time_elapsed = f"{minutes}m {remaining_seconds}s"
+
+        text = font.render(f"Time Elapsed: {time_elapsed}", True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (250, 50)
+        self.screen.blit(text, textRect)
+
 
     def start_screen(self):
 
-        def draw_button():
+        def draw_start_button():
             nonlocal start_button_text_color
             #if mouse hovering make it lighter
-            if self.width/2 <= mouse[0] <= self.width/2 + start_button_dimensions[0] and self.height/2 <= mouse[1] <= self.height/2 + start_button_dimensions[1]: 
+            if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]: 
                 pygame.draw.rect(self.screen, (255,255,255), (start_button_pos, start_button_dimensions)) 
                 start_button_text_color = (0, 0, 0)
             
@@ -154,11 +174,19 @@ class Game:
         def draw_mute_button():
             pygame.draw.rect(self.screen, (255,255,255), (mute_button_pos, mute_button_dimensions))
            
+        def check_mute_and_draw_button():
+            draw_mute_button()
+            if muted:
+                self.lowered_volume, self.volume = 0, 0
+                self.screen.blit(volume_off_icon, volume_icon_pos)
+            
+            else:
+                self.lowered_volume, self.volume = 0.03, 0.1
+                self.screen.blit(volume_on_icon, volume_icon_pos)
 
+            
 
         game_started = False
-
-        pygame.mixer.music.set_volume(0.03)
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
         x_pos = [0, 4, 8, 12, 0, 4, 8]
@@ -176,7 +204,6 @@ class Game:
         ]
         
 
-        
         last_falls = [time.time() for i in pieces]
         start_button_dimensions = (140 ,40)
         start_button_pos = (self.width/2 - 70, self.height/2)
@@ -184,9 +211,11 @@ class Game:
         mute_button_dimensions = (70 , 70)
         mute_button_pos = (self.width/2 - 35, self.height/2 + 100)
         muted = False
-        
-        
-        
+        volume_on_icon = pygame.image.load('assets/volume-high.png')
+        volume_off_icon = pygame.image.load('assets/volume-off.png')
+        volume_icon_pos = (mute_button_pos[0] + mute_button_dimensions[0]/6, mute_button_pos[1] + mute_button_dimensions[1]/6)
+   
+ 
         while not game_started:
             mouse = pygame.mouse.get_pos() 
 
@@ -198,20 +227,16 @@ class Game:
                     
                 if event.type == pygame.MOUSEBUTTONDOWN:
                    
-                    if self.width/2 <= mouse[0] <= self.width/2 + start_button_dimensions[0] and self.height/2 <= mouse[1] <= self.height/2 + start_button_dimensions[1]: 
+                    if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]:  
                         game_started = True
-                        pygame.mixer.music.set_volume(0.15)
+                        pygame.mixer.music.set_volume(self.volume)
 
-                    elif self.width/2 <= mouse[0] <= self.width/2 + mute_button_dimensions[0] and self.height/2 <= mouse[1] <= self.height/2 + mute_button_dimensions[1]: 
+                    elif mute_button_pos[0] <= mouse[0] <= mute_button_pos[0] + mute_button_dimensions[0] and mute_button_pos[1] <= mouse[1] <=  mute_button_pos[1] + mute_button_dimensions[1]: 
                         muted = not muted
+                    
                         
-            if muted:
-                pygame.mixer.music.set_volume(0)
-            
-            else:
-                pygame.mixer.music.set_volume(self.lowered_volume)
            
-
+            pygame.mixer.music.set_volume(self.lowered_volume)
             s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
           
             s.fill((255,255,255, 2))      
@@ -232,12 +257,15 @@ class Game:
                     last_falls[i] = time.time() + 0.75
 
             
-            draw_button()
-            draw_mute_button()
+            check_mute_and_draw_button()
+            draw_start_button()
+    
                 
             pygame.display.update()
 
             game.clock.tick(60)
+
+        self.time_started = time.time()
 
 
 
@@ -389,6 +417,10 @@ class Piece(Game):
         
         if piece == "T":
             self.corners = {"point left": [x-1, y-1], "point right": [x+1, y-1], "flat left": [x-1, y+1], "flat right": [x+1, y+1]}
+
+        elif piece == "I":
+            self.x += 0.5
+            self.y += 0.5
 
     
     def move(self, x, y):

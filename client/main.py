@@ -40,7 +40,7 @@ def game_over():
 
     gameOver = True
 
-    pygame.mixer.music.set_volume(0.03)
+    pygame.mixer.music.set_volume(game.lowered_volume)
     button_dimensions = (165 , 40)
     button_pos = (int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
@@ -60,7 +60,7 @@ def game_over():
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 
-                if game.width/2 <= mouse[0] <= game.width/2 + button_dimensions[0] and game.height/2 <= mouse[1] <= game.height/2 + button_dimensions[1]: 
+                if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
 
                     gameOver = False
                     game.resting.clear()
@@ -72,10 +72,10 @@ def game_over():
                     random.shuffle(next_bag)
                     avoids = 0
                     current = Piece(5, 1, bag.pop(0))
-                    pygame.mixer.music.set_volume(0.15)
+                    pygame.mixer.music.set_volume(game.volume)
                     held = None
 
-        if (game.width/2 <= mouse[0] <= game.width/2 + button_dimensions[0] and game.height/2 <= mouse[1] <= game.height/2 + button_dimensions[1]): 
+        if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
             
             button_text_color = (0, 0, 0)
             button_color = (255, 255, 255)
@@ -114,9 +114,7 @@ last_touched = 0
 touched_floor = False
 
 #This runs the start screen loop, it cant be in the main loop or it will mess things up
-#NOTE uncomment start screen in final version
 game.start_screen()
-
 
 texts = []
 
@@ -153,6 +151,7 @@ while game.running:
 
 
     for event in pygame.event.get():
+
 
         if event.type == pygame.KEYDOWN:
 
@@ -407,6 +406,15 @@ while game.running:
 
                 if lines_cleared:
                     game.lines += lines_cleared
+
+                    # NOTE this code is for singleplayer speed up only 
+                    speed_up_lines_cleared += lines_cleared
+                    if speed_up_lines_cleared >= 10:
+                        speed_up_lines_cleared -= 10
+                        game.level += 1
+                        display_until = time.time() + 3
+                        fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1) 
+                    # ^^^
 
                     combo += 1
 

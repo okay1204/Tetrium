@@ -158,19 +158,34 @@ class Game:
 
     def start_screen(self):
 
-        def draw_button():
-            nonlocal button_text_color
+        def draw_start_button():
+            nonlocal start_button_text_color
             #if mouse hovering make it lighter
-            if self.width/2 <= mouse[0] <= self.width/2 + button_dimensions[0] and self.height/2 <= mouse[1] <= self.height/2 + button_dimensions[1]: 
-                pygame.draw.rect(self.screen, (255,255,255), (button_pos, button_dimensions)) 
-                button_text_color = (0, 0, 0)
+            if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]: 
+                pygame.draw.rect(self.screen, (255,255,255), (start_button_pos, start_button_dimensions)) 
+                start_button_text_color = (0, 0, 0)
             
             else: 
-                pygame.draw.rect(self.screen, (0,0,0), (button_pos, button_dimensions))
-                button_text_color = (255, 255, 255)
+                pygame.draw.rect(self.screen, (0,0,0), (start_button_pos, start_button_dimensions))
+                start_button_text_color = (255, 255, 255)
 
-            self.screen.blit(text, (button_pos[0] + 20, button_pos[1] + 3))
+            self.screen.blit(start_button_text, (start_button_pos[0] + 20, start_button_pos[1] + 3))
         
+        def draw_mute_button():
+            pygame.draw.rect(self.screen, (255,255,255), (mute_button_pos, mute_button_dimensions))
+           
+        def check_mute_and_draw_button():
+            draw_mute_button()
+            if muted:
+                self.lowered_volume, self.volume = 0, 0
+                self.screen.blit(volume_off_icon, volume_icon_pos)
+            
+            else:
+                self.lowered_volume, self.volume = 0.03, 0.1
+                self.screen.blit(volume_on_icon, volume_icon_pos)
+
+            
+
         game_started = False
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
@@ -190,11 +205,17 @@ class Game:
         
 
         last_falls = [time.time() for i in pieces]
-        button_dimensions = (140 ,40)
-        button_pos = (self.width/2 - 70, self.height/2)
-        button_text_color = (255, 255, 255)
-        
-        
+        start_button_dimensions = (140 ,40)
+        start_button_pos = (self.width/2 - 70, self.height/2)
+        start_button_text_color = (255, 255, 255)
+        mute_button_dimensions = (70 , 70)
+        mute_button_pos = (self.width/2 - 35, self.height/2 + 100)
+        muted = False
+        volume_on_icon = pygame.image.load('assets/volume-high.png')
+        volume_off_icon = pygame.image.load('assets/volume-off.png')
+        volume_icon_pos = (mute_button_pos[0] + mute_button_dimensions[0]/6, mute_button_pos[1] + mute_button_dimensions[1]/6)
+   
+ 
         while not game_started:
             mouse = pygame.mouse.get_pos() 
 
@@ -206,19 +227,22 @@ class Game:
                     
                 if event.type == pygame.MOUSEBUTTONDOWN:
                    
-                    if self.width/2 <= mouse[0] <= self.width/2 + button_dimensions[0] and self.height/2 <= mouse[1] <= self.height/2+button_dimensions[1]: 
+                    if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]:  
                         game_started = True
                         pygame.mixer.music.set_volume(self.volume)
 
-   
+                    elif mute_button_pos[0] <= mouse[0] <= mute_button_pos[0] + mute_button_dimensions[0] and mute_button_pos[1] <= mouse[1] <=  mute_button_pos[1] + mute_button_dimensions[1]: 
+                        muted = not muted
+                    
+                        
            
-
+            pygame.mixer.music.set_volume(self.lowered_volume)
             s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
           
             s.fill((255,255,255, 2))      
             self.screen.blit(s, (0, 0))   
-            text = game.font.render('START', True, button_text_color) 
-    
+            start_button_text = game.font.render('START', True, start_button_text_color) 
+
          
 
             for i, piece in enumerate(pieces):
@@ -233,7 +257,9 @@ class Game:
                     last_falls[i] = time.time() + 0.75
 
             
-            draw_button()
+            check_mute_and_draw_button()
+            draw_start_button()
+    
                 
             pygame.display.update()
 

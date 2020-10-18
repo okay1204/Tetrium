@@ -171,11 +171,11 @@ class Game:
 
             self.screen.blit(start_button_text, (start_button_pos[0] + 20, start_button_pos[1] + 3))
         
-        def draw_mute_button():
-            pygame.draw.rect(self.screen, (255,255,255), (mute_button_pos, mute_button_dimensions))
+        def draw_mute_button_background():
+            pygame.draw.circle(self.screen, (255,255,255), mute_button_pos,  mute_button_radius)
            
-        def check_mute_and_draw_button():
-            draw_mute_button()
+        def check_mute_and_draw_icons():
+            draw_mute_button_background()
             if muted:
                 self.lowered_volume, self.volume = 0, 0
                 self.screen.blit(volume_off_icon, volume_icon_pos)
@@ -208,14 +208,15 @@ class Game:
         start_button_dimensions = (140 ,40)
         start_button_pos = (self.width/2 - 70, self.height/2)
         start_button_text_color = (255, 255, 255)
-        mute_button_dimensions = (70 , 70)
-        mute_button_pos = (self.width/2 - 35, self.height/2 + 100)
+        mute_button_pos = (int(self.width/2), int(self.height/2 + 100))
+        mute_button_radius = 35
         muted = False
         volume_on_icon = pygame.image.load('assets/volume-high.png')
         volume_off_icon = pygame.image.load('assets/volume-off.png')
-        volume_icon_pos = (mute_button_pos[0] + mute_button_dimensions[0]/6, mute_button_pos[1] + mute_button_dimensions[1]/6)
+        volume_icon_pos = (mute_button_pos[0] - 25, mute_button_pos[1] - 25)
    
- 
+
+
         while not game_started:
             mouse = pygame.mouse.get_pos() 
 
@@ -231,7 +232,7 @@ class Game:
                         game_started = True
                         pygame.mixer.music.set_volume(self.volume)
 
-                    elif mute_button_pos[0] <= mouse[0] <= mute_button_pos[0] + mute_button_dimensions[0] and mute_button_pos[1] <= mouse[1] <=  mute_button_pos[1] + mute_button_dimensions[1]: 
+                    elif mute_button_pos[0] - mute_button_radius <= mouse[0] <= mute_button_pos[0] + mute_button_radius and mute_button_pos[1] - mute_button_radius <= mouse[1] <=  mute_button_pos[1] + mute_button_radius: 
                         muted = not muted
                     
                         
@@ -257,7 +258,7 @@ class Game:
                     last_falls[i] = time.time() + 0.75
 
             
-            check_mute_and_draw_button()
+            check_mute_and_draw_icons()
             draw_start_button()
     
                 

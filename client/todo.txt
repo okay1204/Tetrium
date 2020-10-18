@@ -1,3 +1,2 @@
 Sound Effects
-Algorithm for I piece rotation
 Add stopwatch

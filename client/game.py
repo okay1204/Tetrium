@@ -372,6 +372,10 @@ class Piece(Game):
         if piece == "T":
             self.corners = {"point left": [x-1, y-1], "point right": [x+1, y-1], "flat left": [x-1, y+1], "flat right": [x+1, y+1]}
 
+        elif piece == "I":
+            self.x += 0.5
+            self.y += 0.5
+
     
     def move(self, x, y):
 

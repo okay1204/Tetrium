@@ -123,7 +123,6 @@ touched_floor = False
 #NOTE uncomment start screen in final version
 # game.start_screen()
 
-
 texts = []
 
 while game.running:
@@ -161,6 +160,7 @@ while game.running:
 
 
     for event in pygame.event.get():
+
 
         if event.type == pygame.KEYDOWN:
 

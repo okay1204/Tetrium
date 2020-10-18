@@ -23,12 +23,16 @@ color_key = {
 class Game:
 
     def __init__(self):
+
+        self.volume = 0.1
+        self.lowered_volume = 0.03
+
         pygame.init()
         self.font = pygame.font.Font('assets/arial.ttf', 32)
 
         pygame.mixer.music.load('assets/background_audio.wav')
         #NOTE set volume to 0.15 in final version
-        pygame.mixer.music.set_volume(0.15)
+        pygame.mixer.music.set_volume(lowered_volume)
         pygame.mixer.music.play(-1)
 
 
@@ -168,8 +172,6 @@ class Game:
             self.screen.blit(text, (button_pos[0] + 20, button_pos[1] + 3))
         
         game_started = False
-
-        pygame.mixer.music.set_volume(0.03)
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
         x_pos = [0, 4, 8, 12, 0, 4, 8]
@@ -206,7 +208,7 @@ class Game:
                    
                     if self.width/2 <= mouse[0] <= self.width/2 + button_dimensions[0] and self.height/2 <= mouse[1] <= self.height/2+button_dimensions[1]: 
                         game_started = True
-                        pygame.mixer.music.set_volume(0.15)
+                        pygame.mixer.music.set_volume(self.volume)
 
    
            

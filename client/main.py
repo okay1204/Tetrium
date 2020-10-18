@@ -45,7 +45,7 @@ def game_over():
 
     gameOver = True
 
-    pygame.mixer.music.set_volume(0.03)
+    pygame.mixer.music.set_volume(game.lowered_volume)
     button_dimensions = (165 , 40)
     button_pos = (int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
@@ -77,7 +77,7 @@ def game_over():
                     random.shuffle(next_bag)
                     avoids = 0
                     current = Piece(5, 1, bag.pop(0))
-                    pygame.mixer.music.set_volume(0.15)
+                    pygame.mixer.music.set_volume(game.volume)
                     held = None
 
         if (game.width/2 <= mouse[0] <= game.width/2 + button_dimensions[0] and game.height/2 <= mouse[1] <= game.height/2 + button_dimensions[1]): 

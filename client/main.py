@@ -42,7 +42,7 @@ def game_over():
     gameOver = True
 
     pygame.mixer.music.set_volume(game.lowered_volume)
-    button_dimensions = (165 , 40)
+    button_dimensions = (165, 40)
     button_pos = (int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
    
@@ -228,6 +228,9 @@ while game.running:
 
                 rotation_last = True
 
+            #Pause
+            elif event.key == pygame.K_ESCAPE:
+                game.pause_screen()   
           
             # hold block
             elif event.key == pygame.K_UP:
@@ -313,7 +316,7 @@ while game.running:
             if event.key == pygame.K_d:
                 if moving == 1:
                     moving = 0
-                
+
 
         elif event.type == pygame.QUIT:
             game.running = False

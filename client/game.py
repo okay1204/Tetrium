@@ -204,7 +204,7 @@ class Game:
         ]
         
 
-        last_falls = [time.time() for i in pieces]
+        last_falls = [time.time() for _ in pieces]
         start_button_dimensions = (140 ,40)
         start_button_pos = (self.width/2 - 70, self.height/2)
         start_button_text_color = (255, 255, 255)
@@ -214,7 +214,7 @@ class Game:
         volume_on_icon = pygame.image.load('assets/volume-high.png')
         volume_off_icon = pygame.image.load('assets/volume-off.png')
         volume_icon_pos = (mute_button_pos[0] - 25, mute_button_pos[1] - 25)
-   
+        s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
 
 
         while not game_started:
@@ -238,11 +238,11 @@ class Game:
                         
            
             pygame.mixer.music.set_volume(self.lowered_volume)
-            s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
+            start_button_text = self.font.render('START', True, start_button_text_color) 
+            
           
             s.fill((255,255,255, 2))      
             self.screen.blit(s, (0, 0))   
-            start_button_text = game.font.render('START', True, start_button_text_color) 
 
          
 
@@ -264,10 +264,49 @@ class Game:
                 
             pygame.display.update()
 
-            game.clock.tick(60)
+            self.clock.tick(60)
 
         self.time_started = time.time()
 
+
+    def pause_screen(self):
+        paused = True
+        s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
+        pause_font = pygame.font.Font('assets/arial.ttf', 75)
+        info_font = pygame.font.Font('assets/arial.ttf', 30)
+        pause_text = pause_font.render('PAUSED', True, (255, 255, 255))
+        info_text = info_font.render('Press ESC to RESUME', True, (255, 255, 255))
+        
+        
+        def draw_background():
+            s.fill((76, 76, 76, 5))      
+            self.screen.blit(s, (0, 0))  
+
+
+        def draw_text():
+            self.screen.blit(pause_text, (self.width/2 - 150, self.height/2 - 200))
+            self.screen.blit(info_text, (self.width/2 - 160, self.height/2))
+
+
+        while paused:
+            
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                elif event.type == pygame.KEYDOWN:
+                    
+                    if event.key == pygame.K_ESCAPE:
+                        paused = False
+            
+        
+            draw_background()
+      
+            draw_text()
+
+            pygame.display.update() 
+        
 
 
 

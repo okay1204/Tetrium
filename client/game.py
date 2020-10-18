@@ -2,7 +2,7 @@
 
 import pygame
 import pieces as pieces_lib
-from math import sin, cos, pi
+import math
 import time
 import sys
 from random import shuffle, randint
@@ -28,7 +28,7 @@ class Game:
 
         pygame.mixer.music.load('assets/background_audio.wav')
         #NOTE set volume to 0.15 in final version
-        pygame.mixer.music.set_volume(0)
+        pygame.mixer.music.set_volume(0.15)
         pygame.mixer.music.play(-1)
 
 
@@ -64,6 +64,9 @@ class Game:
         self.level = 1
         self.score = 0
         self.lines = 0
+
+
+        self.time_started = 0
         
         
 
@@ -134,6 +137,20 @@ class Game:
         textRect.center = (75, 725)
         self.screen.blit(text, textRect)
 
+        font = pygame.font.Font('assets/arial.ttf', 20)
+
+        time_elapsed = math.floor(time.time() - self.time_started)
+
+        minutes = time_elapsed // 60
+        remaining_seconds = time_elapsed % 60
+
+        time_elapsed = f"{minutes}m {remaining_seconds}s"
+
+        text = font.render(f"Time Elapsed: {time_elapsed}", True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (250, 50)
+        self.screen.blit(text, textRect)
+
 
     def start_screen(self):
 
@@ -162,15 +179,14 @@ class Game:
 
             Piece(x_pos[0], randint(-9, -6), 'T'), 
             Piece(x_pos[1], randint(-6, -3), 'L'), 
-            Piece(x_pos[2], randint(-3, 0), 'BL'), 
+            Piece(x_pos[2], randint(-3, 0), 'J'), 
             Piece(x_pos[3], randint(0, 3), 'S'), 
-            Piece(x_pos[4], randint(3, 6), 'BS'), 
+            Piece(x_pos[4], randint(3, 6), 'Z'), 
             Piece(x_pos[5], randint(6, 9), 'I'),
             Piece(x_pos[6], randint(9, 15), 'O')
         ]
         
 
-        
         last_falls = [time.time() for i in pieces]
         button_dimensions = (140 ,40)
         button_pos = (self.width/2 - 70, self.height/2)
@@ -220,6 +236,8 @@ class Game:
             pygame.display.update()
 
             game.clock.tick(60)
+
+        self.time_started = time.time()
 
 
 

@@ -120,8 +120,7 @@ last_touched = 0
 touched_floor = False
 
 #This runs the start screen loop, it cant be in the main loop or it will mess things up
-#NOTE uncomment start screen in final version
-# game.start_screen()
+game.start_screen()
 
 texts = []
 

@@ -472,6 +472,7 @@ while game.running:
                         speed_up_lines_cleared -= 10
                         game.level += 1
                         display_until = time.time() + 3
+                        fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1) 
                     # ^^^
 
                     combo += 1

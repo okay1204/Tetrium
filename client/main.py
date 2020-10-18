@@ -118,6 +118,8 @@ game.start_screen()
 
 texts = []
 
+speed_up_lines_cleared = 0
+
 while game.running:
 
     if moving:

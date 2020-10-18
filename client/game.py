@@ -270,6 +270,7 @@ class Game:
 
 
     def pause_screen(self):
+        start_pause = time.time()
         paused = True
         s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         pause_font = pygame.font.Font('assets/arial.ttf', 75)
@@ -298,6 +299,10 @@ class Game:
                 elif event.type == pygame.KEYDOWN:
                     
                     if event.key == pygame.K_ESCAPE:
+
+                        pause_time = time.time() - start_pause
+                        game.time_started += pause_time
+
                         paused = False
             
         

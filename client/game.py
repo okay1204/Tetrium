@@ -32,7 +32,7 @@ class Game:
 
         pygame.mixer.music.load('assets/background_audio.wav')
         #NOTE set volume to 0.15 in final version
-        pygame.mixer.music.set_volume(lowered_volume)
+        pygame.mixer.music.set_volume(self.lowered_volume)
         pygame.mixer.music.play(-1)
 
 

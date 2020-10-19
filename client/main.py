@@ -470,10 +470,13 @@ while game.running:
 
                     # NOTE this code is for singleplayer speed up only 
                     speed_up_lines_cleared += lines_cleared
+
+                    print(speed_up_lines_cleared)
                     if speed_up_lines_cleared >= 10:
                         speed_up_lines_cleared -= 10
                         game.level += 1
                         display_until = time.time() + 3
+                        print("hi")
                         fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1) 
                     # ^^^
 
@@ -615,9 +618,9 @@ while game.running:
 
      # queing up special texts
     removed_texts = []
-    for text, display_until, size in texts:
+    for text, display_time, size in texts:
 
-        if display_until > time.time():
+        if display_time > time.time():
 
             font = pygame.font.Font('assets/arial.ttf', size)
 
@@ -636,13 +639,13 @@ while game.running:
             for index, element in enumerate(textElements):
                 textElement, textRect = element
 
-                textRect.center = (450, 500 + (texts.index((original, display_until, size)) * 50) + (index * 25))
+                textRect.center = (450, 500 + (texts.index((original, display_time, size)) * 50) + (index * 25))
 
                 game.screen.blit(textElement, textRect)
 
 
         else:
-            removed_texts.append((text, display_until, size))
+            removed_texts.append((text, display_time, size))
     
     for item in removed_texts:
         texts.remove(item)

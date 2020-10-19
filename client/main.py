@@ -343,12 +343,12 @@ while game.running:
 
 
 
-    # speed up fall
-    if time.time() > last_speed_up:
-        last_speed_up = time.time() + speed_up_rate
-        fall_speed /= 1.2
-        game.level += 1
-        display_until = time.time() + 3
+    # NOTE multiplayer only
+    # if time.time() > last_speed_up:
+    #     last_speed_up = time.time() + speed_up_rate
+    #     fall_speed /= 1.2
+    #     game.level += 1
+    #     display_until = time.time() + 3
 
 
     current.move(0, 1)
@@ -453,7 +453,6 @@ while game.running:
                         else:
                             filled_corners[name] = False
 
-                    print(filled_corners)
 
                     # normal t-spin
                     if (filled_corners["point left"] and filled_corners["point right"]) and (filled_corners["flat right"] or filled_corners["flat left"]):
@@ -556,8 +555,6 @@ while game.running:
                 
                 if not lines_cleared:
                     combo = -1
-
-                print(tspin)
                 
 
 

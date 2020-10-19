@@ -124,6 +124,7 @@ class Game:
         textRect.center = (300, 780)
         self.screen.blit(text, textRect)
 
+        self.score = int(self.score)
         text = self.font.render(f"Score: {self.score}", True, (255, 255 ,255))
         textRect = text.get_rect()
         textRect.center = (250, 725)

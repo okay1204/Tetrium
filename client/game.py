@@ -170,8 +170,15 @@ class Game:
                 pygame.draw.rect(self.screen, (0,0,0), (start_button_pos, start_button_dimensions))
                 start_button_text_color = (255, 255, 255)
 
+
+        def draw_text():
+            start_button_text = self.font.render('START', True, start_button_text_color) 
+            title_text = title_font.render('TETRIOS', True, start_button_text_color) 
             self.screen.blit(start_button_text, (start_button_pos[0] + 20, start_button_pos[1] + 3))
-        
+            self.screen.blit(title_text, (self.width/2 - 150, self.height/2 - 200)) 
+
+
+
         def draw_mute_button_background():
             pygame.draw.circle(self.screen, (255,255,255), mute_button_pos,  mute_button_radius)
            
@@ -216,7 +223,8 @@ class Game:
         volume_off_icon = pygame.image.load('assets/volume-off.png')
         volume_icon_pos = (mute_button_pos[0] - 25, mute_button_pos[1] - 25)
         s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
-
+        title_font = pygame.font.Font('assets/arial.ttf', 75)
+      
 
         while not game_started:
             mouse = pygame.mouse.get_pos() 
@@ -239,14 +247,13 @@ class Game:
                         
            
             pygame.mixer.music.set_volume(self.lowered_volume)
-            start_button_text = self.font.render('START', True, start_button_text_color) 
+           
             
           
             s.fill((255,255,255, 2))      
-            self.screen.blit(s, (0, 0))   
+            self.screen.blit(s, (0, 0))  
 
-         
-
+        
             for i, piece in enumerate(pieces):
                 #means piece is off the screen
                 if piece.y >= 28:
@@ -261,6 +268,7 @@ class Game:
             
             check_mute_and_draw_icons()
             draw_start_button()
+            draw_text()
     
                 
             pygame.display.update()
@@ -739,7 +747,7 @@ class Piece(Game):
             if self.piece_type == "T":
                 for index, coords in enumerate(self.corners.values()):
                     coords = org_corner_coords[index]
-
+  
 
         else:
             game.correct_rotateSFX.play()

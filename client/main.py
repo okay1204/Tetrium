@@ -475,7 +475,6 @@ while game.running:
                         # NOTE this code is for singleplayer speed up only 
                         speed_up_lines_cleared += lines_cleared
 
-                
                         if speed_up_lines_cleared >= 10:
                             speed_up_lines_cleared -= 10
                             game.level += 1

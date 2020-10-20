@@ -259,11 +259,6 @@ while game.running:
                             if current.overlapping_blocks():
                                 game_over()
 
-                    if current.y <= -2:
-                        game_over()
-
-                    
-
 
             # speed down
             elif event.key == pygame.K_s:
@@ -584,9 +579,6 @@ while game.running:
 
                         if current.overlapping_blocks():
                             game_over()
-
-                if current.y <= -2:
-                    game_over()
 
 
             else:

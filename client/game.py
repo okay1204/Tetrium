@@ -38,7 +38,7 @@ class Game:
 
         self.correct_rotateSFX = pygame.mixer.Sound('assets/move_effect_success.wav')
         self.holdSFX = pygame.mixer.Sound('assets/hold_effect.wav')
-        # self.row_clearedSFX = pygame.mixer.Sound()
+        self.row_clearedSFX = pygame.mixer.Sound('assets/row_cleared.wav')
         # self.wrong_rotateSFX = pygame.mixer.Sound()
 
         self.width = 500

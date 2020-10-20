@@ -460,6 +460,8 @@ while game.running:
 
 
                 if lines_cleared:
+                    
+                    game.row_clearedSFX.play()
 
 
                     game.lines += lines_cleared

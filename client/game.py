@@ -335,6 +335,21 @@ class Game:
             self.screen.blit(info_text, (self.width/2 - 160, self.height/2))
 
 
+        left_controls = {
+                "A":"Move Left",
+            "S": "Soft Drop",
+            "D": "Move Right"
+        }
+
+        right_controls = {
+            "→":"Rotate Clockwise",
+            "↑": "Hold Piece",
+            "↓": "Hard Drop",
+            "←": "Rotate Counter-Clockwise"
+        }
+
+        font = pygame.font.Font('assets/arial.ttf', 20)
+
         while paused:
             
             for event in pygame.event.get():
@@ -355,6 +370,27 @@ class Game:
             draw_background()
       
             draw_text()
+
+
+            # for controls on left side
+            for index, values in enumerate(left_controls.items()):
+                key, description = values
+
+                text = font.render(f"{key}: {description}", True, (255, 255, 255))
+                textRect = text.get_rect()
+                textRect.center = (70, index*-50+750)
+                self.screen.blit(text, textRect)
+
+
+            # for controls on right side
+            for index, values in enumerate(right_controls.items()):
+                key, description = values
+
+                text = font.render(f"{key} {description}", True, (255, 255, 255))
+                textRect = text.get_rect()
+                textRect.center = (350, index*-50+750)
+                self.screen.blit(text, textRect)
+
 
             pygame.display.update() 
         

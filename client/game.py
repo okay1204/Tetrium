@@ -234,10 +234,10 @@ class Game:
         }
 
         right_controls = {
-            "→":"Rotate Clockwise",
-            "↑": "Hold Piece",
-            "↓": "Hard Drop",
-            "←": "Rotate Counter-Clockwise"
+            "'/→":"Rotate Clockwise",
+            "P/↑": "Hold Piece",
+            ";/↓": "Hard Drop",
+            "L /←": "Rotate Counter-Clockwise"
         }
 
         font = pygame.font.Font('assets/arial.ttf', 20)

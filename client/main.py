@@ -79,6 +79,7 @@ def game_over():
                     pygame.mixer.music.set_volume(game.volume)
                     held = None
                     game_over = False
+                    game.time_started = time.time()
 
         if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
             
@@ -197,7 +198,7 @@ while game.running:
                     moving = 1
 
             # rotate clockwise
-            elif event.key == pygame.K_RIGHT:
+            elif event.key in (pygame.K_RIGHT, pygame.K_QUOTE):
                 
     
                 current.rotate(0)
@@ -214,7 +215,7 @@ while game.running:
 
 
             # rotate counter-clockwise
-            elif event.key == pygame.K_LEFT:
+            elif event.key in (pygame.K_LEFT, pygame.K_l):
                 current.rotate(1)
 
                 current.move(0, 1)
@@ -226,10 +227,9 @@ while game.running:
                 current.move(0, -1)
 
                 rotation_last = True
-
           
             # hold block
-            elif event.key == pygame.K_UP:
+            elif event.key in (pygame.K_UP, pygame.K_p):
                 
                 
                 if canSwitch:
@@ -273,7 +273,7 @@ while game.running:
                     last_fall -= 2
             
             # force down
-            elif event.key == pygame.K_DOWN:
+            elif event.key in (pygame.K_DOWN, pygame.K_SEMICOLON):
                 
                 downCount = 0
                 while not current.check_floor():

@@ -24,8 +24,8 @@ class Game:
 
     def __init__(self):
 
-        self.volume = 0.1
-        self.lowered_volume = 0.03
+        self.volume = 0.05
+        self.lowered_volume = 0.025
 
         pygame.init()
         self.font = pygame.font.Font('assets/arial.ttf', 32)
@@ -45,6 +45,7 @@ class Game:
         self.height = 800
 
         self.running = True
+        self.muted = False
 
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((self.width, self.height))
@@ -178,13 +179,13 @@ class Game:
             self.screen.blit(title_text, (self.width/2 - 150, self.height/2 - 200)) 
 
 
-
         def draw_mute_button_background():
             pygame.draw.circle(self.screen, (255,255,255), mute_button_pos,  mute_button_radius)
            
+
         def check_mute_and_draw_icons():
             draw_mute_button_background()
-            if muted:
+            if self.muted:
                 self.lowered_volume, self.volume = 0, 0
                 self.screen.blit(volume_off_icon, volume_icon_pos)
             
@@ -218,7 +219,6 @@ class Game:
         start_button_text_color = (255, 255, 255)
         mute_button_pos = (int(self.width/2), int(self.height/2 + 100))
         mute_button_radius = 35
-        muted = False
         volume_on_icon = pygame.image.load('assets/volume-high.png')
         volume_off_icon = pygame.image.load('assets/volume-off.png')
         volume_icon_pos = (mute_button_pos[0] - 25, mute_button_pos[1] - 25)
@@ -258,7 +258,7 @@ class Game:
                         pygame.mixer.music.set_volume(self.volume)
 
                     elif mute_button_pos[0] - mute_button_radius <= mouse[0] <= mute_button_pos[0] + mute_button_radius and mute_button_pos[1] - mute_button_radius <= mouse[1] <=  mute_button_pos[1] + mute_button_radius: 
-                        muted = not muted
+                        self.muted = not self.muted
                     
                         
            
@@ -323,7 +323,11 @@ class Game:
         info_font = pygame.font.Font('assets/arial.ttf', 30)
         pause_text = pause_font.render('PAUSED', True, (255, 255, 255))
         info_text = info_font.render('Press ESC to RESUME', True, (255, 255, 255))
-        
+        mute_button_pos = (int(self.width/2), int(self.height/2 + 100))
+        mute_button_radius = 35
+        volume_on_icon = pygame.image.load('assets/volume-high.png')
+        volume_off_icon = pygame.image.load('assets/volume-off.png')
+        volume_icon_pos = (mute_button_pos[0] - 25, mute_button_pos[1] - 25)
         
         def draw_background():
             s.fill((76, 76, 76, 5))      
@@ -350,8 +354,21 @@ class Game:
 
         font = pygame.font.Font('assets/arial.ttf', 20)
 
-        while paused:
+        def draw_mute_button():
+            pygame.draw.circle(self.screen, (255,255,255), mute_button_pos,  mute_button_radius)
             
+            if self.muted:
+                self.lowered_volume, self.volume = 0, 0
+                self.screen.blit(volume_off_icon, volume_icon_pos)
+            
+            else:
+                self.lowered_volume, self.volume = 0.03, 0.1
+                self.screen.blit(volume_on_icon, volume_icon_pos)
+
+
+        while paused:
+            mouse = pygame.mouse.get_pos() 
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -365,11 +382,18 @@ class Game:
                         game.time_started += pause_time
 
                         paused = False
-            
         
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+
+                    if mute_button_pos[0] - mute_button_radius <= mouse[0] <= mute_button_pos[0] + mute_button_radius and mute_button_pos[1] - mute_button_radius <= mouse[1] <=  mute_button_pos[1] + mute_button_radius: 
+                        self.muted = not self.muted
+            
+            pygame.mixer.music.set_volume(self.lowered_volume)
+
+
             draw_background()
-      
             draw_text()
+            draw_mute_button()
 
 
             # for controls on left side
@@ -390,6 +414,7 @@ class Game:
                 textRect = text.get_rect()
                 textRect.center = (350, index*-50+750)
                 self.screen.blit(text, textRect)
+
 
 
             pygame.display.update() 

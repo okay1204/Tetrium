@@ -91,12 +91,10 @@ def game_over():
         s.fill((255,255,255, 2))      
         game.screen.blit(s, (0,0))
         game_over_text = game_over_font.render(f'Game Over', True, (0, 0, 0), game.screen)
-        score_text = score_font.render(f'Score: {game.score}', True, (0, 0, 0), game.screen)
         button_text = button_font.render(f'RESTART', True, button_text_color, game.screen)
         textRect = game_over_text.get_rect() 
         textRect.center = (game.width // 2, 200) 
         game.screen.blit(game_over_text, textRect)
-        game.screen.blit(score_text, (int(game.width/2 - 100), int(game.height/2 - 150)))
         game.screen.blit(button_text, (button_pos[0] + 10, button_pos[1] + 3))
         pygame.display.update()
         game.clock.tick(60)
@@ -122,8 +120,6 @@ touched_floor = False
 game.start_screen()
 
 texts = []
-
-speed_up_lines_cleared = 0
 
 while game.running:
 
@@ -231,9 +227,6 @@ while game.running:
 
                 rotation_last = True
 
-            #Pause
-            elif event.key == pygame.K_ESCAPE:
-                game.pause_screen()   
           
             # hold block
             elif event.key == pygame.K_UP:
@@ -347,11 +340,11 @@ while game.running:
 
 
     # NOTE multiplayer only
-    # if time.time() > last_speed_up:
-    #     last_speed_up = time.time() + speed_up_rate
-    #     fall_speed /= 1.2
-    #     game.level += 1
-    #     display_until = time.time() + 3
+    if time.time() > last_speed_up:
+        last_speed_up = time.time() + speed_up_rate
+        fall_speed /= 1.2
+        game.level += 1
+        display_until = time.time() + 3
 
 
     current.move(0, 1)
@@ -470,17 +463,6 @@ while game.running:
 
 
                     game.lines += lines_cleared
-
-                    if game.level < 15:
-                        # NOTE this code is for singleplayer speed up only 
-                        speed_up_lines_cleared += lines_cleared
-
-                        if speed_up_lines_cleared >= 10:
-                            speed_up_lines_cleared -= 10
-                            game.level += 1
-                            display_until = time.time() + 3
-                            fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1) 
-                        # ^^^
 
                     combo += 1
 

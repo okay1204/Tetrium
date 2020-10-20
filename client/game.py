@@ -229,7 +229,8 @@ class Game:
         left_controls = {
             "A":"Move Left",
             "S": "Soft Drop",
-            "D": "Move Right"
+            "D": "Move Right",
+            "G": "Toggle Movement",
         }
 
         right_controls = {
@@ -292,7 +293,7 @@ class Game:
 
                 text = font.render(f"{key}: {description}", True, (0, 0, 0))
                 textRect = text.get_rect()
-                textRect.center = (70, index*-50+750)
+                textRect.center = (100, index*-50+750)
                 self.screen.blit(text, textRect)
 
 

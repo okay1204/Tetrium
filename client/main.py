@@ -39,15 +39,19 @@ def game_over():
 
     global bag, next_bag, avoids, current, held
 
-    gameOver = True
+    game_over = True
 
     pygame.mixer.music.set_volume(game.lowered_volume)
     button_dimensions = (165, 40)
     button_pos = (int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
    
+    game_over_font = pygame.font.Font('assets/arial.ttf', 60)
+    score_font = pygame.font.Font('assets/arial.ttf', 45)
+    button_font  = pygame.font.Font('assets/arial.ttf', 32)
+    s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
 
-    while gameOver:
+    while game_over:
 
         mouse = pygame.mouse.get_pos()
         #Game over loop
@@ -63,7 +67,6 @@ def game_over():
                 
                 if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
 
-                    gameOver = False
                     game.resting.clear()
                     game.removing.clear()
                     game.level = 0
@@ -75,6 +78,7 @@ def game_over():
                     current = Piece(5, 1, bag.pop(0))
                     pygame.mixer.music.set_volume(game.volume)
                     held = None
+                    game_over = False
 
         if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
             
@@ -84,16 +88,15 @@ def game_over():
 
 
         pygame.draw.rect(game.screen, button_color, (button_pos, button_dimensions))
-        s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         s.fill((255,255,255, 2))      
         game.screen.blit(s, (0,0))
-        game_over_font = pygame.font.Font('assets/arial.ttf', 60)
-        button_font  = pygame.font.Font('assets/arial.ttf', 32)
         game_over_text = game_over_font.render(f'Game Over', True, (0, 0, 0), game.screen)
+        score_text = score_font.render(f'Score: {game.score}', True, (0, 0, 0), game.screen)
         button_text = button_font.render(f'RESTART', True, button_text_color, game.screen)
         textRect = game_over_text.get_rect() 
         textRect.center = (game.width // 2, 200) 
         game.screen.blit(game_over_text, textRect)
+        game.screen.blit(score_text, (int(game.width/2 - 100), int(game.height/2 - 150)))
         game.screen.blit(button_text, (button_pos[0] + 10, button_pos[1] + 3))
         pygame.display.update()
         game.clock.tick(60)
@@ -649,6 +652,8 @@ while game.running:
     
     for item in removed_texts:
         texts.remove(item)
+
+    pygame.mixer.music.set_volume(game.volume)
 
     removed_texts.clear()
 

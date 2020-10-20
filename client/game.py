@@ -226,6 +226,22 @@ class Game:
         title_font = pygame.font.Font('assets/arial.ttf', 75)
       
 
+        left_controls = {
+            "A":"Move Left",
+            "S": "Soft Drop",
+            "D": "Move Right"
+        }
+
+        right_controls = {
+            "→":"Rotate Clockwise",
+            "↑": "Hold Piece",
+            "↓": "Hard Drop",
+            "←": "Rotate Counter-Clockwise"
+        }
+
+        font = pygame.font.Font('assets/arial.ttf', 20)
+
+
         while not game_started:
             mouse = pygame.mouse.get_pos() 
 
@@ -269,7 +285,28 @@ class Game:
             check_mute_and_draw_icons()
             draw_start_button()
             draw_text()
-    
+
+            # for controls on left side
+            for index, values in enumerate(left_controls.items()):
+                key, description = values
+
+                text = font.render(f"{key}: {description}", True, (0, 0, 0))
+                textRect = text.get_rect()
+                textRect.center = (70, index*-50+750)
+                self.screen.blit(text, textRect)
+
+
+            # for controls on right side
+            for index, values in enumerate(right_controls.items()):
+                key, description = values
+
+                text = font.render(f"{key} {description}", True, (0, 0, 0))
+                textRect = text.get_rect()
+                textRect.center = (350, index*-50+750)
+                self.screen.blit(text, textRect)
+
+
+
                 
             pygame.display.update()
 

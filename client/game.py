@@ -54,7 +54,7 @@ class Game:
         self.icon = pygame.image.load('./tetris.jpg')
         pygame.display.set_icon(self.icon)
 
-        self.caption = "Tetris"
+        self.caption = "Tetrium"
         pygame.display.set_caption(self.caption)
 
         # 30px x 30px is one block
@@ -186,7 +186,7 @@ class Game:
 
         def draw_text():
             start_button_text = self.font.render('START', True, start_button_text_color) 
-            title_text = title_font.render('TETRIOS', True, start_button_text_color) 
+            title_text = title_font.render('TETRIUM', True, start_button_text_color) 
             self.screen.blit(start_button_text, (start_button_pos[0] + 20, start_button_pos[1] + 3))
             self.screen.blit(title_text, (self.width/2 - 150, self.height/2 - 200)) 
 

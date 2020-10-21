@@ -162,6 +162,7 @@ class Game:
 
 
         # junk line meter
+        pygame.draw.rect(self.screen, (255, 255, 255), (32, 397, 36, 306))
         pygame.draw.rect(self.screen, (93, 110, 105), (35, 400, 30, 300))
 
 

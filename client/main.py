@@ -37,7 +37,7 @@ rotation_last = False
 
 def game_over():
 
-    global bag, next_bag, avoids, current, held
+    global bag, next_bag, avoids, current, held, canSwitch
 
     game_over = True
 
@@ -79,6 +79,7 @@ def game_over():
                     pygame.mixer.music.set_volume(game.volume)
                     held = None
                     game_over = False
+                    canSwitch = True
                     game.time_started = time.time()
 
         if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 

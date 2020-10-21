@@ -159,6 +159,12 @@ class Game:
         self.screen.blit(text, textRect)
 
 
+
+
+        # junk line meter
+        pygame.draw.rect(self.screen, (93, 110, 105), (35, 400, 30, 300))
+
+
     def start_screen(self):
 
         def draw_start_button():
@@ -268,7 +274,7 @@ class Game:
            
             
           
-            s.fill((255,255,255, 2))      
+            s.fill((255,255,255, 2))
             self.screen.blit(s, (0, 0))  
 
         

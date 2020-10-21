@@ -17,8 +17,17 @@ color_key = {
     'red': (250, 15, 15),
     'orange': (255, 128, 43),
     'purple': (168, 24, 245),
-    'yellow': (255, 223, 13)
+    'yellow': (255, 223, 13),
+    'gray': (107, 115, 120)
 }
+
+
+def darken(value):
+
+    value -= 60
+
+    if value < 0: return 0
+    else: return value
 
 class Game:
 
@@ -75,7 +84,7 @@ class Game:
         self.time_started = 0
 
 
-        # list of dictionaries, with amount and stage
+        # list of lists, with amount, x position, stage
         self.meter = []
         
         
@@ -163,11 +172,36 @@ class Game:
         self.screen.blit(text, textRect)
 
 
-
-
         # junk line meter
         pygame.draw.rect(self.screen, (255, 255, 255), (32, 397, 36, 306))
         pygame.draw.rect(self.screen, (93, 110, 105), (35, 400, 30, 300))
+
+        meter_block = 0
+        for index, value in enumerate(self.meter):
+
+            amount = value[0]
+            stage = value[2]
+
+            if index == 0:
+                if stage == 1:
+                    color = color_key["yellow"]
+                elif stage == 2:
+                    color = color_key["orange"]
+                elif stage == 3:
+                    color = color_key["red"]
+            else:
+                color = color_key["gray"]
+
+            darkened = (tuple(darken(color) for color in color))
+
+            for block in range(amount):
+
+                if meter_block >= 10:
+                    break
+                pygame.draw.rect(self.screen, darkened, (35, 670 - (30 * meter_block), 30, 30))
+                pygame.draw.rect(self.screen, color, (40, 675 - (30 * meter_block), 20, 20))
+                meter_block += 1
+
 
 
     def start_screen(self):
@@ -332,14 +366,6 @@ class Game:
 
 game = Game()
 
-
-
-def darken(value):
-
-    value -= 60
-
-    if value < 0: return 0
-    else: return value
 
 class Block(Game):
 

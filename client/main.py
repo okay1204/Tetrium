@@ -37,7 +37,7 @@ rotation_last = False
 
 def game_over():
 
-    global bag, next_bag, avoids, current, held, canSwitch
+    global bag, next_bag, avoids, current, held, canSwitch, moving
 
     game_over = True
 
@@ -47,7 +47,6 @@ def game_over():
 
    
     game_over_font = pygame.font.Font('assets/arial.ttf', 60)
-    score_font = pygame.font.Font('assets/arial.ttf', 45)
     button_font  = pygame.font.Font('assets/arial.ttf', 32)
     s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
 
@@ -80,6 +79,8 @@ def game_over():
                     held = None
                     game_over = False
                     canSwitch = True
+                    moving = 0
+                    game.meter.clear()
                     game.time_started = time.time()
 
         if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
@@ -119,7 +120,7 @@ last_touched = 0
 touched_floor = False
 
 #This runs the start screen loop, it cant be in the main loop or it will mess things up
-game.start_screen()
+# game.start_screen()
 
 texts = []
 
@@ -161,6 +162,12 @@ while game.running:
 
 
         if event.type == pygame.KEYDOWN:
+
+
+            # for testing junk lines
+            if event.key == pygame.K_r:
+                game.meter.append([random.randint(1, 4), random.randint(1, 10), 1])
+
 
             # move left
             if event.key == pygame.K_a:
@@ -548,6 +555,25 @@ while game.running:
                 
                 if not lines_cleared:
                     combo = -1
+
+
+                    if game.meter:
+                        # increasing the stage of the incoming junk
+                        game.meter[0][2] += 1
+
+                        if game.meter[0][2] > 3:
+
+                            amount = game.meter[0][0]
+                            position = game.meter[0][1]
+                            game.meter.pop(0)
+
+                            for block in game.resting:
+                                block.y -= amount
+                            
+                            for y in range(amount):
+                                for x in range(1, 11):
+                                    if x != position:
+                                        game.resting.append(Block(x, 20-y, "gray"))
                 
 
 

@@ -14,7 +14,7 @@ next_bag = pieces.copy()
 random.shuffle(next_bag)
 
 fall_speed = 1 # means once per second
-speed_up_rate = 30 # every 30 seconds speed up
+speed_up_rate = 60 # every 60 seconds speed up
 
 
 last_fall = time.time() + fall_speed
@@ -119,7 +119,7 @@ last_touched = 0
 touched_floor = False
 
 #This runs the start screen loop, it cant be in the main loop or it will mess things up
-game.start_screen()
+# game.start_screen()
 
 texts = []
 

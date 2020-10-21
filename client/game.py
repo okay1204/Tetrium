@@ -73,6 +73,10 @@ class Game:
 
 
         self.time_started = 0
+
+
+        # list of dictionaries, with amount and stage
+        self.meter = []
         
         
 

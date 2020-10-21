@@ -250,15 +250,24 @@ while game.running:
 
                     # checking if game is over
                     if current.overlapping_blocks():
-                        current.rotate(1)
 
-                        if current.overlapping_blocks():
-                            current.rotate(-1)
-                            current.rotate(-1)
+                        if current.piece_type != "O":
+                            current.rotate(1)
 
                             if current.overlapping_blocks():
-                                game_over()
+                                current.rotate(-1)
 
+                        else:
+                            current.move(0, -1)
+
+                            if current.overlapping_blocks():
+                                current.move(1, 0)
+                                
+                                if current.overlapping_blocks():
+                                    current.move(-2, 0)
+
+                        if current.overlapping_blocks():
+                            game_over()
 
             # speed down
             elif event.key == pygame.K_s:
@@ -570,14 +579,24 @@ while game.running:
 
                 # checking if game is over
                 if current.overlapping_blocks():
-                    current.rotate(1)
 
-                    if current.overlapping_blocks():
-                        current.rotate(-1)
-                        current.rotate(-1)
+                    if current.piece_type != "O":
+                        current.rotate(1)
 
                         if current.overlapping_blocks():
-                            game_over()
+                            current.rotate(-1)
+
+                    else:
+                        current.move(0, -1)
+
+                        if current.overlapping_blocks():
+                            current.move(1, 0)
+                            
+                            if current.overlapping_blocks():
+                                current.move(-2, 0)
+
+                    if current.overlapping_blocks():
+                        game_over()
 
 
             else:

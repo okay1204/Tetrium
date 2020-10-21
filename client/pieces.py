@@ -24,15 +24,15 @@ def preview_piece(x, y, piece):
     elif piece == "L":
 
         return [
-            (color, x-15, y-30, 15, 45),
-            (color, x-15, y+10, 30, 15)
+            (color, x+10, y-15, 15, 15),
+            (color, x-20, y, 45, 15)
         ]
 
     elif piece == "J":
 
         return [
-            (color, x, y-30, 15, 45),
-            (color, x-15, y+10, 30, 15)
+            (color, x-20, y-15, 15, 15),
+            (color, x-20, y, 45, 15)
         ]
 
     elif piece == "S":
@@ -80,18 +80,18 @@ def get_piece(x, y, piece):
 
         return [
             (x, y, color),
-            (x, y+1, color),
-            (x, y-1, color),
-            (x+1, y+1, color)
+            (x+1, y, color),
+            (x-1, y, color),
+            (x+1, y-1, color)
         ]
     
     elif piece == 'J':
 
         return [
             (x, y, color),
-            (x, y+1, color),
-            (x, y-1, color),
-            (x-1, y+1, color)
+            (x-1, y, color),
+            (x+1, y, color),
+            (x-1, y-1, color)
         ]
 
     elif piece == 'S':
@@ -114,13 +114,11 @@ def get_piece(x, y, piece):
 
     elif piece == 'I':
 
-        
-
         return [
-            (x, y-1, color),
             (x, y, color),
-            (x, y+1, color),
-            (x, y+2, color)
+            (x+1, y, color),
+            (x+2, y, color),
+            (x-1, y, color)
         ]
 
     elif piece == 'O':

@@ -465,14 +465,7 @@ class Piece(Game):
 
         self.blocks = list(map(lambda args: Block(*args), pieces_lib.get_piece(x, y, piece)))
 
-        if piece in ("J", "I"):
-            self.rotation = "L"
-
-        elif piece == "L":
-            self.rotation = "R"
-
-        elif piece in ("O", "S", "Z", "T"):
-            self.rotation = "0"
+        self.rotation = "0"
 
         
         if piece == "T":

@@ -124,6 +124,27 @@ touched_floor = False
 
 texts = []
 
+# for sending junk lines
+line_key = [0, 1, 2, 4]
+t_spin_line_key = [2, 4, 6]
+combo_line_key = [(1, 3), (4, 5), (6, 7), (8, 10), (11, 10000000)]
+
+
+def send_lines(amount):
+
+    # blocking incoming lines
+    while game.meter and amount > 0:
+        game.meter[0] -= 1
+        amount -= 1
+
+        if game.meter[0] <= 0:
+            game.meter.pop(0)
+            game.meter_stage = 1
+
+
+    if amount > 0:
+        print(f"{amount} lines sent")
+
 while game.running:
 
     if moving:
@@ -166,7 +187,7 @@ while game.running:
 
             # for testing junk lines
             if event.key == pygame.K_r:
-                game.meter.append([random.randint(1, 4), random.randint(1, 10), 1])
+                game.meter.append(random.randint(1, 4))
 
 
             # move left
@@ -470,23 +491,36 @@ while game.running:
                         tspin = "mini"
 
 
+                lines_sent = 0
+
                 if lines_cleared:
                     
                     game.row_clearedSFX.play()
 
 
                     game.lines += lines_cleared
+                
 
                     combo += 1
 
                     if combo > 0:
                         texts.append((f"{combo+1} Combo", time.time() + 3, 20))
 
+                        for minimum, maximum in combo_line_key:
+                            if minimum <= combo <= maximum:
+                                lines_sent += combo
+                                break
+
                     # calcualting combos
                     game.score += 50 * combo * (21 - lowest_y)
 
+                    
+
 
                     if not tspin:
+
+                        lines_sent += line_key[lines_cleared-1]
+
                         # for adding normal value
                         line_clear_value = (21 - lowest_y) * score_key[lines_cleared-1]
 
@@ -500,12 +534,16 @@ while game.running:
                                 line_clear_value *= 1.5
                                 line_clear_value = int(line_clear_value)
                                 texts.append((f"Back to Back", time.time() + 3, 15))
+                                lines_sent += 1
                             else:
                                 difficult_before = True
 
                         game.score += line_clear_value
 
                     else:
+
+                        lines_sent += t_spin_line_key[lines_cleared-1]
+
                         # any line clears with t-spins are considered difficult
                          
                         score_value = (21 - lowest_y) * tspin_key[lines_cleared-1][tspin]
@@ -527,6 +565,7 @@ while game.running:
                         if difficult_before:
                             score_value *= 1.5
                             texts.append((f"Back to Back", time.time() + 3, 15))
+                            lines_sent += 1
                         else:
                             difficult_before = True
 
@@ -551,6 +590,15 @@ while game.running:
                     elif tspin == "mini":
                         game.score += 100 * lowest_y
                         texts.append((f"T-Spin Mini", time.time() + 3, 17))
+        
+
+                if not list(filter(lambda block: not block.fade_increments, game.resting)):
+                    lines_sent = 10
+                    texts.append((f"Perfect Clear", time.time() + 3, 17))
+
+
+                if lines_sent:
+                    send_lines(lines_sent)
                     
                 
                 if not lines_cleared:
@@ -559,21 +607,26 @@ while game.running:
 
                     if game.meter:
                         # increasing the stage of the incoming junk
-                        game.meter[0][2] += 1
+                        game.meter_stage += 1
 
-                        if game.meter[0][2] > 3:
+                        if game.meter_stage > 3:
+                            
+                            game.meter_stage = 1
 
-                            amount = game.meter[0][0]
-                            position = game.meter[0][1]
+                            amount = game.meter[0]
                             game.meter.pop(0)
 
                             for block in game.resting:
                                 block.y -= amount
+
+                            position = random.randint(1, 10)
                             
                             for y in range(amount):
                                 for x in range(1, 11):
                                     if x != position:
                                         game.resting.append(Block(x, 20-y, "gray"))
+
+
                 
 
 

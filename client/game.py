@@ -84,8 +84,9 @@ class Game:
         self.time_started = 0
 
 
-        # list of lists, with amount, x position, stage
+        # list of numbers, with numbers being attack amounts
         self.meter = []
+        self.meter_stage = 1
         
         
 
@@ -177,17 +178,15 @@ class Game:
         pygame.draw.rect(self.screen, (93, 110, 105), (35, 400, 30, 300))
 
         meter_block = 0
-        for index, value in enumerate(self.meter):
+        for index, amount in enumerate(self.meter):
 
-            amount = value[0]
-            stage = value[2]
 
-            if index == 0:
-                if stage == 1:
+            if not index:
+                if self.meter_stage == 1:
                     color = color_key["yellow"]
-                elif stage == 2:
+                elif self.meter_stage  == 2:
                     color = color_key["orange"]
-                elif stage == 3:
+                elif self.meter_stage  == 3:
                     color = color_key["red"]
             else:
                 color = color_key["gray"]

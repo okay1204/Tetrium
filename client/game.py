@@ -205,8 +205,13 @@ class Game:
         self.render_second_screen()
 
 
+    # NOTE renders primary screen is temporary, replace game.resting with oponents game
     def render_second_screen(self):
-        pygame.draw.rect(self.screen, (93, 110, 105), (550, 250, 150, 300))
+        pygame.draw.rect(self.screen, (93, 110, 105), (570, 250, 150, 300))
+
+        for block in game.resting:
+            block.render_second()
+
 
 
     def start_screen(self):
@@ -477,7 +482,12 @@ class Block(Game):
                 self.flash_color = None
 
 
-                    
+    # for putting blocks on second screen
+    def render_second(self):
+
+        darker = tuple(map(darken, self.color))
+        pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size/2 + 570, (self.y-1)* self.size/2 + 250, 15, 15))
+        pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size/2 + 572, (self.y-1)* self.size/2 + 252, 11, 11))                    
 
 
     def render_preview(self):
@@ -877,6 +887,7 @@ class Piece(Game):
         
         if preview:
             downCount = 0
+
             while not self.check_floor():
                 self.move(0, 1)
                 downCount += 1
@@ -896,6 +907,9 @@ class Piece(Game):
         # for actual piece
         for block in self.blocks:
             block.render()
+
+            # NOTE this is temporary, do this with opponents piece instead
+            block.render_second()
 
 
 

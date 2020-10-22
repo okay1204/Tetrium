@@ -1,13 +1,15 @@
 import socket
 import _thread
 
-server = "192.168.1.100"
+server = "localhost"
+
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
     s.bind((server, port))
+    
 except socket.error as e:
     print(e)
 
@@ -35,6 +37,7 @@ def threaded_client(conn):
     
     print("Connection Lost")
     conn.close()
+
 
 while True:
     conn, addr = s.accept()

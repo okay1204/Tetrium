@@ -174,8 +174,8 @@ class Game:
 
 
         # junk line meter
-        pygame.draw.rect(self.screen, (255, 255, 255), (32, 397, 36, 306))
-        pygame.draw.rect(self.screen, (93, 110, 105), (35, 400, 30, 300))
+        pygame.draw.rect(self.screen, (255, 255, 255), (32, 394, 36, 306))
+        pygame.draw.rect(self.screen, (93, 110, 105), (35, 397, 30, 300))
 
         meter_block = 0
         for index, amount in enumerate(self.meter):
@@ -197,8 +197,8 @@ class Game:
 
                 if meter_block >= 10:
                     break
-                pygame.draw.rect(self.screen, darkened, (35, 670 - (30 * meter_block), 30, 30))
-                pygame.draw.rect(self.screen, color, (40, 675 - (30 * meter_block), 20, 20))
+                pygame.draw.rect(self.screen, darkened, (35, 667 - (30 * meter_block), 30, 30))
+                pygame.draw.rect(self.screen, color, (40, 672 - (30 * meter_block), 20, 20))
                 meter_block += 1
 
         
@@ -214,8 +214,8 @@ class Game:
 
         
         # junk line meter
-        pygame.draw.rect(self.screen, (255, 255, 255), (537, 397, 21, 156))
-        pygame.draw.rect(self.screen, (93, 110, 105), (540, 400, 15, 150))
+        pygame.draw.rect(self.screen, (255, 255, 255), (539, 398, 17, 152))
+        pygame.draw.rect(self.screen, (93, 110, 105), (540, 399, 15, 150))
 
         # using own meter, change with other player's meter
         meter_block = 0
@@ -238,8 +238,8 @@ class Game:
 
                 if meter_block >= 10:
                     break
-                pygame.draw.rect(self.screen, darkened, (540, 535 - (15 * meter_block), 15, 15))
-                pygame.draw.rect(self.screen, color, (542, 537 - (15 * meter_block), 11, 11))
+                pygame.draw.rect(self.screen, darkened, (540, 534 - (15 * meter_block), 15, 15))
+                pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11))
                 meter_block += 1
 
 

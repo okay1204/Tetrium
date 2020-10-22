@@ -91,7 +91,6 @@ class Game:
         
 
 
-
     def render(self, pieces=None, held=None):
         
         self.screen.fill((0, 0, 0))
@@ -392,7 +391,7 @@ class Game:
                 text = font.render(f"{key} {description}", True, (0, 0, 0))
                 textRect = text.get_rect()
                 textRect.center = (350, index*-50+750)
-                self.screen.blit(text, textRect)
+                self.screen.blit(text, (game.width- textRect.center[0] + 60, textRect[1]))
 
 
 

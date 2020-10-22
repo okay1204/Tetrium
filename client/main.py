@@ -120,7 +120,7 @@ last_touched = 0
 touched_floor = False
 
 #This runs the start screen loop, it cant be in the main loop or it will mess things up
-# game.start_screen()
+game.start_screen()
 
 texts = []
 
@@ -344,6 +344,14 @@ while game.running:
             if event.key == pygame.K_d:
                 if moving == 1:
                     moving = 0
+
+            if event.key == pygame.K_m:
+                if game.lowered_volume and game.volume:
+                    game.lowered_volume, game.volume = 0, 0
+
+                else: 
+                    game.lowered_volume, game.volume =  0.025, 0.05
+
 
 
         elif event.type == pygame.QUIT:
@@ -642,7 +650,7 @@ while game.running:
                     temp = bag.copy()
                     temp.extend(next_bag[:3 - amount])
                     game.render(temp, held)
-                    
+
                 else:
                     bag = next_bag.copy()
                     next_bag = pieces.copy()

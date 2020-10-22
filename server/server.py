@@ -1,7 +1,7 @@
 import socket
 import _thread
 
-server = "192.168.1.100"
+server = "localhost"
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -14,7 +14,7 @@ except socket.error as e:
 s.listen(2)
 print("Server Started, Waiting for connection")
 
-def threaded_client(conn):
+def threaded_client(conn, player):
     
     reply = ""
     while True:
@@ -36,8 +36,10 @@ def threaded_client(conn):
     print("Connection Lost")
     conn.close()
 
+player = 1
 while True:
     conn, addr = s.accept()
     print("Connected to", addr)
 
-    _thread.start_new_thread(threaded_client, (conn,))
+    _thread.start_new_thread(threaded_client, (conn, player))
+    player += 1

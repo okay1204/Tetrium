@@ -51,7 +51,7 @@ class Game:
         self.row_clearedSFX.set_volume(0.5)
         # self.wrong_rotateSFX = pygame.mixer.Sound()
 
-        self.width = 500
+        self.width = 750
         self.height = 800
 
         self.running = True
@@ -201,6 +201,12 @@ class Game:
                 pygame.draw.rect(self.screen, color, (40, 675 - (30 * meter_block), 20, 20))
                 meter_block += 1
 
+        
+        self.render_second_screen()
+
+
+    def render_second_screen(self):
+        pygame.draw.rect(self.screen, (93, 110, 105), (550, 250, 150, 300))
 
 
     def start_screen(self):
@@ -359,6 +365,7 @@ class Game:
             self.clock.tick(60)
 
         self.time_started = time.time()
+    
         
 
 

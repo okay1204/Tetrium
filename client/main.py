@@ -143,6 +143,7 @@ def send_lines(amount):
 
 
     if amount > 0:
+        #TODO sending lines go here
         print(f"{amount} lines sent")
 
 while game.running:

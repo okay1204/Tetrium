@@ -318,6 +318,7 @@ class Game:
             "S": "Soft Drop",
             "D": "Move Right",
             "G": "Toggle Movement",
+            "M": "Mute Music"
         }
 
         right_controls = {

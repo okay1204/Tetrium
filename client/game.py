@@ -6,6 +6,7 @@ import math
 import time
 import sys
 from random import shuffle, randint
+from network import Network
 
 from pieces import preview_piece
 
@@ -329,6 +330,7 @@ class Game:
 
         font = pygame.font.Font('assets/arial.ttf', 20)
 
+        connected = False
 
         while not game_started:
             mouse = pygame.mouse.get_pos() 
@@ -342,8 +344,14 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                    
                     if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]:  
-                        game_started = True
+                        
+                        
+                        n = Network()
+                        self.player = n.p
+
                         pygame.mixer.music.set_volume(self.volume)
+
+                        self.screen.fill((0, 0, 0))
 
                     elif mute_button_pos[0] - mute_button_radius <= mouse[0] <= mute_button_pos[0] + mute_button_radius and mute_button_pos[1] - mute_button_radius <= mouse[1] <=  mute_button_pos[1] + mute_button_radius: 
                         self.muted = not self.muted

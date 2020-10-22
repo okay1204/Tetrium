@@ -23,6 +23,9 @@ games = {}
 def threaded_client(conn, player, gameId):
 
     global idCount
+
+    # send player number to client right after connecting
+    conn.send(str.encode(str(player)))
     
     while True:
         try:

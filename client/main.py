@@ -14,7 +14,6 @@ next_bag = pieces.copy()
 random.shuffle(next_bag)
 
 fall_speed = 1 # means once per second
-speed_up_rate = 60 # every 60 seconds speed up
 
 
 last_fall = time.time() + fall_speed
@@ -28,7 +27,7 @@ avoids = 0
 
 held = ''
 
-last_speed_up = time.time() + speed_up_rate
+
 display_until = 0
 
 canSwitch = True
@@ -376,15 +375,6 @@ while game.running:
         next_bag = pieces.copy()
         random.shuffle(next_bag)
         game.render(bag[:3], held)
-
-
-
-    # NOTE multiplayer only
-    if time.time() > last_speed_up:
-        last_speed_up = time.time() + speed_up_rate
-        fall_speed /= 1.2
-        game.level += 1
-        display_until = time.time() + 3
 
 
     current.move(0, 1)

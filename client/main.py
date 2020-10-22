@@ -642,6 +642,7 @@ while game.running:
                     temp = bag.copy()
                     temp.extend(next_bag[:3 - amount])
                     game.render(temp, held)
+                    
                 else:
                     bag = next_bag.copy()
                     next_bag = pieces.copy()

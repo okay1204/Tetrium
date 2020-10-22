@@ -34,7 +34,13 @@ class Game:
         else:
             return self.meters[0]
 
-    
+    def restart(self):
+
+        self.current_piece = [None, None]
+
+        self.resting_blocks = [[], []]
+        self.meters = [[], []]
+        
     
     
     

@@ -36,10 +36,8 @@ def threaded_client(conn, player, gameId):
                     print("Disconnected")
                     break
                 else:
-                    print("Recieved:", data)
-                    print("Sending:", data)
                 
-                conn.sendall(pickle.dumps(game))
+                    conn.sendall(pickle.dumps(game))
 
             else:
                 break

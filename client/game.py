@@ -51,7 +51,7 @@ class Game:
         self.row_clearedSFX.set_volume(0.5)
         # self.wrong_rotateSFX = pygame.mixer.Sound()
 
-        self.width = 500
+        self.width = 750
         self.height = 800
 
         self.running = True
@@ -174,8 +174,8 @@ class Game:
 
 
         # junk line meter
-        pygame.draw.rect(self.screen, (255, 255, 255), (32, 397, 36, 306))
-        pygame.draw.rect(self.screen, (93, 110, 105), (35, 400, 30, 300))
+        pygame.draw.rect(self.screen, (255, 255, 255), (32, 394, 36, 306))
+        pygame.draw.rect(self.screen, (93, 110, 105), (35, 397, 30, 300))
 
         meter_block = 0
         for index, amount in enumerate(self.meter):
@@ -197,9 +197,51 @@ class Game:
 
                 if meter_block >= 10:
                     break
-                pygame.draw.rect(self.screen, darkened, (35, 670 - (30 * meter_block), 30, 30))
-                pygame.draw.rect(self.screen, color, (40, 675 - (30 * meter_block), 20, 20))
+                pygame.draw.rect(self.screen, darkened, (35, 667 - (30 * meter_block), 30, 30))
+                pygame.draw.rect(self.screen, color, (40, 672 - (30 * meter_block), 20, 20))
                 meter_block += 1
+
+        
+        self.render_second_screen()
+
+
+    def render_second_screen(self):
+        pygame.draw.rect(self.screen, (93, 110, 105), (570, 250, 150, 300))
+
+        # NOTE renders primary screen is temporary, replace game.resting with oponents game
+        for block in game.resting:
+            block.render_second()
+
+        
+        # junk line meter
+        pygame.draw.rect(self.screen, (255, 255, 255), (539, 398, 17, 152))
+        pygame.draw.rect(self.screen, (93, 110, 105), (540, 399, 15, 150))
+
+        # using own meter, change with other player's meter
+        meter_block = 0
+        for index, amount in enumerate(self.meter):
+
+
+            if not index:
+                if self.meter_stage == 1:
+                    color = color_key["yellow"]
+                elif self.meter_stage  == 2:
+                    color = color_key["orange"]
+                elif self.meter_stage  == 3:
+                    color = color_key["red"]
+            else:
+                color = color_key["gray"]
+
+            darkened = (tuple(darken(color) for color in color))
+
+            for block in range(amount):
+
+                if meter_block >= 10:
+                    break
+                pygame.draw.rect(self.screen, darkened, (540, 534 - (15 * meter_block), 15, 15))
+                pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11))
+                meter_block += 1
+
 
 
 
@@ -276,6 +318,7 @@ class Game:
             "S": "Soft Drop",
             "D": "Move Right",
             "G": "Toggle Movement",
+            "M": "Mute Music"
         }
 
         right_controls = {
@@ -359,6 +402,7 @@ class Game:
             self.clock.tick(60)
 
         self.time_started = time.time()
+    
         
 
 
@@ -470,7 +514,12 @@ class Block(Game):
                 self.flash_color = None
 
 
-                    
+    # for putting blocks on second screen
+    def render_second(self):
+
+        darker = tuple(map(darken, self.color))
+        pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size/2 + 570, (self.y-1)* self.size/2 + 250, 15, 15))
+        pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size/2 + 572, (self.y-1)* self.size/2 + 252, 11, 11))                    
 
 
     def render_preview(self):
@@ -870,6 +919,7 @@ class Piece(Game):
         
         if preview:
             downCount = 0
+
             while not self.check_floor():
                 self.move(0, 1)
                 downCount += 1
@@ -889,6 +939,9 @@ class Piece(Game):
         # for actual piece
         for block in self.blocks:
             block.render()
+
+            # NOTE this is temporary, do this with opponents piece instead
+            block.render_second()
 
 
 

@@ -52,7 +52,7 @@ def preview_piece(x, y, piece):
     elif piece == "I":
 
         return [
-            (color, x-8, y-30, 15, 60)
+            (color, x-30, y-8, 60, 15)
         ]
 
     elif piece == "O":

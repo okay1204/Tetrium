@@ -143,6 +143,7 @@ def send_lines(amount):
 
 
     if amount > 0:
+        #TODO sending lines go here
         print(f"{amount} lines sent")
 
 while game.running:
@@ -180,7 +181,6 @@ while game.running:
 
 
     for event in pygame.event.get():
-
 
         if event.type == pygame.KEYDOWN:
 

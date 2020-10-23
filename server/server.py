@@ -37,6 +37,7 @@ def threaded_client(conn, player, gameId):
 
             else:
                 break
+            
         except Exception as e:
             print(e)
             break

@@ -6,16 +6,6 @@ import pickle
 server = "localhost"
 port = 5555
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-try:
-    s.bind((server, port))
-    
-except socket.error as e:
-    print(e)
-
-s.listen()
-print("Server Started, Waiting for connections")
 
 idCount = 0
 games = {}
@@ -64,18 +54,22 @@ def threaded_client(conn, player, gameId):
 player = 0
 
 while True:
-    conn, addr = s.accept()
-    print("Connected to", addr)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind((server, port))
+        s.listen()
+        print("Server Started, Waiting for connections")
+        conn, addr = s.accept()
+        with conn:
+            print("Connected to", addr)
+            idCount += 1
+            gameId = (idCount - 1)//2
 
-    idCount += 1
-    gameId = (idCount - 1)//2
+            if idCount % 2 == 1:
+                games[gameId] = Game(gameId)
+                player = 0
+            else:
+                games[gameId].ready = True
+                player = 1
+                print("Started game", gameId)
 
-    if idCount % 2 == 1:
-        games[gameId] = Game(gameId)
-        player = 0
-    else:
-        games[gameId].ready = True
-        player = 1
-        print("Started game", gameId)
-
-    _thread.start_new_thread(threaded_client, (conn, player, gameId))
+            _thread.start_new_thread(threaded_client, (conn, player, gameId))

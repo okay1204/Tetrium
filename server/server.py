@@ -11,6 +11,10 @@ port = 5555
 idCount = 0
 games = {}
 
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+s.bind((server, port))
+
 def threaded_client(conn, player, gameId):
 
     global idCount
@@ -20,11 +24,15 @@ def threaded_client(conn, player, gameId):
     
     while True:
         try:
-            buf = b''
-            while len(buf) < 4:
-                buf += conn.recv(4 - len(buf))
+            # buf = b''
+            # while len(buf) < 4:
+            #     buf += conn.recv(4 - len(buf))
 
-            length = struct.unpack("!I", buf)[0]
+            # length = struct.unpack("!I", buf)[0]
+
+            # conn.recv(length)
+
+            data = pickle.loads(conn.recv(4026))
 
             if gameId in games.keys():
 
@@ -57,12 +65,11 @@ def threaded_client(conn, player, gameId):
     conn.close()
 
 player = 0
+s.listen()
+print("Server Started, Waiting for connections")
 
 while True:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((server, port))
-        s.listen()
-        print("Server Started, Waiting for connections")
+        
         conn, addr = s.accept()
         
         print("Connected to", addr)

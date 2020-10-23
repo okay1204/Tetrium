@@ -423,7 +423,7 @@ class Game:
 
 
             # checking if game started
-            if connected and self.n.send("get").ready:
+            if connected and self.n.send('get').ready:
                 break
 
                 

@@ -2,6 +2,7 @@ import socket
 import _thread
 from game import Game
 import pickle
+import struct
 
 server = "localhost"
 port = 5555
@@ -19,7 +20,10 @@ def threaded_client(conn, player, gameId):
     
     while True:
         try:
-            data = pickle.loads(conn.recv(4096))
+            data = b''
+            data += pickle.loads(conn.recv(4096))
+
+            length = struct.unpack("!I", data)[0]
 
             if gameId in games.keys():
 

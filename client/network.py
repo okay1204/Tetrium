@@ -1,5 +1,6 @@
 import socket
 import pickle
+import struct
 
 
 class Network:
@@ -19,7 +20,11 @@ class Network:
 
     def send(self, data):
         try:
-            self.client.send(str.encode(data))
+            packet = pickle.dumps(data)
+            length = struct.pack('!I', len(packet))
+            packet = length + packet
+
+            self.client.send(packet)
             return pickle.loads(self.client.recv(4096))
         except socket.error as e:
             print(e)

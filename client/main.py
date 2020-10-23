@@ -147,7 +147,7 @@ def send_lines(amount):
         print(f"{amount} lines sent")
 
 
-# for gettig information about opponent
+# for getting information about opponent
 disconnected = False
 
 def get_second_data():

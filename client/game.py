@@ -88,6 +88,9 @@ class Game:
         # list of numbers, with numbers being attack amounts
         self.meter = []
         self.meter_stage = 1
+
+
+        self.opp_resting = self.opp_meter = self.opp_meter_stage = self.opp_piece = None
         
         
 
@@ -208,8 +211,10 @@ class Game:
     def render_second_screen(self):
         pygame.draw.rect(self.screen, (93, 110, 105), (570, 250, 150, 300))
 
-        # NOTE renders primary screen is temporary, replace game.resting with oponents game
-        for block in game.resting:
+        if self.time_started + 1 > time.time():
+            return
+        
+        for block in game.opp_resting:
             block.render_second()
 
         
@@ -217,17 +222,17 @@ class Game:
         pygame.draw.rect(self.screen, (255, 255, 255), (539, 398, 17, 152))
         pygame.draw.rect(self.screen, (93, 110, 105), (540, 399, 15, 150))
 
-        # using own meter, change with other player's meter
+
         meter_block = 0
-        for index, amount in enumerate(self.meter):
+        for index, amount in enumerate(self.opp_meter):
 
 
             if not index:
-                if self.meter_stage == 1:
+                if self.opp_meter_stage == 1:
                     color = color_key["yellow"]
-                elif self.meter_stage  == 2:
+                elif self.opp_meter_stage  == 2:
                     color = color_key["orange"]
-                elif self.meter_stage  == 3:
+                elif self.opp_meter_stage  == 3:
                     color = color_key["red"]
             else:
                 color = color_key["gray"]

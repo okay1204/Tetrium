@@ -29,7 +29,7 @@ def threaded_client(conn, player, gameId):
     
     while True:
         try:
-            data = conn.recv(2048).decode()
+            data = pickle.loads(conn.recv(4096))
 
             if gameId in games.keys():
 
@@ -38,6 +38,11 @@ def threaded_client(conn, player, gameId):
                 if not data:
                     break
                 else:
+                    # data will be in order of
+                    # resting, piece, meter, meter stage
+                    if isinstance(data, tuple):
+                        game.update(data, player)
+
                     conn.sendall(pickle.dumps(game))
 
             else:

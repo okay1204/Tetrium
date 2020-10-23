@@ -12,6 +12,7 @@ class Game:
 
         # Both players junk meter
         self.meters = [[], []]
+        self.meter_stages = [1, 1]
 
         self._id = game_id
     
@@ -28,11 +29,27 @@ class Game:
         else:
             return self.resting_blocks[0]
 
-    def opp_meters(self, p):
+    def opp_meter(self, p):
         if not p:
             return self.meters[1]
         else:
             return self.meters[0]
+
+    def opp_meter_stage(self, p):
+        if not p:
+            return self.meter_stages[1]
+        else:
+            return self.meter_stages[0]
+
+
+    def update(self, data, p):
+        
+        resting, piece, meter, meter_stage = data
+
+        self.current_piece[p] = piece
+        self.resting_blocks[p] = resting
+        self.meters[p] = meter
+        self.meter_stages[p] = meter_stage
 
     def restart(self):
 

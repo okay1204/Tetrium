@@ -36,10 +36,8 @@ def threaded_client(conn, player, gameId):
                 game = games[gameId]
 
                 if not data:
-                    print("Disconnected")
                     break
                 else:
-                
                     conn.sendall(pickle.dumps(game))
 
             else:
@@ -47,10 +45,10 @@ def threaded_client(conn, player, gameId):
         except Exception as e:
             print(e)
     
-    print("Connection Lost")
+    print("Connection lost to player", player, "lost in game", game)
     try:
         del games[gameId]
-        print("Closed Game", gameId)
+        print("Closed game", gameId)
     except:
         pass
 

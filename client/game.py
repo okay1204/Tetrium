@@ -247,22 +247,35 @@ class Game:
 
     def start_screen(self):
 
+        connected = False
+
         def draw_start_button():
-            nonlocal start_button_text_color
-            #if mouse hovering make it lighter
-            if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]: 
-                pygame.draw.rect(self.screen, (255,255,255), (start_button_pos, start_button_dimensions)) 
-                start_button_text_color = (0, 0, 0)
-            
-            else: 
-                pygame.draw.rect(self.screen, (0,0,0), (start_button_pos, start_button_dimensions))
-                start_button_text_color = (255, 255, 255)
+            nonlocal start_button_text_color, connected
+
+            if not connected:
+                #if mouse hovering make it lighter
+                if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]: 
+                    pygame.draw.rect(self.screen, (255,255,255), (start_button_pos, start_button_dimensions)) 
+                    start_button_text_color = (0, 0, 0)
+                
+                else: 
+                    pygame.draw.rect(self.screen, (0,0,0), (start_button_pos, start_button_dimensions))
+                    start_button_text_color = (255, 255, 255)
 
 
         def draw_text():
-            start_button_text = self.font.render('START', True, start_button_text_color) 
+
+            nonlocal connected
+
+            if not connected:
+                start_button_text = self.font.render('START', True, start_button_text_color)
+                start_button_coords = (start_button_pos[0] + 20, start_button_pos[1] + 3)
+            else:
+                start_button_text = self.font.render('Waiting for opponent...', True, start_button_text_color)
+                start_button_coords = (start_button_pos[0] - 80, start_button_pos[1])
+
             title_text = title_font.render('TETRIUM', True, start_button_text_color) 
-            self.screen.blit(start_button_text, (start_button_pos[0] + 20, start_button_pos[1] + 3))
+            self.screen.blit(start_button_text, start_button_coords)
             self.screen.blit(title_text, (self.width/2 - 150, self.height/2 - 200)) 
 
 
@@ -330,8 +343,6 @@ class Game:
 
         font = pygame.font.Font('assets/arial.ttf', 20)
 
-        connected = False
-
         while not game_started:
             mouse = pygame.mouse.get_pos() 
 
@@ -341,16 +352,16 @@ class Game:
                     pygame.quit()
                     sys.exit()
                     
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and not connected:
                    
                     if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]:  
                         
                         
-                        n = Network()
-                        self.player = n.p
+                        self.n = Network()
+                        self.player = self.n.p
+                        connected = True
 
                         pygame.mixer.music.set_volume(self.volume)
-
                         self.screen.fill((0, 0, 0))
 
                     elif mute_button_pos[0] - mute_button_radius <= mouse[0] <= mute_button_pos[0] + mute_button_radius and mute_button_pos[1] - mute_button_radius <= mouse[1] <=  mute_button_pos[1] + mute_button_radius: 
@@ -379,7 +390,10 @@ class Game:
 
             
             check_mute_and_draw_icons()
-            draw_start_button()
+
+            if not connected:
+                draw_start_button()
+                
             draw_text()
 
             # for controls on left side
@@ -402,6 +416,10 @@ class Game:
                 self.screen.blit(text, (game.width- textRect.center[0] + 60, textRect[1]))
 
 
+
+            # checking if game started
+            if connected and self.n.send("get").ready:
+                break
 
                 
             pygame.display.update()

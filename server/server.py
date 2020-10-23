@@ -20,10 +20,11 @@ def threaded_client(conn, player, gameId):
     
     while True:
         try:
-            data = b''
-            data += pickle.loads(conn.recv(4096))
+            buf = b''
+            while len(buf) < 4:
+                buf += conn.recv(4 - len(buf))
 
-            length = struct.unpack("!I", data)[0]
+            length = struct.unpack("!I", buf)[0]
 
             if gameId in games.keys():
 
@@ -64,6 +65,7 @@ while True:
         s.listen()
         print("Server Started, Waiting for connections")
         conn, addr = s.accept()
+        
         print("Connected to", addr)
         idCount += 1
         gameId = (idCount - 1)//2
@@ -77,4 +79,3 @@ while True:
             print("Started game", gameId)
 
         _thread.start_new_thread(threaded_client, (conn, player, gameId))
- 

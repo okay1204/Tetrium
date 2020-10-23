@@ -214,7 +214,7 @@ class Game:
         if self.time_started + 1 > time.time():
             return
         
-        for block in game.opp_resting:
+        for block in self.opp_resting:
             block.render_second()
 
         

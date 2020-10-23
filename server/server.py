@@ -41,7 +41,7 @@ def threaded_client(conn, player, gameId):
 
             else:
                 break
-            
+
         except Exception as e:
             print(e)
             break
@@ -64,17 +64,17 @@ while True:
         s.listen()
         print("Server Started, Waiting for connections")
         conn, addr = s.accept()
-        with conn:
-            print("Connected to", addr)
-            idCount += 1
-            gameId = (idCount - 1)//2
+        print("Connected to", addr)
+        idCount += 1
+        gameId = (idCount - 1)//2
 
-            if idCount % 2 == 1:
-                games[gameId] = Game(gameId)
-                player = 0
-            else:
-                games[gameId].ready = True
-                player = 1
-                print("Started game", gameId)
+        if idCount % 2 == 1:
+            games[gameId] = Game(gameId)
+            player = 0
+        else:
+            games[gameId].ready = True
+            player = 1
+            print("Started game", gameId)
 
-            _thread.start_new_thread(threaded_client, (conn, player, gameId))
+        _thread.start_new_thread(threaded_client, (conn, player, gameId))
+ 

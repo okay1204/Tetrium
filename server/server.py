@@ -44,8 +44,9 @@ def threaded_client(conn, player, gameId):
                 break
         except Exception as e:
             print(e)
+            break
     
-    print("Connection lost to player", player, "lost in game", game)
+    print("Connection lost to player", player, "lost in game", gameId)
     try:
         del games[gameId]
         print("Closed game", gameId)
@@ -70,5 +71,6 @@ while True:
     else:
         games[gameId].ready = True
         player = 1
+        print("Started game", gameId)
 
     _thread.start_new_thread(threaded_client, (conn, player, gameId))

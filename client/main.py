@@ -4,6 +4,7 @@ from game import *
 import time
 import random
 import sys
+import _thread
 
 
 pieces = ["T", "L", "J", "S", "Z", "I", "O"]
@@ -145,7 +146,29 @@ def send_lines(amount):
         #TODO sending lines go here
         print(f"{amount} lines sent")
 
+
+disconnected = False
+
+def get_second_data():
+    
+    global disconnected
+
+    while True:
+        
+        try:
+            data = game.n.send("get")
+        except:
+            disconnected = True
+            break
+
+_thread.start_new_thread(get_second_data, ())
+
 while game.running:
+
+    if disconnected:
+        #TODO add disconnected screen here
+        game.running = False
+        sys.exit()
 
     if moving:
 

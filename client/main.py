@@ -321,6 +321,8 @@ while game.running:
                 last_touched -= 5
 
                 game.score += downCount*2
+                if downCount:
+                    rotation_last = False
 
             elif event.key == pygame.K_g:
                 game.continuous = not game.continuous

@@ -136,22 +136,12 @@ t_spin_line_key = [2, 4, 6]
 combo_line_key = [(1, 3), (4, 5), (6, 7), (8, 10), (11, 10000000)]
 
 
+
 def send_lines(amount):
+    game.n.send("junk " + str(amount))
 
-    temp = amount
-
-    # blocking incoming lines
-    while game.meter and temp > 0:
-        game.meter[0] -= 1
-        temp -= 1
-
-        if game.meter[0] <= 0:
-            game.meter.pop(0)
-            game.meter_stage = 1
-
-
-    #TODO sending lines go here
-    print(f"{amount} lines sent")
+def meter_increase():
+    game.n.send("meter increase")
 
 
 # for gettig information about opponent
@@ -167,7 +157,7 @@ def server_connection():
         piece_block_coords = list(map(lambda block: (block.x, block.y, block.color), current.blocks))
         
         try:
-            data = game.n.send((resting_coords, piece_block_coords, game.meter, game.meter_stage))
+            data = game.n.send((resting_coords, piece_block_coords))
         except:
             disconnected = True
             break
@@ -176,6 +166,11 @@ def server_connection():
         game.opp_piece_blocks = data.opp_piece_blocks(game.n.p)
         game.opp_meter = data.opp_meter(game.n.p)
         game.opp_meter_stage = data.opp_meter_stage(game.n.p)
+
+
+        game.meter = list(map(lambda value: int(value), data.own_meter(game.n.p)))
+        game.meter_stage = data.own_meter_stage(game.n.p)
+        
 
 _thread.start_new_thread(server_connection, ())
 
@@ -221,12 +216,6 @@ while game.running:
     for event in pygame.event.get():
 
         if event.type == pygame.KEYDOWN:
-
-
-            # for testing junk lines
-            if event.key == pygame.K_r:
-                game.meter.append(random.randint(1, 4))
-
 
             # move left
             if event.key == pygame.K_a:
@@ -637,7 +626,7 @@ while game.running:
 
 
                 if lines_sent:
-                    send_lines(lines_sent)
+                    _thread.start_new_thread(send_lines, (lines_sent,))
                     
                 
                 if not lines_cleared:
@@ -646,7 +635,7 @@ while game.running:
 
                     if game.meter:
                         # increasing the stage of the incoming junk
-                        game.meter_stage += 1
+                        _thread.start_new_thread(meter_increase, ())
 
                         if game.meter_stage > 3:
                             
@@ -689,7 +678,6 @@ while game.running:
                     game.render(bag[:3], held)
 
 
-                #TODO play land sound here
                 canSwitch = True
 
                 # make new falling piece

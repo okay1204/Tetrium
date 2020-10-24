@@ -2,7 +2,6 @@ import socket
 import _thread
 from onlineGame import OnlineGame
 import pickle
-import struct
 import traceback
 
 
@@ -38,6 +37,7 @@ def threaded_client(conn, player, gameId):
 
                 if not data:
                     break
+                
                 else:
                     # data will be in order of
                     # resting, piece, meter, meter stage

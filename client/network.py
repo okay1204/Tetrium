@@ -9,7 +9,7 @@ class Network:
         self.server = "localhost"
         self.port = 5555
         self.addr = (self.server, self.port)
-        self.p = self.connect()
+        self.p = int(self.connect())
 
     def connect(self):
         try:
@@ -20,11 +20,13 @@ class Network:
 
     def send(self, data):
         try:
-            packet = pickle.dumps(data)
-            length = struct.pack('!I', len(packet))
-            packet = length + packet
+            # packet = pickle.dumps(data)
+            # length = struct.pack('!I', len(packet))
+            # packet = length + packet
 
-            self.client.send(packet)
+            # self.client.send(packet)
+
+            self.client.send(pickle.dumps(data))
             return pickle.loads(self.client.recv(4096))
         except socket.error as e:
             print(e)

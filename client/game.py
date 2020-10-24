@@ -90,7 +90,7 @@ class Game:
         self.meter_stage = 1
 
 
-        self.opp_resting = self.opp_meter = self.opp_meter_stage = self.opp_piece = None
+        self.opp_resting = self.opp_meter = self.opp_meter_stage = self.opp_piece_blocks = None
         
         
 
@@ -214,9 +214,12 @@ class Game:
         if self.time_started + 1 > time.time():
             return
         
-        for block in self.opp_resting:
-            block.render_second()
+        for x, y, color in self.opp_resting:
+            Block(x, y, color, colorByName=False).render_second()
 
+        
+        for x, y, color in self.opp_piece_blocks:
+            Block(x, y, color, colorByName=False).render_second()
         
         # junk line meter
         pygame.draw.rect(self.screen, (255, 255, 255), (539, 398, 17, 152))
@@ -349,6 +352,7 @@ class Game:
         font = pygame.font.Font('assets/arial.ttf', 20)
 
         while not game_started:
+
             mouse = pygame.mouse.get_pos() 
 
             #Game over loop
@@ -423,7 +427,7 @@ class Game:
 
 
             # checking if game started
-            if connected and self.n.send("get").ready:
+            if connected and self.n.send('get').ready:
                 break
 
                 
@@ -969,9 +973,6 @@ class Piece(Game):
         # for actual piece
         for block in self.blocks:
             block.render()
-
-            # NOTE this is temporary, do this with opponents piece instead
-            block.render_second()
 
 
 

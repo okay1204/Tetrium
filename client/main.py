@@ -7,6 +7,12 @@ import sys
 import _thread
 
 
+# in order to get classes from a different folder
+import os
+import sys
+sys.path.insert(1 , os.path.join(os.path.dirname(os.getcwd()), 'server'))
+
+
 pieces = ["T", "L", "J", "S", "Z", "I", "O"]
 
 bag = pieces.copy()
@@ -132,43 +138,46 @@ combo_line_key = [(1, 3), (4, 5), (6, 7), (8, 10), (11, 10000000)]
 
 def send_lines(amount):
 
+    temp = amount
+
     # blocking incoming lines
-    while game.meter and amount > 0:
+    while game.meter and temp > 0:
         game.meter[0] -= 1
-        amount -= 1
+        temp -= 1
 
         if game.meter[0] <= 0:
             game.meter.pop(0)
             game.meter_stage = 1
 
 
-    if amount > 0:
-        #TODO sending lines go here
-        print(f"{amount} lines sent")
+    #TODO sending lines go here
+    print(f"{amount} lines sent")
 
 
 # for getting information about opponent
 disconnected = False
 
-def get_second_data():
+def server_connection():
     
     global disconnected, current
 
     while True:
+
+        resting_coords = list(map(lambda block: (block.x, block.y, block.color), game.resting))
+        piece_block_coords = list(map(lambda block: (block.x, block.y, block.color), current.blocks))
         
         try:
-            data = game.n.send((game.resting, current, game.meter, game.meter_stage))
+            data = game.n.send((resting_coords, piece_block_coords, game.meter, game.meter_stage))
         except:
             disconnected = True
             break
-            
         
         game.opp_resting = data.opp_resting(game.n.p)
-        game.opp_piece = data.opp_piece(game.n.p)
+        game.opp_piece_blocks = data.opp_piece_blocks(game.n.p)
         game.opp_meter = data.opp_meter(game.n.p)
         game.opp_meter_stage = data.opp_meter_stage(game.n.p)
 
-_thread.start_new_thread(get_second_data, ())
+_thread.start_new_thread(server_connection, ())
 
 while game.running:
 

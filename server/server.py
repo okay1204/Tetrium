@@ -1,8 +1,10 @@
 import socket
 import _thread
-from game import Game
+from onlineGame import OnlineGame
 import pickle
 import struct
+import traceback
+
 
 server = "localhost"
 port = 5555
@@ -10,6 +12,10 @@ port = 5555
 
 idCount = 0
 games = {}
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+s.bind((server, port))
 
 def threaded_client(conn, player, gameId):
 
@@ -20,11 +26,11 @@ def threaded_client(conn, player, gameId):
     
     while True:
         try:
-            buf = b''
-            while len(buf) < 4:
-                buf += conn.recv(4 - len(buf))
 
-            length = struct.unpack("!I", buf)[0]
+            try:
+                data = pickle.loads(conn.recv(4026))
+            except:
+                break
 
             if gameId in games.keys():
 
@@ -42,9 +48,8 @@ def threaded_client(conn, player, gameId):
 
             else:
                 break
-
-        except Exception as e:
-            print(e)
+        except Exception:
+            traceback.print_exc()
             break
     
     print("Connection lost to player", player, "lost in game", gameId)
@@ -58,24 +63,23 @@ def threaded_client(conn, player, gameId):
     conn.close()
 
 player = 0
+s.listen()
+print("Server Started, Waiting for connections")
 
 while True:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((server, port))
-        s.listen()
-        print("Server Started, Waiting for connections")
-        conn, addr = s.accept()
         
-        print("Connected to", addr)
-        idCount += 1
-        gameId = (idCount - 1)//2
+    conn, addr = s.accept()
+    
+    print("Connected to", addr)
+    idCount += 1
+    gameId = (idCount - 1)//2
 
-        if idCount % 2 == 1:
-            games[gameId] = Game(gameId)
-            player = 0
-        else:
-            games[gameId].ready = True
-            player = 1
-            print("Started game", gameId)
+    if idCount % 2 == 1:
+        games[gameId] = OnlineGame(gameId)
+        player = 0
+    else:
+        games[gameId].ready = True
+        player = 1
+        print("Started game", gameId)
 
-        _thread.start_new_thread(threaded_client, (conn, player, gameId))
+    _thread.start_new_thread(threaded_client, (conn, player, gameId))

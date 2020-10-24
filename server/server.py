@@ -42,7 +42,15 @@ def threaded_client(conn, player, gameId):
                     # data will be in order of
                     # resting, piece, meter, meter stage
                     if isinstance(data, tuple):
-                        game.update(data, player)
+                        game._update(data, player)
+
+                    elif data.startswith("junk"):
+
+                        game._send_lines(data.split()[1], player)
+
+                    elif data == "meter increase":
+
+                        game._increase_meter(player)
 
                     conn.sendall(pickle.dumps(game))
 

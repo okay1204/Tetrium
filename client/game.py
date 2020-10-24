@@ -181,6 +181,7 @@ class Game:
         pygame.draw.rect(self.screen, (93, 110, 105), (35, 397, 30, 300))
 
         meter_block = 0
+
         for index, amount in enumerate(self.meter):
 
 
@@ -228,7 +229,6 @@ class Game:
 
         meter_block = 0
         for index, amount in enumerate(self.opp_meter):
-
 
             if not index:
                 if self.opp_meter_stage == 1:

@@ -164,7 +164,7 @@ def server_connection():
         
         game.opp_resting = data.opp_resting(game.n.p)
         game.opp_piece_blocks = data.opp_piece_blocks(game.n.p)
-        game.opp_meter = data.opp_meter(game.n.p)
+        game.opp_meter = list(map(lambda value: int(value), data.opp_meter(game.n.p)))
         game.opp_meter_stage = data.opp_meter_stage(game.n.p)
 
 

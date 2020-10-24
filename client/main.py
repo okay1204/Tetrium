@@ -7,6 +7,12 @@ import sys
 import _thread
 
 
+# in order to get classes from a different folder
+import os
+import sys
+sys.path.insert(1 , os.path.join(os.path.dirname(os.getcwd()), 'server'))
+
+
 pieces = ["T", "L", "J", "S", "Z", "I", "O"]
 
 bag = pieces.copy()
@@ -155,16 +161,18 @@ def get_second_data():
     global disconnected, current
 
     while True:
+
+        resting_coords = list(map(lambda block: (block.x, block.y, block.color), game.resting))
+        piece_block_coords = list(map(lambda block: (block.x, block.y, block.color), current.blocks))
         
         try:
-            data = game.n.send((game.resting, current, game.meter, game.meter_stage))
+            data = game.n.send((resting_coords, piece_block_coords, game.meter, game.meter_stage))
         except:
             disconnected = True
             break
-            
         
         game.opp_resting = data.opp_resting(game.n.p)
-        game.opp_piece = data.opp_piece(game.n.p)
+        game.opp_piece_blocks = data.opp_piece_blocks(game.n.p)
         game.opp_meter = data.opp_meter(game.n.p)
         game.opp_meter_stage = data.opp_meter_stage(game.n.p)
 

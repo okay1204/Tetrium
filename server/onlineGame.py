@@ -1,4 +1,6 @@
-class Game:
+
+
+class OnlineGame:
 
     def __init__(self, game_id):
 
@@ -17,13 +19,14 @@ class Game:
         self._id = game_id
     
     
-    def opp_piece(self, p):
+    def opp_piece_blocks(self, p):
         if not p:
             return self.current_piece[1]
         else:
             return self.current_piece[0]
 
     def opp_resting(self, p):
+
         if not p:
             return self.resting_blocks[1]
         else:

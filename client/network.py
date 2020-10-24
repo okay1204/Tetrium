@@ -9,7 +9,7 @@ class Network:
         self.server = "localhost"
         self.port = 5555
         self.addr = (self.server, self.port)
-        self.p = self.connect()
+        self.p = int(self.connect())
 
     def connect(self):
         try:

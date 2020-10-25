@@ -184,8 +184,7 @@ class Game:
 
         for index, amount in enumerate(self.meter):
 
-
-            if not index:
+            if not index and self.meter_stage != 4:
                 if self.meter_stage == 1:
                     color = color_key["yellow"]
                 elif self.meter_stage  == 2:

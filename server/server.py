@@ -52,6 +52,10 @@ def threaded_client(conn, player, gameId):
 
                         game._increase_meter(player)
 
+                    elif data == "meter stage reset":
+
+                        game._reset_meter(player)
+
                     conn.sendall(pickle.dumps(game))
 
             else:

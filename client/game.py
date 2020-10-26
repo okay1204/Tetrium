@@ -91,6 +91,7 @@ class Game:
 
 
         self.opp_resting = self.opp_meter = self.opp_meter_stage = self.opp_piece_blocks = None
+        self.opp_name = None
         
         
 
@@ -172,7 +173,19 @@ class Game:
 
         text = font.render(f"Time Elapsed: {time_elapsed}", True, (255, 255 ,255))
         textRect = text.get_rect()
-        textRect.center = (250, 50)
+        textRect.center = (250, 25)
+        self.screen.blit(text, textRect)
+
+
+        text = font.render(self.name, True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (250, 65)
+        self.screen.blit(text, textRect)
+
+
+        text = font.render(self.opp_name, True, (255, 255 ,255))
+        textRect = text.get_rect()
+        textRect.center = (650, 230)
         self.screen.blit(text, textRect)
 
 
@@ -329,10 +342,20 @@ class Game:
                 input_text += key
     
         def start():
-            nonlocal connected
+            nonlocal connected, input_active, input_text
+            input_active = False
+
+            input_text = input_text.strip()
+            if not input_text:
+                input_text = "Player"
+
             self.n = Network()
             self.player = self.n.p
             connected = True
+
+            self.name = input_text
+            self.n.send("name " + input_text)
+
 
         game_started = False
         
@@ -417,7 +440,7 @@ class Game:
                     elif mute_button_pos[0] - mute_button_radius <= mouse[0] <= mute_button_pos[0] + mute_button_radius and mute_button_pos[1] - mute_button_radius <= mouse[1] <=  mute_button_pos[1] + mute_button_radius: 
                         self.muted = not self.muted
                     
-                    elif input_box.collidepoint(event.pos):
+                    elif input_box.collidepoint(event.pos) and not connected:
                         input_active = True
                     
                     else: 
@@ -489,7 +512,8 @@ class Game:
 
 
             # checking if game started
-            if connected and self.n.send('get').ready:
+            if connected and ( data := self.n.send('get') ).ready:
+                self.opp_name = data.opp_name(self.n.p)
                 break
             
                 

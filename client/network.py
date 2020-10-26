@@ -20,14 +20,7 @@ class Network:
 
     def send(self, data):
         try:
-            # packet = pickle.dumps(data)
-            # length = struct.pack('!I', len(packet))
-            # packet = length + packet
-
-            # self.client.send(packet)
-
             self.client.send(pickle.dumps(data))
             return pickle.loads(self.client.recv(4096))
         except socket.error as e:
             print(e)
-

@@ -22,6 +22,7 @@ def threaded_client(conn, player, gameId):
 
     # send player number to client right after connecting
     conn.send(str.encode(str(player)))
+
     
     while True:
         try:
@@ -55,6 +56,10 @@ def threaded_client(conn, player, gameId):
                     elif data == "meter reset":
 
                         game._reset_meter(player)
+
+                    elif data.startswith('name '):
+
+                        game.names[player] = data[5:]
 
                     conn.sendall(pickle.dumps(game))
 

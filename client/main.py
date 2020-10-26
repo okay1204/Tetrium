@@ -140,8 +140,6 @@ combo_line_key = [(1, 3), (4, 5), (6, 7), (8, 10), (11, 10000000)]
 def send_lines(amount):
     game.n.send("junk " + str(amount))
 
-def meter_increase():
-    game.n.send("meter increase")
 
 
 # for getting information about opponent
@@ -635,11 +633,17 @@ while game.running:
 
                     if game.meter:
                         # increasing the stage of the incoming junk
-                        _thread.start_new_thread(meter_increase, ())
-
-                        if game.meter_stage > 3:
+                        try:
+                            data = game.n.send("meter increase")
+                        except:
+                            disconnected = True
+                            continue
                             
-                            game.meter_stage = 1
+                        meter_stage = data.own_meter_stage(game.n.p)
+
+                        if meter_stage > 3:
+                            
+                            game.n.send("meter reset")
 
                             amount = game.meter[0]
                             game.meter.pop(0)
@@ -653,6 +657,8 @@ while game.running:
                                 for x in range(1, 11):
                                     if x != position:
                                         game.resting.append(Block(x, 20-y, "gray"))
+                        
+
 
 
                 

@@ -184,8 +184,7 @@ class Game:
 
         for index, amount in enumerate(self.meter):
 
-
-            if not index:
+            if not index and self.meter_stage != 4:
                 if self.meter_stage == 1:
                     color = color_key["yellow"]
                 elif self.meter_stage  == 2:
@@ -215,11 +214,11 @@ class Game:
         if self.time_started + 1 > time.time():
             return
         
-        for x, y, color in self.opp_resting:
+        for x, y, color in self.opp_resting: # noqa pylint: disable=not-an-iterable
             Block(x, y, color, colorByName=False).render_second()
 
         
-        for x, y, color in self.opp_piece_blocks:
+        for x, y, color in self.opp_piece_blocks: # noqa pylint: disable=not-an-iterable
             Block(x, y, color, colorByName=False).render_second()
         
         # junk line meter

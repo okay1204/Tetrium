@@ -87,6 +87,11 @@ class OnlineGame:
 
         self.meter_stages[player] += 1
 
+    def _reset_meter(self, player):
+
+        self.meter_stages[player] = 1
+        self.meters[player].pop(0)
+
     def _restart(self):
 
         self.current_piece = [None, None]

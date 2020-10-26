@@ -214,11 +214,11 @@ class Game:
         if self.time_started + 1 > time.time():
             return
         
-        for x, y, color in self.opp_resting:
+        for x, y, color in self.opp_resting: # noqa pylint: disable=not-an-iterable
             Block(x, y, color, colorByName=False).render_second()
 
         
-        for x, y, color in self.opp_piece_blocks:
+        for x, y, color in self.opp_piece_blocks: # noqa pylint: disable=not-an-iterable
             Block(x, y, color, colorByName=False).render_second()
         
         # junk line meter

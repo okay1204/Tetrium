@@ -46,13 +46,13 @@ def threaded_client(conn, player, gameId):
 
                     elif data.startswith("junk"):
 
-                        game._send_lines(data.split()[1], player)
+                        game._send_lines(int(data.split()[1]), player)
 
                     elif data == "meter increase":
 
                         game._increase_meter(player)
 
-                    elif data == "meter stage reset":
+                    elif data == "meter reset":
 
                         game._reset_meter(player)
 

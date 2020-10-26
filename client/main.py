@@ -139,6 +139,7 @@ combo_line_key = [(1, 3), (4, 5), (6, 7), (8, 10), (11, 10000000)]
 
 def send_lines(amount):
     game.n.send("junk " + str(amount))
+    print(amount)
 
 
 

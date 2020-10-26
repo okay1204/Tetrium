@@ -277,6 +277,7 @@ class Game:
             if not connected:
                 start_button_text = self.font.render('START', True, start_button_text_color)
                 start_button_coords = (start_button_pos[0] + 20, start_button_pos[1] + 3)
+            
             else:
                 start_button_text = self.font.render('Waiting for opponent...', True, start_button_text_color)
                 start_button_coords = (start_button_pos[0] - 80, start_button_pos[1])
@@ -284,6 +285,7 @@ class Game:
             title_text = title_font.render('TETRIUM', True, start_button_text_color) 
             self.screen.blit(start_button_text, start_button_coords)
             self.screen.blit(title_text, (self.width/2 - 150, self.height/2 - 200)) 
+         
 
 
         def draw_mute_button_background():
@@ -300,12 +302,42 @@ class Game:
                 self.lowered_volume, self.volume = 0.03, 0.1
                 self.screen.blit(volume_on_icon, volume_icon_pos)
 
+        def draw_input_text():
+            nonlocal input_text_width
+            input_text_render = input_font.render(input_text, True, (0, 0, 0))
+            input_text_width = input_text_render.get_rect().width
+            self.screen.blit(input_text_render, (input_box_x + 5, input_box_y))
+
+
+        def draw_input_box():
+            if input_active:
+                input_bkg_color = (0, 0, 255)
+
+            else:
+                input_bkg_color = (0, 0, 0)
+
+            pygame.draw.rect(self.screen, input_bkg_color, input_box, 10)
+            pygame.draw.rect(self.screen, (255,255,255), input_box_bkg)
+
+            draw_input_text()
             
+           
+
+        def get_input(key):
+            nonlocal input_text
+            if input_text_width < input_box_width - 15:
+                input_text += key
+    
+        def start():
+            nonlocal connected
+            self.n = Network()
+            self.player = self.n.p
+            connected = True
 
         game_started = False
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
-        x_pos = [0, 4, 8, 12, 0, 4, 8]
+        x_pos = [0, 4, 8, 12, 16, 20, 0, 4, 8]
         shuffle(x_pos)
 
         pieces = [
@@ -316,7 +348,10 @@ class Game:
             Piece(x_pos[3], randint(0, 3), 'S'), 
             Piece(x_pos[4], randint(3, 6), 'Z'), 
             Piece(x_pos[5], randint(6, 9), 'I'),
-            Piece(x_pos[6], randint(9, 15), 'O')
+            Piece(x_pos[6], randint(9, 12), 'T'),
+            Piece(x_pos[7], randint(12, 15), 'L'),
+            Piece(x_pos[8], randint(-15, -12), 'J'),
+         
         ]
         
 
@@ -331,6 +366,16 @@ class Game:
         volume_icon_pos = (mute_button_pos[0] - 25, mute_button_pos[1] - 25)
         s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         title_font = pygame.font.Font('assets/arial.ttf', 75)
+        input_font = pygame.font.Font('assets/arial.ttf', 30)
+        input_box_x = (self.width - 200)/2
+        input_box_y =  self.height/2 - 85
+        input_box_width = 200
+        input_box_height = 50
+        input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
+        input_box_bkg = pygame.Rect((self.width - 200)/2 , self.height/2 - 85, 200, 50)
+        input_active = False
+        input_text = ''
+        input_text_width = 0
       
 
         left_controls = {
@@ -364,10 +409,7 @@ class Game:
                    
                     if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]:  
                         
-                        
-                        self.n = Network()
-                        self.player = self.n.p
-                        connected = True
+                        start()
 
                         pygame.mixer.music.set_volume(self.volume)
                         self.screen.fill((0, 0, 0))
@@ -375,7 +417,27 @@ class Game:
                     elif mute_button_pos[0] - mute_button_radius <= mouse[0] <= mute_button_pos[0] + mute_button_radius and mute_button_pos[1] - mute_button_radius <= mouse[1] <=  mute_button_pos[1] + mute_button_radius: 
                         self.muted = not self.muted
                     
+                    elif input_box.collidepoint(event.pos):
+                        input_active = True
+                    
+                    else: 
+                        input_active = False
+
+                elif event.type == pygame.KEYDOWN:
+                    
+                    if input_active:
                         
+                        if event.key == pygame.K_RETURN:
+                            #TODO send name to server
+                            start()
+
+                        elif event.key == pygame.K_BACKSPACE:
+                            input_text = input_text[:-1]
+
+                        else:
+                            get_input(event.unicode)
+
+
            
             pygame.mixer.music.set_volume(self.lowered_volume)
            
@@ -403,6 +465,7 @@ class Game:
                 draw_start_button()
                 
             draw_text()
+            draw_input_box()
 
             # for controls on left side
             for index, values in enumerate(left_controls.items()):
@@ -428,7 +491,7 @@ class Game:
             # checking if game started
             if connected and self.n.send('get').ready:
                 break
-
+            
                 
             pygame.display.update()
 

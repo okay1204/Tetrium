@@ -143,7 +143,7 @@ def send_lines(amount):
 
 
 
-# for gettig information about opponent
+# for getting information about opponent
 disconnected = False
 
 def server_connection():

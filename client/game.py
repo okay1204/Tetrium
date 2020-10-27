@@ -253,6 +253,7 @@ class Game:
 
 
     def start_screen(self):
+        # self.disconnected_screen()
 
         connected = False
 
@@ -263,7 +264,7 @@ class Game:
                 #if mouse hovering make it lighter
                 if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]: 
                     pygame.draw.rect(self.screen, (255,255,255), (start_button_pos, start_button_dimensions)) 
-                    start_button_text_color = (0, 0, 0)
+                    start_button_text_color = (r, g, b)
                 
                 else: 
                     pygame.draw.rect(self.screen, (0,0,0), (start_button_pos, start_button_dimensions))
@@ -302,11 +303,17 @@ class Game:
                 self.lowered_volume, self.volume = 0.03, 0.1
                 self.screen.blit(volume_on_icon, volume_icon_pos)
 
+       
         def draw_input_text():
             nonlocal input_text_width
+
+            if not input_text:
+                self.screen.blit(input_box_placeholder, (input_box_x + 25, input_box_y + 12))
+
+
             input_text_render = input_font.render(input_text, True, (0, 0, 0))
             input_text_width = input_text_render.get_rect().width
-            self.screen.blit(input_text_render, (input_box_x + 5, input_box_y))
+            self.screen.blit(input_text_render, (input_box_x + 5, input_box_y + 6))
 
 
         def draw_input_box():
@@ -334,6 +341,24 @@ class Game:
             self.player = self.n.p
             connected = True
 
+        def cycle_colors():
+        
+            nonlocal r, g, b
+      
+            if g < 255 and r > 0:
+                g += 1
+                r -= 1
+
+            else:
+                if b < 255 and g > 0:
+                    b += 1
+                    g -= 1
+ 
+                else:
+                    r, g, b = 255, 0, 0
+                
+
+
         game_started = False
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
@@ -354,9 +379,9 @@ class Game:
          
         ]
         
-
+        r, g, b = 255, 0, 0
         last_falls = [time.time() for _ in pieces]
-        start_button_dimensions = (140 ,40)
+        start_button_dimensions = (140, 40)
         start_button_pos = (self.width/2 - 70, self.height/2)
         start_button_text_color = (255, 255, 255)
         mute_button_pos = (int(self.width/2), int(self.height/2 + 100))
@@ -367,12 +392,14 @@ class Game:
         s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         title_font = pygame.font.Font('assets/arial.ttf', 75)
         input_font = pygame.font.Font('assets/arial.ttf', 30)
-        input_box_x = (self.width - 200)/2
+        input_place_holder_font = pygame.font.Font('assets/arial.ttf', 20)
+        input_box_placeholder = input_place_holder_font.render("Enter a name...", True, (96, 93, 93))
         input_box_y =  self.height/2 - 85
-        input_box_width = 200
+        input_box_width = 300
+        input_box_x = (self.width - input_box_width)/2
         input_box_height = 50
         input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
-        input_box_bkg = pygame.Rect((self.width - 200)/2 , self.height/2 - 85, 200, 50)
+        input_box_bkg = pygame.Rect((self.width - input_box_width)/2 , self.height/2 - 85, input_box_width, input_box_height)
         input_active = False
         input_text = ''
         input_text_width = 0
@@ -445,6 +472,7 @@ class Game:
           
             s.fill((255,255,255, 2))
             self.screen.blit(s, (0, 0))  
+            cycle_colors()
 
         
             for i, piece in enumerate(pieces):
@@ -499,7 +527,80 @@ class Game:
 
         self.time_started = time.time()
     
+    def disconnected_screen(self):
+
+        def draw_text():
+            dc_text_1 = self.font.render('OPPONENT DISCONNECTED', True, (255, 255, 255))
+            dc_text_2 = self.font.render('YOU WIN!',  True, (255, 255, 255))
+            self.screen.blit(dc_text_1, (self.width/2 - 225, 200))
+            self.screen.blit(dc_text_2, (self.width/2 - 75, 300))
         
+        def cycle_colors():
+            
+            nonlocal r, g, b
+
+            if g < 255 and r > 0:
+                g += 1
+                r -= 1
+
+            else:
+                if b < 255 and g > 0:
+                    b += 1
+                    g -= 1
+                
+                else:
+                    r, g, b = 255, 0, 0
+
+           
+        def draw_button():
+            nonlocal button_text_color
+
+            #if mouse hovering make it yellow
+            if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
+                pygame.draw.rect(self.screen, (255,255,255), button_rect)
+                cycle_colors()
+                button_text_color = (r, g, b)
+
+            
+            else: 
+                pygame.draw.rect(self.screen, (255,255,255), button_rect)
+                button_text_color = (0, 0, 0)
+                
+            button_text = self.font.render("FIND NEW MATCH", True, button_text_color)
+            self.screen.blit(button_text, (button_pos[0] + 10, button_pos[1] + 3))
+
+        def check_click(pos):
+            nonlocal disconnected
+            if button_rect.collidepoint(pos):
+                disconnected = False
+
+
+        r, g, b = 255, 0, 0
+        button_text_color = (0,0,0)
+        button_dimensions = (300, 40)
+        button_pos = (self.width/2 - button_dimensions[0]/2, self.height/2 - button_dimensions[1]/2)
+        button_rect = pygame.Rect(*button_pos, *button_dimensions)
+        disconnected = True
+        while disconnected:
+
+            mouse = pygame.mouse.get_pos() 
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    
+                    check_click(event.pos)
+
+    
+            self.screen.fill((0,0,0))
+
+            draw_text()
+            draw_button()
+
+            pygame.display.update()
 
 
 

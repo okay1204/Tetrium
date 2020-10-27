@@ -6,6 +6,9 @@ class OnlineGame:
 
         self.ready = False
 
+        # Player names
+        self.names = [None, None]
+
         # Falling current piece of both players
         self.current_piece = [None, None]
 
@@ -50,6 +53,13 @@ class OnlineGame:
 
     def own_meter_stage(self, p):
         return self.meter_stages[p]
+
+    def opp_name(self, p):
+
+        if not p:
+            return self.names[1]
+        else:
+            return self.names[0]
 
 
     def _update(self, data, p):

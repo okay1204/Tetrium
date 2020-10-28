@@ -21,7 +21,7 @@ next_bag = pieces.copy()
 random.shuffle(next_bag)
 
 
-
+fall_speed = 1
 last_fall = time.time() + fall_speed
 fall = 0
 
@@ -38,6 +38,7 @@ display_until = 0
 
 canSwitch = True
 rotation_last = False
+
 
 
 def game_over():
@@ -162,23 +163,19 @@ def server_connection():
         game.opp_piece_blocks = data.opp_piece_blocks(game.n.p)
         game.opp_meter = list(map(lambda value: int(value), data.opp_meter(game.n.p)))
         game.opp_meter_stage = data.opp_meter_stage(game.n.p)
-
-
         game.meter = list(map(lambda value: int(value), data.own_meter(game.n.p)))
         game.meter_stage = data.own_meter_stage(game.n.p)
         
 
 _thread.start_new_thread(server_connection, ())
 
-
 speed_up_time = time.time() + 60
-fall_speed = 1
 while game.running:
 
     if disconnected:
-        #TODO add disconnected screen here
+        #TODO make seperate "you disconnected" or "opponent disconnect" in server
         game.running = False
-        sys.exit()
+        game.disconnected_screen()
 
     if moving:
 
@@ -391,7 +388,8 @@ while game.running:
     if time.time() > speed_up_time:
         speed_up_time = time.time() + 60
         game.level += 1
-        fall_speed = 
+        fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
+        display_until = time.time() + 3
 
 
 
@@ -729,7 +727,7 @@ while game.running:
     if display_until > time.time():
         text = game.font.render(f'Speed Level {game.level}', True, (0, 0 ,0))
         textRect = text.get_rect() 
-        textRect.center = (game.width // 2, game.height // 2) 
+        textRect.center = (250, game.height // 2) 
         game.screen.blit(text, textRect)
 
 

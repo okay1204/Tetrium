@@ -20,7 +20,6 @@ random.shuffle(bag)
 next_bag = pieces.copy()
 random.shuffle(next_bag)
 
-fall_speed = 1 # means once per second
 
 
 last_fall = time.time() + fall_speed
@@ -139,8 +138,6 @@ combo_line_key = [(1, 3), (4, 5), (6, 7), (8, 10), (11, 10000000)]
 
 def send_lines(amount):
     game.n.send("junk " + str(amount))
-    print(amount)
-
 
 
 # for getting information about opponent
@@ -173,6 +170,9 @@ def server_connection():
 
 _thread.start_new_thread(server_connection, ())
 
+
+speed_up_time = time.time() + 60
+fall_speed = 1
 while game.running:
 
     if disconnected:
@@ -386,6 +386,12 @@ while game.running:
             game.running = False
             sys.exit()
 
+
+    # for speeding up
+    if time.time() > speed_up_time:
+        speed_up_time = time.time() + 60
+        game.level += 1
+        fall_speed = 
 
 
 

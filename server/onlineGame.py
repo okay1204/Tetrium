@@ -1,4 +1,4 @@
-
+import time
 
 class OnlineGame:
 

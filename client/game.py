@@ -267,7 +267,6 @@ class Game:
 
 
     def start_screen(self):
-        # self.disconnected_screen()
 
         connected = False
 
@@ -381,7 +380,6 @@ class Game:
                 
 
 
-        game_started = False
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
         x_pos = [0, 4, 8, 12, 16, 20, 0, 4, 8]
@@ -444,19 +442,23 @@ class Game:
 
         font = pygame.font.Font('assets/arial.ttf', 20)
 
-        while not game_started:
+        while True:
 
             mouse = pygame.mouse.get_pos() 
 
             #Game over loop
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+
+                    if connected:
+                        self.n.disconnect()
+
                     pygame.quit()
                     sys.exit()
                     
-                if event.type == pygame.MOUSEBUTTONDOWN and not connected:
+                if event.type == pygame.MOUSEBUTTONDOWN:
                    
-                    if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]:  
+                    if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1] and not connected:  
                         
                         start()
 
@@ -549,12 +551,13 @@ class Game:
             self.clock.tick(60)
 
         self.time_started = time.time()
+        self.running = True
     
-    def disconnected_screen(self):
+    def disconnected_screen(self, text1, text2):
 
         def draw_text():
-            dc_text_1 = self.font.render('OPPONENT DISCONNECTED', True, (255, 255, 255))
-            dc_text_2 = self.font.render('YOU WIN!',  True, (255, 255, 255))
+            dc_text_1 = self.font.render(text1, True, (255, 255, 255))
+            dc_text_2 = self.font.render(text2,  True, (255, 255, 255))
             self.screen.blit(dc_text_1, (self.width/2 - 225, 200))
             self.screen.blit(dc_text_2, (self.width/2 - 75, 300))
         
@@ -596,6 +599,7 @@ class Game:
             nonlocal disconnected
             if button_rect.collidepoint(pos):
                 disconnected = False
+                game.running = False
 
 
         r, g, b = 255, 0, 0

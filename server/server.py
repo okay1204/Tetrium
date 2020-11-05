@@ -31,16 +31,24 @@ def threaded_client(conn, player, gameId):
         try:
 
             # procedure of recieving multiplepackets to combine into a singular data            
-            blocks = []
-            while True:
-                blocks.append(conn.recv(16))
+            try:
+                blocks = []
+                while True:
+                    blocks.append(conn.recv(16))
 
-                if sentinel in b''.join(blocks):
-                    break
-            
-            data = b''.join(blocks)
-            data = data.replace(sentinel, b'')
-            data = pickle.loads(data)
+                    if sentinel in b''.join(blocks):
+                        break
+                
+                data = b''.join(blocks)
+                data = data.replace(sentinel, b'')
+                data = pickle.loads(data)
+            except:
+                print("Player", player, "in game", gameId, "forcefully disconnected")
+                break
+
+            if data == "disconnect":
+                print("Player", player, "in game", gameId, "safely disconnected")
+                break
 
 
             if gameId in games.keys():
@@ -92,16 +100,24 @@ def threaded_client(conn, player, gameId):
                     # means end packets
                     conn.send(sentinel)
 
-            else:
+
+            else: # game doesn't exist
+                print("Player", player, "in game", gameId, "disconnected safely from game closing")
+
+                # dumps data
+                sending = pickle.dumps('disconnect')
+                for n in range(len(sending)//blocksize+1):
+                    # sends portion of bytes
+                    conn.send(sending[n*blocksize:(n+1)*blocksize])
+                # means end packets
+                conn.send(sentinel)
                 break
         except Exception:
             traceback.print_exc()
             break
     
-    print("Connection lost to player", player, "lost in game", gameId)
     try:
         del games[gameId]
-        print("Closed game", gameId)
     except:
         pass
 
@@ -116,7 +132,6 @@ while True:
         
     conn, addr = s.accept()
     
-    print("Connected to", addr)
     idCount += 1
     gameId = (idCount - 1)//2
 
@@ -126,6 +141,7 @@ while True:
     else:
         games[gameId].ready = True
         player = 1
-        print("Started game", gameId)
+    
+    print(addr[0], "connected to game", gameId, "as player", player)
 
     _thread.start_new_thread(threaded_client, (conn, player, gameId))

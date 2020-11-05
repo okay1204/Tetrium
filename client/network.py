@@ -23,6 +23,17 @@ class Network:
         except:
             pass
 
+    def disconnect(self):
+        # dumps data
+        data = pickle.dumps('disconnect')
+        for n in range(len(data)//self.blocksize+1):
+            # sends portion of bytes
+            self.client.send(data[n*self.blocksize:(n+1)*self.blocksize])
+        # means end packets
+        self.client.send(self.sentinel)
+
+
+
     def send(self, data):
         try:
             

@@ -140,9 +140,6 @@ difficult_before = False
 last_touched = 0
 touched_floor = False
 
-#This runs the start screen loop, it cant be in the main loop or it will mess things up
-game.start_screen()
-
 texts = []
 
 # for sending junk lines
@@ -160,13 +157,13 @@ def send(string):
 
 
 # for getting information about opponent
-disconnected = False
+disconnected = None
 
 def server_connection():
     
     global disconnected, current, specials, display_until, fall_speed
 
-    while True:
+    while game.running:
 
         # for any events
 
@@ -182,7 +179,12 @@ def server_connection():
         try:
             data = game.n.send([resting_coords, piece_block_coords, sent_specials])
         except:
-            disconnected = True
+            # lost connection unexpectedly
+            disconnected = ("You disconnected", "Try again?")
+            break
+
+        if data == "disconnect":
+            disconnected = ("Opponent disconnected", "You win!")
             break
 
         for special in sent_specials:
@@ -201,551 +203,557 @@ def server_connection():
             fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
         
 
-_thread.start_new_thread(server_connection, ())
+while True:
 
-while game.running:
+    game.start_screen()
+    _thread.start_new_thread(server_connection, ())
 
-    if disconnected:
-        #TODO make seperate "you disconnected" or "opponent disconnect" in server
-        game.running = False
-        game.disconnected_screen()
+    while game.running:
 
-
-    # if there are fading blocks, pause the game for a quick moment
-    if game.rows_cleared:
-
-        # checking if the fading blocks can be removed yet
-        if game.rows_cleared[0][0].fade_start + 0.5 < time.time():
-            
-            for row in game.rows_cleared:
-
-                for block in row:
-                    game.resting.remove(block)
-
-                for block in game.resting:
-                    if block.y < row[0].y:
-                        block.y += 1
-        
-            game.rows_cleared.clear()
-
-        game.render()
-        pygame.display.update()
-        game.clock.tick(60)
-
-        continue
-
-
-    if not current:
-        current = Piece(5, 1, pick_bag())
-
-        # checking if game is over
-        if current.overlapping_blocks():
-
-            if current.piece_type != "O":
-                current.rotate(1)
-
-                if current.overlapping_blocks():
-                    current.rotate(-1)
-
-            else:
-                current.move(0, -1)
-
-                if current.overlapping_blocks():
-                    current.move(1, 0)
-                    
-                    if current.overlapping_blocks():
-                        current.move(-2, 0)
-
-            if current.overlapping_blocks():
-                game_over()
-
-    if moving:
-
-        rotation_last = False
-
-        if moving == -1:
-            if time.time() - last_moved > 0.1:
-                if not current.check_left():
-                    current.move(-1, 0)
-                    last_moved = time.time()
-
-                    current.move(0, 1)
-                    if current.check_floor():
-                        if avoids < 15:
-                            fall = time.time() + 0.3
-                            avoids += 1
-                    current.move(0, -1)
-
-
-        elif moving == 1:
-            if time.time() - last_moved > 0.1:
-                if not current.check_right():
-                    current.move(1, 0)
-                    last_moved = time.time()
-
-                    current.move(0, 1)
-                    if current.check_floor():
-                        if avoids < 15:
-                            fall = time.time() + 0.3
-                            avoids += 1
-                    current.move(0, -1)
-
-    backToTop = False
-    for event in pygame.event.get():
-
-        if event.type == pygame.KEYDOWN:
-
-            # move left
-            if event.key == pygame.K_a:
-
-                if not game.continuous:
-                    if not current.check_left():
-                        current.move(-1, 0)
-
-                        current.move(0, 1)
-                        if current.check_floor():
-                            if avoids < 15:
-                                fall = time.time() + 0.3
-                                avoids += 1
-                        current.move(0, -1)
-
-                        rotation_last = False
-
-                else:
-                    moving = -1
-            
-            # move right
-            elif event.key == pygame.K_d:
-
-                if not game.continuous:
-                    if not current.check_right():
-                        current.move(1, 0)
-
-                        current.move(0, 1)
-                        if current.check_floor():
-                            if avoids < 15:
-                                fall = time.time() + 0.3
-                                avoids += 1
-                        current.move(0, -1)
-
-                else:
-                    moving = 1
-
-            # rotate clockwise
-            elif event.key in (pygame.K_RIGHT, pygame.K_QUOTE):
-                
-    
-                current.rotate(0)
-
-                current.move(0, 1)
-                if current.check_floor():
-                    if avoids < 15:
-                        fall = time.time() + 1
-                        avoids += 1
-                current.move(0, -1)
-
-                rotation_last = True
-
-
-
-            # rotate counter-clockwise
-            elif event.key in (pygame.K_LEFT, pygame.K_l):
-                current.rotate(1)
-
-                current.move(0, 1)
-                if current.check_floor():
-                    if avoids < 15:
-                        fall = time.time() + 1
-                        avoids += 1
-                
-                current.move(0, -1)
-
-                rotation_last = True
-          
-            # hold block
-            elif event.key in (pygame.K_UP, pygame.K_p):
-                
-                
-                if canSwitch:
-                    game.holdSFX.play()
-                    
-                    if not held:
-                        held = current.piece_type
-                        current = None
-                    
-                    else:
-                        past_held = held
-                        held = current.piece_type
-                        current = Piece(5, 1, past_held)
-
-                    avoids = 0
-                    canSwitch = False
-                    rotation_last = False
-                    
-                    backToTop = True
-
-            # speed down
-            elif event.key == pygame.K_s:
-                if not speedUp:
-                    fall_speed /= 10
-                    speedUp = True
-                    last_fall -= 2
-            
-            # force down
-            elif event.key in (pygame.K_DOWN, pygame.K_SEMICOLON):
-                
-                downCount = 0
-                while not current.check_floor():
-                    current.move(0, 1)
-                    downCount += 1
-
-                current.move(0,-1)
-                downCount -= 1
-
-                last_fall -= 5
-                fall -= 5
-                touched_floor = True
-                last_touched -= 5
-
-                game.score += downCount*2
-                if downCount:
-                    rotation_last = False
-
-            elif event.key == pygame.K_g:
-                game.continuous = not game.continuous
-                moving = 0
-
-        elif event.type == pygame.KEYUP:
-
-            # stop speed down
-            if event.key == pygame.K_s:
-                if speedUp:
-                    fall_speed *= 10
-                    speedUp = False
-
-            
-            # stop hold moving
-            if event.key == pygame.K_a:
-                if moving == -1:
-                    moving = 0
-
-            if event.key == pygame.K_d:
-                if moving == 1:
-                    moving = 0
-
-            if event.key == pygame.K_m:
-                if game.lowered_volume and game.volume:
-                    game.lowered_volume, game.volume = 0, 0
-
-                else: 
-                    game.lowered_volume, game.volume =  0.025, 0.05
-
-
-
-        elif event.type == pygame.QUIT:
+        if disconnected:
             game.running = False
-            sys.exit()
-
-    if backToTop:
-        continue
-
+            game.disconnected_screen(*disconnected)
+            disconnected = False
+            break
 
 
-    game.render(bag[:3], held)
+        # if there are fading blocks, pause the game for a quick moment
+        if game.rows_cleared:
+
+            # checking if the fading blocks can be removed yet
+            if game.rows_cleared[0][0].fade_start + 0.5 < time.time():
+                
+                for row in game.rows_cleared:
+
+                    for block in row:
+                        game.resting.remove(block)
+
+                    for block in game.resting:
+                        if block.y < row[0].y:
+                            block.y += 1
+            
+                game.rows_cleared.clear()
+
+            game.render()
+            pygame.display.update()
+            game.clock.tick(60)
+
+            continue
 
 
-    current.move(0, 1)
-    if current.check_floor() and not touched_floor:
-        last_touched = time.time() + 0.95
-        touched_floor = True
-    elif not current.check_floor():
-        touched_floor = False
-    current.move(0, -1)
+        if not current:
+            current = Piece(5, 1, pick_bag())
 
+            # checking if game is over
+            if current.overlapping_blocks():
 
+                if current.piece_type != "O":
+                    current.rotate(1)
 
-    # makes the piece fall by one
-    if time.time() > last_fall:
-        last_fall = time.time() + fall_speed
-        current.move(0, 1)
-        
-        if speedUp and not current.check_floor():
-            game.score += 1
+                    if current.overlapping_blocks():
+                        current.rotate(-1)
 
+                else:
+                    current.move(0, -1)
 
-        if not current.check_floor():
+                    if current.overlapping_blocks():
+                        current.move(1, 0)
+                        
+                        if current.overlapping_blocks():
+                            current.move(-2, 0)
+
+                if current.overlapping_blocks():
+                    game_over()
+
+        if moving:
+
             rotation_last = False
 
-        if current.check_floor():
+            if moving == -1:
+                if time.time() - last_moved > 0.1:
+                    if not current.check_left():
+                        current.move(-1, 0)
+                        last_moved = time.time()
+
+                        current.move(0, 1)
+                        if current.check_floor():
+                            if avoids < 15:
+                                fall = time.time() + 0.3
+                                avoids += 1
+                        current.move(0, -1)
 
 
-            if time.time() > fall and time.time() > last_touched:
+            elif moving == 1:
+                if time.time() - last_moved > 0.1:
+                    if not current.check_right():
+                        current.move(1, 0)
+                        last_moved = time.time()
 
-                current.flash()
-                # turn piece into resting blocks
-                for block in current.blocks:
-                    block.y -= 1    
-                    game.resting.append(block)
+                        current.move(0, 1)
+                        if current.check_floor():
+                            if avoids < 15:
+                                fall = time.time() + 0.3
+                                avoids += 1
+                        current.move(0, -1)
 
-                touched_floor = False
+        backToTop = False
+        for event in pygame.event.get():
 
-                # detect if a row was made
-                lines_cleared = 0
-                lowest_y = 0
-                for y in range(1, 21):
-                    row = list(filter(lambda block: block.y == y, game.resting))
+            if event.type == pygame.KEYDOWN:
 
-                    # line clear
-                    if len(row) == 10:
+                # move left
+                if event.key == pygame.K_a:
 
-                        for block in row:
-                            block.fade_start = time.time()
+                    if not game.continuous:
+                        if not current.check_left():
+                            current.move(-1, 0)
 
-                        lines_cleared += 1
-                        if lowest_y < y:
-                            lowest_y = y
+                            current.move(0, 1)
+                            if current.check_floor():
+                                if avoids < 15:
+                                    fall = time.time() + 0.3
+                                    avoids += 1
+                            current.move(0, -1)
 
-                        game.rows_cleared.append(row)
+                            rotation_last = False
 
-                tspin = None
-
-                tspin = None
-
-                # T-Spin detection
-                if current.piece_type == "T" and rotation_last:
-
-                    filled_corners = {}
-            
-                    # getting all filled corners, either by blocks or walls
-                    for name, value in current.corners.items():
-                        x, y = value
-                        y -= 1
-
-                        if not 0 < x < 10 or y > 20:
-                            filled_corners[name] = True
-                            continue
-
-                        for block in game.resting:
-                            if (block.x, block.y) == (x, y):
-                                filled_corners[name] = True
-                                break
-                        else:
-                            filled_corners[name] = False
-
-
-                    # normal t-spin
-                    if (filled_corners["point left"] and filled_corners["point right"]) and (filled_corners["flat right"] or filled_corners["flat left"]):
-                        tspin = "normal"
-
-                    # mini t-spin
-                    elif (filled_corners["flat right"] and filled_corners["flat left"]) and (filled_corners["point left"] or filled_corners["point right"]):
-                        tspin = "mini"
-
-
-                lines_sent = 0
-
-                if lines_cleared:
-
-                    send(f"clear {lines_cleared}")
-                    
-                    game.row_clearedSFX.play()
-                    game.lines += lines_cleared
+                    else:
+                        moving = -1
                 
+                # move right
+                elif event.key == pygame.K_d:
 
-                    combo += 1
+                    if not game.continuous:
+                        if not current.check_right():
+                            current.move(1, 0)
 
-                    if combo > 0:
-                        texts.append((f"{combo+1} Combo", time.time() + 3, 20))
+                            current.move(0, 1)
+                            if current.check_floor():
+                                if avoids < 15:
+                                    fall = time.time() + 0.3
+                                    avoids += 1
+                            current.move(0, -1)
 
-                        for minimum, maximum in combo_line_key:
-                            if minimum <= combo <= maximum:
-                                lines_sent += combo
-                                break
+                    else:
+                        moving = 1
 
-                    # calcualting combos
-                    game.score += 50 * combo * (21 - lowest_y)
+                # rotate clockwise
+                elif event.key in (pygame.K_RIGHT, pygame.K_QUOTE):
+                    
+        
+                    current.rotate(0)
 
+                    current.move(0, 1)
+                    if current.check_floor():
+                        if avoids < 15:
+                            fall = time.time() + 1
+                            avoids += 1
+                    current.move(0, -1)
+
+                    rotation_last = True
+
+
+
+                # rotate counter-clockwise
+                elif event.key in (pygame.K_LEFT, pygame.K_l):
+                    current.rotate(1)
+
+                    current.move(0, 1)
+                    if current.check_floor():
+                        if avoids < 15:
+                            fall = time.time() + 1
+                            avoids += 1
+                    
+                    current.move(0, -1)
+
+                    rotation_last = True
+            
+                # hold block
+                elif event.key in (pygame.K_UP, pygame.K_p):
+                    
+                    
+                    if canSwitch:
+                        game.holdSFX.play()
+                        
+                        if not held:
+                            held = current.piece_type
+                            current = None
+                        
+                        else:
+                            past_held = held
+                            held = current.piece_type
+                            current = Piece(5, 1, past_held)
+
+                        avoids = 0
+                        canSwitch = False
+                        rotation_last = False
+                        
+                        backToTop = True
+
+                # speed down
+                elif event.key == pygame.K_s:
+                    if not speedUp:
+                        fall_speed /= 10
+                        speedUp = True
+                        last_fall -= 2
+                
+                # force down
+                elif event.key in (pygame.K_DOWN, pygame.K_SEMICOLON):
+                    
+                    downCount = 0
+                    while not current.check_floor():
+                        current.move(0, 1)
+                        downCount += 1
+
+                    current.move(0,-1)
+                    downCount -= 1
+
+                    last_fall -= 5
+                    fall -= 5
+                    touched_floor = True
+                    last_touched -= 5
+
+                    game.score += downCount*2
+                    if downCount:
+                        rotation_last = False
+
+                elif event.key == pygame.K_g:
+                    game.continuous = not game.continuous
+                    moving = 0
+
+            elif event.type == pygame.KEYUP:
+
+                # stop speed down
+                if event.key == pygame.K_s:
+                    if speedUp:
+                        fall_speed *= 10
+                        speedUp = False
+
+                
+                # stop hold moving
+                if event.key == pygame.K_a:
+                    if moving == -1:
+                        moving = 0
+
+                if event.key == pygame.K_d:
+                    if moving == 1:
+                        moving = 0
+
+                if event.key == pygame.K_m:
+                    if game.lowered_volume and game.volume:
+                        game.lowered_volume, game.volume = 0, 0
+
+                    else: 
+                        game.lowered_volume, game.volume =  0.025, 0.05
+
+
+
+            elif event.type == pygame.QUIT:
+
+                game.n.disconnect()
+                game.running = False
+                sys.exit()
+
+        if backToTop:
+            continue
+
+
+
+        game.render(bag[:3], held)
+
+
+        current.move(0, 1)
+        if current.check_floor() and not touched_floor:
+            last_touched = time.time() + 0.95
+            touched_floor = True
+        elif not current.check_floor():
+            touched_floor = False
+        current.move(0, -1)
+
+
+
+        # makes the piece fall by one
+        if time.time() > last_fall:
+            last_fall = time.time() + fall_speed
+            current.move(0, 1)
+            
+            if speedUp and not current.check_floor():
+                game.score += 1
+
+
+            if not current.check_floor():
+                rotation_last = False
+
+            if current.check_floor():
+
+
+                if time.time() > fall and time.time() > last_touched:
+
+                    current.flash()
+                    # turn piece into resting blocks
+                    for block in current.blocks:
+                        block.y -= 1    
+                        game.resting.append(block)
+
+                    touched_floor = False
+
+                    # detect if a row was made
+                    lines_cleared = 0
+                    lowest_y = 0
+                    for y in range(1, 21):
+                        row = list(filter(lambda block: block.y == y, game.resting))
+
+                        # line clear
+                        if len(row) == 10:
+
+                            for block in row:
+                                block.fade_start = time.time()
+
+                            lines_cleared += 1
+                            if lowest_y < y:
+                                lowest_y = y
+
+                            game.rows_cleared.append(row)
+
+                    tspin = None
+
+                    tspin = None
+
+                    # T-Spin detection
+                    if current.piece_type == "T" and rotation_last:
+
+                        filled_corners = {}
+                
+                        # getting all filled corners, either by blocks or walls
+                        for name, value in current.corners.items():
+                            x, y = value
+                            y -= 1
+
+                            if not 0 < x < 10 or y > 20:
+                                filled_corners[name] = True
+                                continue
+
+                            for block in game.resting:
+                                if (block.x, block.y) == (x, y):
+                                    filled_corners[name] = True
+                                    break
+                            else:
+                                filled_corners[name] = False
+
+
+                        # normal t-spin
+                        if (filled_corners["point left"] and filled_corners["point right"]) and (filled_corners["flat right"] or filled_corners["flat left"]):
+                            tspin = "normal"
+
+                        # mini t-spin
+                        elif (filled_corners["flat right"] and filled_corners["flat left"]) and (filled_corners["point left"] or filled_corners["point right"]):
+                            tspin = "mini"
+
+
+                    lines_sent = 0
+
+                    if lines_cleared:
+
+                        send(f"clear {lines_cleared}")
+                        
+                        game.row_clearedSFX.play()
+                        game.lines += lines_cleared
                     
 
+                        combo += 1
 
-                    if not tspin:
+                        if combo > 0:
+                            texts.append((f"{combo+1} Combo", time.time() + 3, 20))
 
-                        lines_sent += line_key[lines_cleared-1]
+                            for minimum, maximum in combo_line_key:
+                                if minimum <= combo <= maximum:
+                                    lines_sent += combo
+                                    break
 
-                        # for adding normal value
-                        line_clear_value = (21 - lowest_y) * score_key[lines_cleared-1]
+                        # calcualting combos
+                        game.score += 50 * combo * (21 - lowest_y)
 
-        
-                        # checking for back-to-back difficult line clear
-                        if lines_cleared == 4:
+                        
 
-                            texts.append(('Tetris', time.time() + 3, 30))
+
+                        if not tspin:
+
+                            lines_sent += line_key[lines_cleared-1]
+
+                            # for adding normal value
+                            line_clear_value = (21 - lowest_y) * score_key[lines_cleared-1]
+
+            
+                            # checking for back-to-back difficult line clear
+                            if lines_cleared == 4:
+
+                                texts.append(('Tetris', time.time() + 3, 30))
+
+                                if difficult_before:
+                                    line_clear_value *= 1.5
+                                    line_clear_value = int(line_clear_value)
+                                    texts.append((f"Back to Back", time.time() + 3, 15))
+                                    lines_sent += 1
+                                else:
+                                    difficult_before = True
+
+                            game.score += line_clear_value
+
+                        else:
+
+                            lines_sent += t_spin_line_key[lines_cleared-1]
+
+                            # any line clears with t-spins are considered difficult
+                            
+                            score_value = (21 - lowest_y) * tspin_key[lines_cleared-1][tspin]
+
+                            if tspin == "normal":
+                                spin_text, size = "T-Spin", 30
+                            else:
+                                spin_text, size = "T-Spin Mini", 17
+
+                            if lines_cleared == 1:
+                                lines_text = "Single"
+                            elif lines_cleared == 2:
+                                lines_text = "Double"
+                            elif lines_cleared == 3:
+                                lines_text = "Triple"
+
+                            texts.append(([spin_text, lines_text], time.time() + 3, size))
 
                             if difficult_before:
-                                line_clear_value *= 1.5
-                                line_clear_value = int(line_clear_value)
+                                score_value *= 1.5
                                 texts.append((f"Back to Back", time.time() + 3, 15))
                                 lines_sent += 1
                             else:
                                 difficult_before = True
 
-                        game.score += line_clear_value
+                            game.score += score_value
+                        
+                    
+                    # no line t-spins
+                    elif tspin:
+                    
+                        # getting block with lowest y value
+                        lowest_y = 0
+                        for block in current.blocks:
+                            if block.y > lowest_y:
+                                lowest_y = block.y
 
-                    else:
-
-                        lines_sent += t_spin_line_key[lines_cleared-1]
-
-                        # any line clears with t-spins are considered difficult
-                         
-                        score_value = (21 - lowest_y) * tspin_key[lines_cleared-1][tspin]
+                        lowest_y -= 19
 
                         if tspin == "normal":
-                            spin_text, size = "T-Spin", 30
-                        else:
-                            spin_text, size = "T-Spin Mini", 17
+                            game.score += 400 * lowest_y
+                            texts.append((f"T-Spin", time.time() + 3, 30))
 
-                        if lines_cleared == 1:
-                            lines_text = "Single"
-                        elif lines_cleared == 2:
-                            lines_text = "Double"
-                        elif lines_cleared == 3:
-                            lines_text = "Triple"
+                        elif tspin == "mini":
+                            game.score += 100 * lowest_y
+                            texts.append((f"T-Spin Mini", time.time() + 3, 17))
+            
 
-                        texts.append(([spin_text, lines_text], time.time() + 3, size))
-
-                        if difficult_before:
-                            score_value *= 1.5
-                            texts.append((f"Back to Back", time.time() + 3, 15))
-                            lines_sent += 1
-                        else:
-                            difficult_before = True
-
-                        game.score += score_value
-                    
-                
-                # no line t-spins
-                elif tspin:
-                
-                    # getting block with lowest y value
-                    lowest_y = 0
-                    for block in current.blocks:
-                        if block.y > lowest_y:
-                            lowest_y = block.y
-
-                    lowest_y -= 19
-
-                    if tspin == "normal":
-                        game.score += 400 * lowest_y
-                        texts.append((f"T-Spin", time.time() + 3, 30))
-
-                    elif tspin == "mini":
-                        game.score += 100 * lowest_y
-                        texts.append((f"T-Spin Mini", time.time() + 3, 17))
-        
-
-                if not list(filter(lambda block: not block.fade_start, game.resting)):
-                    lines_sent = 10
-                    texts.append((f"Perfect Clear", time.time() + 3, 17))
+                    if not list(filter(lambda block: not block.fade_start, game.resting)):
+                        lines_sent = 10
+                        texts.append((f"Perfect Clear", time.time() + 3, 17))
 
 
-                if lines_sent:
-                    send(f"junk {lines_sent}")
-                    
-                
-                if not lines_cleared:
-                    combo = -1
-
-
-                    if game.meter:
-                        # increasing the stage of the incoming junk
-                        send("meter increase")
-                            
-                        meter_stage = game.meter_stage
-
-                        if meter_stage >= 3:
-                            
-                            send("meter reset")
-
-                            amount = game.meter[0]
-                            game.meter.pop(0)
-
-                            for block in game.resting:
-                                block.y -= amount
-
-                            position = random.randint(1, 10)
-                            
-                            for y in range(amount):
-                                for x in range(1, 11):
-                                    if x != position:
-                                        game.resting.append(Block(x, 20-y, "gray"))
+                    if lines_sent:
+                        send(f"junk {lines_sent}")
                         
+                    
+                    if not lines_cleared:
+                        combo = -1
+
+
+                        if game.meter:
+                            # increasing the stage of the incoming junk
+                            send("meter increase")
+                                
+                            meter_stage = game.meter_stage
+
+                            if meter_stage >= 3:
+                                
+                                send("meter reset")
+
+                                amount = game.meter[0]
+                                game.meter.pop(0)
+
+                                for block in game.resting:
+                                    block.y -= amount
+
+                                position = random.randint(1, 10)
+                                
+                                for y in range(amount):
+                                    for x in range(1, 11):
+                                        if x != position:
+                                            game.resting.append(Block(x, 20-y, "gray"))
+                            
 
 
 
-                
+                    
 
 
-                game.render(bag[:3], held)
+                    game.render(bag[:3], held)
 
-                canSwitch = True
+                    canSwitch = True
 
-                # make new falling piece
-                current = None
-                avoids = 0
+                    # make new falling piece
+                    current = None
+                    avoids = 0
+
+
+                else:
+                    current.move(0, -1)
+
+        if current:
+            current.render()
+
+        if display_until > time.time():
+            text = game.font.render(f'Speed Level {game.level}', True, (0, 0 ,0))
+            textRect = text.get_rect() 
+            textRect.center = (250, game.height // 2) 
+            game.screen.blit(text, textRect)
+
+
+        # queing up special texts
+        removed_texts = []
+        for text, display_time, size in texts:
+
+            if display_time > time.time():
+
+                font = pygame.font.Font('assets/arial.ttf', size)
+
+                original = text
+
+                if isinstance(text, str):
+                    text = text,
+
+                textElements = []
+                for line in text:
+                    textElement = font.render(line, True, (255, 255, 255))
+                    textRect = textElement.get_rect()
+
+                    textElements.append((textElement, textRect))
+
+                for index, element in enumerate(textElements):
+                    textElement, textRect = element
+
+                    textRect.center = (450, 500 + (texts.index((original, display_time, size)) * 50) + (index * 25))
+
+                    game.screen.blit(textElement, textRect)
 
 
             else:
-                current.move(0, -1)
+                removed_texts.append((text, display_time, size))
+        
+        for item in removed_texts:
+            texts.remove(item)
 
-    if current:
-        current.render()
+        pygame.mixer.music.set_volume(game.volume)
 
-    if display_until > time.time():
-        text = game.font.render(f'Speed Level {game.level}', True, (0, 0 ,0))
-        textRect = text.get_rect() 
-        textRect.center = (250, game.height // 2) 
-        game.screen.blit(text, textRect)
+        removed_texts.clear()
 
+        
+        pygame.display.update()
 
-     # queing up special texts
-    removed_texts = []
-    for text, display_time, size in texts:
-
-        if display_time > time.time():
-
-            font = pygame.font.Font('assets/arial.ttf', size)
-
-            original = text
-
-            if isinstance(text, str):
-                text = text,
-
-            textElements = []
-            for line in text:
-                textElement = font.render(line, True, (255, 255, 255))
-                textRect = textElement.get_rect()
-
-                textElements.append((textElement, textRect))
-
-            for index, element in enumerate(textElements):
-                textElement, textRect = element
-
-                textRect.center = (450, 500 + (texts.index((original, display_time, size)) * 50) + (index * 25))
-
-                game.screen.blit(textElement, textRect)
-
-
-        else:
-            removed_texts.append((text, display_time, size))
-    
-    for item in removed_texts:
-        texts.remove(item)
-
-    pygame.mixer.music.set_volume(game.volume)
-
-    removed_texts.clear()
-
-    
-    pygame.display.update()
-
-    game.clock.tick(60)
+        game.clock.tick(60)

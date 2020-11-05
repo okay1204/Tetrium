@@ -151,9 +151,12 @@ t_spin_line_key = [2, 4, 6]
 combo_line_key = [(1, 3), (4, 5), (6, 7), (8, 10), (11, 10000000)]
 
 
+specials = []
 
-def send_lines(amount):
-    game.n.send("junk " + str(amount))
+def send(string):
+    global specials
+
+    specials.append(string)
 
 
 # for getting information about opponent
@@ -161,9 +164,11 @@ disconnected = False
 
 def server_connection():
     
-    global disconnected, current
+    global disconnected, current, specials
 
     while True:
+
+        # for any events
 
         resting_coords = list(map(lambda block: (block.x, block.y, block.color), game.resting))
 
@@ -172,11 +177,16 @@ def server_connection():
         else:
             piece_block_coords = None
         
+        sent_specials = specials.copy()
+
         try:
-            data = game.n.send((resting_coords, piece_block_coords))
+            data = game.n.send([resting_coords, piece_block_coords, sent_specials])
         except:
             disconnected = True
             break
+
+        for special in sent_specials:
+            specials.remove(special)
         
         game.opp_resting = data.opp_resting(game.n.p)
         game.opp_piece_blocks = data.opp_piece_blocks(game.n.p)
@@ -643,7 +653,7 @@ while game.running:
 
 
                 if lines_sent:
-                    _thread.start_new_thread(send_lines, (lines_sent,))
+                    send(f"junk {lines_sent}")
                     
                 
                 if not lines_cleared:
@@ -652,17 +662,13 @@ while game.running:
 
                     if game.meter:
                         # increasing the stage of the incoming junk
-                        try:
-                            data = game.n.send("meter increase")
-                        except:
-                            disconnected = True
-                            continue
+                        send("meter increase")
                             
-                        meter_stage = data.own_meter_stage(game.n.p)
+                        meter_stage = game.meter_stage
 
-                        if meter_stage > 3:
+                        if meter_stage >= 3:
                             
-                            game.n.send("meter reset")
+                            send("meter reset")
 
                             amount = game.meter[0]
                             game.meter.pop(0)

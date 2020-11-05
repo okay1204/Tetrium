@@ -14,7 +14,7 @@ class Network:
 
         self.blocksize = 16
         # marks the end of packet sending
-        self.sentinel = b'\x00\x00END_MESSAGE!\x00\x00'[:self.blocksize]
+        self.sentinel = b'\x00\x00END_MESSAGE!\x00\x00'
 
     def connect(self):
         try:
@@ -33,8 +33,6 @@ class Network:
                 self.client.send(data[n*self.blocksize:(n+1)*self.blocksize])
             # means end packets
             self.client.send(self.sentinel)
-
-
 
 
             # procedure of recieving multiplepackets to combine into a singular data            

@@ -17,7 +17,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((server, port))
 
 blocksize = 16
-sentinel = b'\x00\x00END_MESSAGE!\x00\x00'[:blocksize]
+sentinel = b'\x00\x00END_MESSAGE!\x00\x00'
 
 def threaded_client(conn, player, gameId):
 
@@ -39,12 +39,9 @@ def threaded_client(conn, player, gameId):
                     break
             
             data = b''.join(blocks)
-            if player:
-                print(data)
             data = data.replace(sentinel, b'')
-            if player:
-                print(data)
             data = pickle.loads(data)
+
 
             if gameId in games.keys():
 
@@ -56,23 +53,27 @@ def threaded_client(conn, player, gameId):
                 else:
                     # data will be in order of
                     # resting, piece, meter, meter stage
-                    if isinstance(data, tuple):
+
+                    if isinstance(data, list):
+                        specials = data.pop(2)
+                
                         game._update(data, player)
 
-                    elif data.startswith("junk"):
+                        for special in specials:
 
-                        game._send_lines(int(data.split()[1]), player)
+                            if special.startswith("junk"):
 
-                    elif data == "meter increase":
+                                game._send_lines(int(special.split()[1]), player)
 
-                        game._increase_meter(player)
+                            elif special == "meter increase":
 
-                    elif data == "meter reset":
+                                game._increase_meter(player)
 
-                        game._reset_meter(player)
+                            elif special == "meter reset":
+
+                                game._reset_meter(player)
 
                     elif data.startswith('name '):
-
                         game.names[player] = data[5:]
 
                     # dumps data

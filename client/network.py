@@ -7,8 +7,8 @@ import traceback
 class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "localhost"
-        self.port = 5555
+        self.server = "64.225.35.234"
+        self.port = 6969
         self.addr = (self.server, self.port)
         self.p = int(self.connect())
 

@@ -297,9 +297,9 @@ class Game:
                 start_button_text = self.font.render('Waiting for opponent...', True, start_button_text_color)
                 start_button_coords = (start_button_pos[0] - 80, start_button_pos[1])
 
-            title_text = title_font.render('TETRIUM', True, start_button_text_color) 
+            title_text = title_font.render('TETRIUM', True, (r, g, b)) 
             self.screen.blit(start_button_text, start_button_coords)
-            self.screen.blit(title_text, (self.width/2 - 150, self.height/2 - 200)) 
+            self.screen.blit(title_text, (self.width/2 - 165, self.height/2 - 200)) 
          
 
 
@@ -492,7 +492,7 @@ class Game:
            
             
           
-            s.fill((255,255,255, 2))
+            s.fill((0,0,0, 1))
             self.screen.blit(s, (0, 0))  
             cycle_colors()
 
@@ -521,7 +521,7 @@ class Game:
             for index, values in enumerate(left_controls.items()):
                 key, description = values
 
-                text = font.render(f"{key}: {description}", True, (0, 0, 0))
+                text = font.render(f"{key}: {description}", True, (r, g, b))
                 textRect = text.get_rect()
                 textRect.center = (100, index*-50+750)
                 self.screen.blit(text, textRect)
@@ -531,7 +531,7 @@ class Game:
             for index, values in enumerate(right_controls.items()):
                 key, description = values
 
-                text = font.render(f"{key} {description}", True, (0, 0, 0))
+                text = font.render(f"{key} {description}", True,  (r, g, b))
                 textRect = text.get_rect()
                 textRect.center = (350, index*-50+750)
                 self.screen.blit(text, (game.width- textRect.center[0] + 60, textRect[1]))

@@ -6,7 +6,7 @@ import traceback
 
 
 server = "localhost"
-port = 5555
+port = 6969
 
 
 idCount = 0

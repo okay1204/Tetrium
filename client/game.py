@@ -254,7 +254,7 @@ class Game:
 
             darkened = (tuple(darken(color) for color in color))
 
-            for block in range(amount):
+            for block in range(amount): # noqa pylint: disable=unused-variable
 
                 if meter_block >= 10:
                     break

@@ -16,6 +16,9 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 s.bind((server, port))
 
+blocksize = 16
+sentinel = b'\x00\x00END_MESSAGE!\x00\x00'[:blocksize]
+
 def threaded_client(conn, player, gameId):
 
     global idCount
@@ -27,10 +30,17 @@ def threaded_client(conn, player, gameId):
     while True:
         try:
 
-            try:
-                data = pickle.loads(conn.recv(4026))
-            except:
-                break
+            # procedure of recieving multiplepackets to combine into a singular data            
+            blocks = []
+            while True:
+                blocks.append(conn.recv(16))
+
+                if sentinel in b''.join(blocks):
+                    blocks.pop()
+                    break
+            
+            data = b''.join(blocks)
+            data = pickle.loads(data)
 
             if gameId in games.keys():
 
@@ -61,7 +71,13 @@ def threaded_client(conn, player, gameId):
 
                         game.names[player] = data[5:]
 
-                    conn.sendall(pickle.dumps(game))
+                    # dumps data
+                    sending = pickle.dumps(game)
+                    for n in range(len(sending)//blocksize+1):
+                        # sends portion of bytes
+                        conn.send(sending[n*blocksize:(n+1)*blocksize])
+                    # means end packets
+                    conn.send(sentinel)
 
             else:
                 break

@@ -70,8 +70,6 @@ class Game:
         # 30px x 30px is one block
 
         self.resting = []
-
-        self.removing = []
     
 
         self.continuous = True
@@ -92,6 +90,8 @@ class Game:
 
         self.opp_resting = self.opp_meter = self.opp_meter_stage = self.opp_piece_blocks = None
         self.opp_name = None
+
+        self.rows_cleared = []
         
         
 
@@ -643,94 +643,70 @@ class Block(Game):
         self.size = 30
 
 
-        self.fade_increments = None
-        self.fade_stage = 0
+        self.flash_start = 0
+        self.direction = 0
 
 
-        self.flash_color = None
-        self.flash_stage = 0
-        self.flash_increments = None
+        self.fade_start = 0
     
     def render(self):
 
         # normal
-        if not self.fade_increments and not self.flash_color:
-    
+        if time.time() > self.flash_start + 0.2 and not self.fade_start:
+
             darker = tuple(map(darken, self.color))
             pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
             pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
-      
-        # fading
-        elif self.fade_increments:
-
-            if self.fade_stage < 15:
-                color = list(self.color)
-
-                for index, add in enumerate(self.fade_increments):
-                    color[index] = color[index] + add
-                self.color = tuple(color)
-
-                pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-                self.fade_stage += 1
-
-            elif self.fade_stage >= 15:
-                
-                game.resting.remove(self)
-
-                # going through each row
-                for remove_row in game.removing:
-        
-                    # if in that row
-                    if self in remove_row:
-                        # check if all are ready to remove
-                        for block in remove_row:
-                            if block.fade_stage < 15:
-                                return
-                        break
-                else:
-                    return
-
-
-                for block in game.resting:
-                    if block.y < self.y:
-                        block.y += 1
-
-                for remove_row in game.removing:
-                    if self in remove_row:
-                        game.removing.remove(remove_row)
-                        # game.row_clearedSFX.play()
-                        break
 
         # flashing
-        else:
+        elif time.time() <= self.flash_start + 0.2:
 
-            if self.flash_stage < 7:
+            flash_time = self.flash_start + 0.2 - time.time()
 
-                # increasing brightness
-                for index, additive in enumerate(self.flash_increments):
-                    
-                    self.flash_color[index] += additive # noqa pylint: disable=unsupported-assignment-operation
+            flash_color = []
 
-            elif self.flash_stage < 14:
+            # whether it flashes dark or light
+            direction = self.direction
 
-                # decreasing brightness
-                for index, additive in enumerate(self.flash_increments):
-                    
-                    self.flash_color[index] -= additive # noqa pylint: disable=unsupported-assignment-operation
+            # orange, blue, purple flashes light
+            if flash_time >= 0.1:
+                direction *= -1
 
+            for color in self.color:
 
-            
-            self.flash_stage += 1
+                color = color + (flash_time * 270 * direction)
+                
+                if color > 255: color = 255
+                elif color < 0: color = 0
 
-            # drawing the rect
-            darker = tuple(map(darken, self.flash_color))
+                flash_color.append(color)
+
+            flash_color = tuple(flash_color)
+
+            darker = tuple(map(darken, flash_color))
+
             pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-            pygame.draw.rect(game.screen, tuple(self.flash_color), ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
-            
+            pygame.draw.rect(game.screen, flash_color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
 
-            if self.flash_stage >= 14:
-                self.flash_stage = 0
-                self.flash_color = None
+        # fading
+        else:
+            fade_time = self.fade_start + 0.5 - time.time()
+
+            if fade_time > 0:
+                color_difference = [255 - color for color in self.color]
+
+                fade_color = []
+                for x in range(3):
+                    fade_color.append((color_difference[x] / 0.5 * (0.5 - fade_time)) + self.color[x])
+                fade_color = tuple(fade_color)
+            else:
+                fade_color = (255, 255, 255)
+
+            
+            darker = tuple(map(darken, fade_color))
+
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
+            pygame.draw.rect(game.screen, fade_color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
 
 
     # for putting blocks on second screen
@@ -742,7 +718,7 @@ class Block(Game):
 
 
     def render_preview(self):
-                                        # white
+
         pygame.draw.rect(game.screen, (255, 255, 255), ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
         pygame.draw.rect(game.screen, (93, 110, 105), ((self.x-1) * self.size + 103, (self.y-1)* self.size + 103, 24, 24))
 
@@ -782,6 +758,17 @@ class Piece(Game):
             for coords in self.corners.values():
                 coords[0] += x 
                 coords[1] += y
+
+    def flash(self):
+
+        if self.piece_type in ("L", "J", "T"):
+            direction = -1
+        else:
+            direction = 1
+
+        for block in self.blocks:
+            block.direction = direction
+            block.flash_start = time.time()
 
 
     def _set_rotation_value(self, direct):

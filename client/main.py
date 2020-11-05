@@ -177,6 +177,29 @@ while game.running:
         game.running = False
         game.disconnected_screen()
 
+
+    # if there are fading blocks, pause the game for a quick moment
+    if game.rows_cleared:
+
+        game.render()
+        pygame.display.update()
+
+        # checking if the fading blocks can be removed yet
+        if game.rows_cleared[0][0].fade_start + 0.5 < time.time():
+            
+            for row in game.rows_cleared:
+
+                for block in row:
+                    game.resting.remove(block)
+
+                for block in game.resting:
+                    if block.y < row[0].y:
+                        block.y += 1
+        
+            game.rows_cleared.clear()
+
+        continue
+
     if moving:
 
         rotation_last = False
@@ -437,28 +460,10 @@ while game.running:
 
             if time.time() > fall and time.time() > last_touched:
 
+                current.flash()
                 # turn piece into resting blocks
                 for block in current.blocks:
-                    block = Block(block.x, block.y-1, block.color, colorByName=False)
-                    block.flash_color = list(block.color)
-    
-                    flash_increments = []
-
-                    if current.piece_type in ('L', 'J', 'Z', 'T'):
-                        for color in block.flash_color:
-                            target = color + 200
-                            if target > 255: target = 255
-                            color = (target-color) // 14
-                            flash_increments.append(color)
-                    else:
-                        for color in block.flash_color:
-                            target = color - 150
-                            if target < 0: target = 0
-                            color = (color-target) // 14
-                            flash_increments.append(color*-1)
-                    
-                    block.flash_increments = tuple(flash_increments)
-                    
+                    block.y -= 1    
                     game.resting.append(block)
 
                 touched_floor = False
@@ -472,22 +477,16 @@ while game.running:
                     # line clear
                     if len(row) == 10:
 
-                        removed_blocks = []
-                        # set the fade increments for blocks
                         for block in row:
-                            
-                            fade_increments = []
-                            for color in block.color:
-                                fade_increments.append((255 - color) // 15)
-
-                            block.fade_increments = tuple(fade_increments)
-                            removed_blocks.append(block)
-                        
-                        game.removing.append(removed_blocks)
+                            block.fade_start = time.time()
 
                         lines_cleared += 1
                         if lowest_y < y:
                             lowest_y = y
+
+                        game.rows_cleared.append(row)
+
+                tspin = None
 
                 tspin = None
 
@@ -623,7 +622,7 @@ while game.running:
                         texts.append((f"T-Spin Mini", time.time() + 3, 17))
         
 
-                if not list(filter(lambda block: not block.fade_increments, game.resting)):
+                if not list(filter(lambda block: not block.fade_start, game.resting)):
                     lines_sent = 10
                     texts.append((f"Perfect Clear", time.time() + 3, 17))
 

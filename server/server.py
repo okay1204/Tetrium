@@ -61,14 +61,22 @@ def threaded_client(conn, player, gameId):
 
                         for special in specials:
 
+                            # sending junk
                             if special.startswith("junk"):
 
                                 game._send_lines(int(special.split()[1]), player)
 
+                            # clearing own junk
+                            elif special.startswith("clear"):
+
+                                game._clear_junk(int(special.split()[1]), player)
+
+                            # increases meter stage
                             elif special == "meter increase":
 
                                 game._increase_meter(player)
 
+                            # resets meter
                             elif special == "meter reset":
 
                                 game._reset_meter(player)

@@ -549,10 +549,10 @@ while game.running:
                 lines_sent = 0
 
                 if lines_cleared:
+
+                    send(f"clear {lines_cleared}")
                     
                     game.row_clearedSFX.play()
-
-
                     game.lines += lines_cleared
                 
 

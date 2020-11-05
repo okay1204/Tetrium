@@ -71,20 +71,6 @@ class OnlineGame:
 
     def _send_lines(self, amount, sender):
 
-        # clearing lines from sender
-        temp = amount
-
-        meter = self.meters[sender]
-
-        while meter and temp > 0:
-            meter[0] -= 1
-            temp -= 1
-
-            if meter[0] <= 0:
-                meter.pop(0)
-                self.meter_stages[sender] = 1
-
-
         # adding lines to opponent
         if not sender:
             reciever = 1
@@ -92,6 +78,20 @@ class OnlineGame:
             reciever = 0
         
         self.meters[reciever].append(amount)
+
+    def _clear_junk(self, amount, p):
+
+        # clearing lines from sender
+        meter = self.meters[p]
+
+        while meter and amount > 0:
+            meter[0] -= 1
+            amount -= 1
+
+            if meter[0] <= 0:
+                meter.pop(0)
+                self.meter_stages[p] = 1
+
 
     def _increase_meter(self, player):
 

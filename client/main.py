@@ -20,12 +20,26 @@ random.shuffle(bag)
 next_bag = pieces.copy()
 random.shuffle(next_bag)
 
+def pick_bag():
+    global bag, next_bag
+
+    value = bag.pop(0)
+
+    if not next_bag:
+        next_bag = pieces.copy()
+        random.shuffle(next_bag)
+
+    bag.append(next_bag.pop(0))
+
+    return value
+
+
 
 fall_speed = 1
 last_fall = time.time() + fall_speed
 fall = 0
 
-current = Piece(5, 1, bag.pop(0))
+current = None
 
 speedUp = False
 
@@ -73,14 +87,15 @@ def game_over():
                 if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
 
                     game.resting.clear()
-                    game.removing.clear()
-                    game.level = 0
+                    game.level = 1
+                    game.score = 0
+                    game.lines = 0
                     bag = pieces.copy()
                     random.shuffle(bag)
                     next_bag = pieces.copy()
                     random.shuffle(next_bag)
                     avoids = 0
-                    current = Piece(5, 1, bag.pop(0))
+                    current = None
                     pygame.mixer.music.set_volume(game.volume)
                     held = None
                     game_over = False
@@ -151,7 +166,11 @@ def server_connection():
     while True:
 
         resting_coords = list(map(lambda block: (block.x, block.y, block.color), game.resting))
-        piece_block_coords = list(map(lambda block: (block.x, block.y, block.color), current.blocks))
+
+        if current:
+            piece_block_coords = list(map(lambda block: (block.x, block.y, block.color), current.blocks))
+        else:
+            piece_block_coords = None
         
         try:
             data = game.n.send((resting_coords, piece_block_coords))
@@ -181,9 +200,6 @@ while game.running:
     # if there are fading blocks, pause the game for a quick moment
     if game.rows_cleared:
 
-        game.render()
-        pygame.display.update()
-
         # checking if the fading blocks can be removed yet
         if game.rows_cleared[0][0].fade_start + 0.5 < time.time():
             
@@ -198,7 +214,36 @@ while game.running:
         
             game.rows_cleared.clear()
 
+        game.render()
+        pygame.display.update()
+        game.clock.tick(60)
+
         continue
+
+
+    if not current:
+        current = Piece(5, 1, pick_bag())
+
+        # checking if game is over
+        if current.overlapping_blocks():
+
+            if current.piece_type != "O":
+                current.rotate(1)
+
+                if current.overlapping_blocks():
+                    current.rotate(-1)
+
+            else:
+                current.move(0, -1)
+
+                if current.overlapping_blocks():
+                    current.move(1, 0)
+                    
+                    if current.overlapping_blocks():
+                        current.move(-2, 0)
+
+            if current.overlapping_blocks():
+                game_over()
 
     if moving:
 
@@ -231,7 +276,7 @@ while game.running:
                             avoids += 1
                     current.move(0, -1)
 
-
+    backToTop = False
     for event in pygame.event.get():
 
         if event.type == pygame.KEYDOWN:
@@ -312,7 +357,7 @@ while game.running:
                     
                     if not held:
                         held = current.piece_type
-                        current = Piece(5, 1, bag.pop(0))
+                        current = None
                     
                     else:
                         past_held = held
@@ -322,27 +367,8 @@ while game.running:
                     avoids = 0
                     canSwitch = False
                     rotation_last = False
-
-                    # checking if game is over
-                    if current.overlapping_blocks():
-
-                        if current.piece_type != "O":
-                            current.rotate(1)
-
-                            if current.overlapping_blocks():
-                                current.rotate(-1)
-
-                        else:
-                            current.move(0, -1)
-
-                            if current.overlapping_blocks():
-                                current.move(1, 0)
-                                
-                                if current.overlapping_blocks():
-                                    current.move(-2, 0)
-
-                        if current.overlapping_blocks():
-                            game_over()
+                    
+                    backToTop = True
 
             # speed down
             elif event.key == pygame.K_s:
@@ -406,6 +432,9 @@ while game.running:
             game.running = False
             sys.exit()
 
+    if backToTop:
+        continue
+
 
     # for speeding up
     if time.time() > speed_up_time:
@@ -416,21 +445,7 @@ while game.running:
 
 
 
-    # for getting the next three items
-    if len(bag) >= 3:
-        game.render(bag[:3], held)
-
-    elif len(bag) > 0:
-        amount = len(bag)
-
-        temp = bag.copy()
-        temp.extend(next_bag[:3 - amount])
-        game.render(temp, held)
-    else:
-        bag = next_bag.copy()
-        next_bag = pieces.copy()
-        random.shuffle(next_bag)
-        game.render(bag[:3], held)
+    game.render(bag[:3], held)
 
 
     current.move(0, 1)
@@ -668,60 +683,20 @@ while game.running:
                 
 
 
-    
-                # for getting the next three items
-                if len(bag) >= 3:
-                    game.render(bag[:3], held)
-
-
-
-                elif len(bag) > 0:
-                    amount = len(bag)
-                    temp = bag.copy()
-                    temp.extend(next_bag[:3 - amount])
-                    game.render(temp, held)
-
-                else:
-                    bag = next_bag.copy()
-                    next_bag = pieces.copy()
-                    random.shuffle(next_bag)
-                    game.render(bag[:3], held)
-
+                game.render(bag[:3], held)
 
                 canSwitch = True
 
                 # make new falling piece
-                current = Piece(5, 1, bag.pop(0))
+                current = None
                 avoids = 0
-
-
-                # checking if game is over
-                if current.overlapping_blocks():
-
-                    if current.piece_type != "O":
-                        current.rotate(1)
-
-                        if current.overlapping_blocks():
-                            current.rotate(-1)
-
-                    else:
-                        current.move(0, -1)
-
-                        if current.overlapping_blocks():
-                            current.move(1, 0)
-                            
-                            if current.overlapping_blocks():
-                                current.move(-2, 0)
-
-                    if current.overlapping_blocks():
-                        game_over()
 
 
             else:
                 current.move(0, -1)
 
-    
-    current.render()
+    if current:
+        current.render()
 
     if display_until > time.time():
         text = game.font.render(f'Speed Level {game.level}', True, (0, 0 ,0))

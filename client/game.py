@@ -231,8 +231,9 @@ class Game:
             Block(x, y, color, colorByName=False).render_second()
 
         
-        for x, y, color in self.opp_piece_blocks: # noqa pylint: disable=not-an-iterable
-            Block(x, y, color, colorByName=False).render_second()
+        if self.opp_piece_blocks:
+            for x, y, color in self.opp_piece_blocks: # noqa pylint: disable=not-an-iterable
+                Block(x, y, color, colorByName=False).render_second()
         
         # junk line meter
         pygame.draw.rect(self.screen, (255, 255, 255), (539, 398, 17, 152))

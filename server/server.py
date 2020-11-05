@@ -36,10 +36,10 @@ def threaded_client(conn, player, gameId):
                 blocks.append(conn.recv(16))
 
                 if sentinel in b''.join(blocks):
-                    blocks.pop()
                     break
             
             data = b''.join(blocks)
+            data = data.replace(sentinel, b'')
             data = pickle.loads(data)
 
             if gameId in games.keys():

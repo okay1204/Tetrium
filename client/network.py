@@ -42,10 +42,10 @@ class Network:
             while True:
                 blocks.append(self.client.recv(16))
                 if self.sentinel in b''.join(blocks):
-                    blocks.pop()
                     break
             
             recieved = b''.join(blocks)
+            recieved.replace(self.sentinel, b'')
             recieved = pickle.loads(recieved)
 
             return recieved

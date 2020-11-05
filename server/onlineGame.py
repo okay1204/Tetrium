@@ -20,6 +20,15 @@ class OnlineGame:
         self.meter_stages = [1, 1]
 
         self._id = game_id
+
+
+        self.time_started = time.time()
+
+    
+    def speed_level(self):
+        level = int(((time.time() - self.time_started) // 30) + 1)
+        if level > 15: level = 15
+        return level
     
     
     def opp_piece_blocks(self, p):

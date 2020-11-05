@@ -164,7 +164,7 @@ disconnected = False
 
 def server_connection():
     
-    global disconnected, current, specials
+    global disconnected, current, specials, display_until, fall_speed
 
     while True:
 
@@ -194,11 +194,15 @@ def server_connection():
         game.opp_meter_stage = data.opp_meter_stage(game.n.p)
         game.meter = list(map(lambda value: int(value), data.own_meter(game.n.p)))
         game.meter_stage = data.own_meter_stage(game.n.p)
+
+        if game.level != data.speed_level():
+            display_until = time.time() + 3
+            game.level = data.speed_level()
+            fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
         
 
 _thread.start_new_thread(server_connection, ())
 
-speed_up_time = time.time() + 60
 while game.running:
 
     if disconnected:
@@ -444,14 +448,6 @@ while game.running:
 
     if backToTop:
         continue
-
-
-    # for speeding up
-    if time.time() > speed_up_time:
-        speed_up_time = time.time() + 60
-        game.level += 1
-        fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
-        display_until = time.time() + 3
 
 
 

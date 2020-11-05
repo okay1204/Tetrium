@@ -35,7 +35,7 @@ class Game:
     def __init__(self):
 
         self.volume = 0.05
-        self.lowered_volume = 0.025
+        self.lowered_volume = 0.015
 
         pygame.init()
         self.font = pygame.font.Font('assets/arial.ttf', 32)

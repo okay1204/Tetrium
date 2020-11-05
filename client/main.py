@@ -201,6 +201,9 @@ def server_connection():
             display_until = time.time() + 3
             game.level = data.speed_level()
             fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
+
+            if speedUp:
+                fall_speed *= 10
         
 
 while True:

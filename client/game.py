@@ -53,7 +53,7 @@ class Game:
         self.holdSFX = pygame.mixer.Sound('assets/hold_effect.wav')
         self.row_clearedSFX = pygame.mixer.Sound('assets/row_cleared.wav')
         self.row_clearedSFX.set_volume(0.5)
-        # self.wrong_rotateSFX = pygame.mixer.Sound()
+        
 
         self.width = 750
         self.height = 800
@@ -95,6 +95,14 @@ class Game:
         self.opp_name = None
 
         self.rows_cleared = []
+
+        self.small_font = pygame.font.Font('assets/arial.ttf', 15)
+        self.medium_font = pygame.font.Font('assets/arial.ttf', 20)
+        self.big_font = pygame.font.Font('assets/arial.ttf', 30)
+        self.very_big_font = pygame.font.Font('assets/arial.ttf', 75)
+        self.back_icon = pygame.image.load('assets/arrow-back.png')
+        self.back_button = pygame.Rect(10, 10, 75, 65)
+
 
 
     def render(self, pieces=None, held=None):
@@ -265,6 +273,12 @@ class Game:
                 meter_block += 1
 
 
+
+    def draw_back_button(self):
+        pygame.draw.rect(self.screen, (255,255,255), self.back_button)
+        self.screen.blit(self.back_icon, (-3, -7))
+
+
     def credits_screen(self, pieces, draw_tetris_pieces):
 
         
@@ -272,18 +286,13 @@ class Game:
         text_y = 0
         text_offset = 80
         text_scroll_dist = 0.1
-        back_icon = pygame.image.load('assets/arrow-back.png')
-        back_button = pygame.Rect(10, 10, 75, 65)
-
+        
         def draw_text(tup):
             index, text = tup
             rendered_text = self.font.render(text, True, (255,255,255))
             self.screen.blit(rendered_text, (rendered_text.get_rect(center = (self.width/2, self.height/2))[0], text_y + (index * text_offset)))
         
-        def draw_back_button():
-            pygame.draw.rect(self.screen, (255,255,255), back_button)
-            self.screen.blit(back_icon, (-3, -7))
-
+       
 
         running = True
         while running:
@@ -296,15 +305,13 @@ class Game:
                     sys.exit()
 
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if back_button.collidepoint(event.pos):
-                        self.screen.fill((255, 255, 255))
-                        pygame.display.update()
+                    if self.back_button.collidepoint(event.pos):
                         running = False
 
 
             self.screen.fill((0,0,0))
             draw_tetris_pieces(pieces)
-            draw_back_button()
+            self.draw_back_button()
 
             text_y = text_y + text_scroll_dist if text_y <= self.width + 100 else -1 * (len(credits_list) * text_offset)
 
@@ -314,8 +321,17 @@ class Game:
     
     def pick_controls_screen(self):
         
+
+        def draw_title():
+            self.screen.blit(title_text, (self.width/2 - 200, 200))
+            self.screen.blit(zghan_text, (self.width/2 - 70, 300))
+        
+        title_text = self.big_font.render('CHOOSE YOUR CONTROLS', True, (255, 255, 255))
+        zghan_text = self.big_font.render('Hi zack :)', True, (255, 255, 255))
+
         running = True
         while running:
+            self.screen.fill((0, 0, 0))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -323,8 +339,14 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-                
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if self.back_button.collidepoint(event.pos):
+                        running = False
 
+
+            draw_title()
+            self.draw_back_button()
+            
 
 
             pygame.display.update()
@@ -361,7 +383,7 @@ class Game:
                 start_button_text = self.font.render('Waiting for opponent...', True, start_button_text_color)
                 start_button_coords = (start_button_pos[0] - 80, start_button_pos[1])
 
-            title_text = title_font.render('TETRIUM', True, (r, g, b)) 
+            title_text = self.very_big_font.render('TETRIUM', True, (r, g, b)) 
             self.screen.blit(start_button_text, start_button_coords)
             self.screen.blit(title_text, (self.width/2 - 165, self.height/2 - 200)) 
          
@@ -389,7 +411,7 @@ class Game:
                 self.screen.blit(input_box_placeholder, (input_box_x + 25, input_box_y + 12))
 
 
-            input_text_render = input_font.render(input_text, True, (0, 0, 0))
+            input_text_render = self.big_font.render(input_text, True, (0, 0, 0))
             input_text_width = input_text_render.get_rect().width
             self.screen.blit(input_text_render, (input_box_x + 5, input_box_y + 6))
 
@@ -457,12 +479,30 @@ class Game:
 
         def draw_credits_button():
             pygame.draw.rect(self.screen, (r, g, b), credits_button)
-            self.screen.blit(credits_button_text, (credits_button_pos[0] + 3, credits_button_pos[1] + 2))   
+            self.screen.blit(credits_button_text, (credits_button_pos[0] + 3, credits_button_pos[1] + 5))   
 
 
         def draw_controls_menu_button():
             pygame.draw.rect(self.screen, (r, g, b), controls_menu_button)
             self.screen.blit(controls_menu_button_text, (controls_button_pos[0] + 5, controls_button_pos[1] + 3))
+        
+        def draw_controls(controls, pos):
+            #pos 0 = left side, 1 = right side
+            for index, values in enumerate(controls):
+                key, description = values
+                text_1 = self.big_font.render(key, True, (r, g, b))
+                text_2 = self.medium_font.render(f" = {description}", True, (r, g, b))
+                text_2_rect = text_2.get_rect()
+                text_2_rect.center = ((135 if pos == 0 else self.width - 135), (index * - 50) + 725)
+                text_1_rect = text_1.get_rect()
+                text_1_rect.center = (text_2_rect.x - 20, text_2_rect.y + 10)
+            
+ 
+                pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(text_2_rect[0], text_2_rect[1], text_2_rect.width, text_2_rect.height))
+                pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(text_1_rect[0], text_1_rect[1], text_1_rect.width, text_1_rect.height))
+                self.screen.blit(text_1, text_1_rect)
+                self.screen.blit(text_2, text_2_rect)
+
 
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
@@ -484,7 +524,7 @@ class Game:
         ]
         
         r, g, b = 255, 0, 0
-        font = pygame.font.Font('assets/arial.ttf', 20)
+
         last_falls = [time.time() for _ in pieces]
         start_button_dimensions = (140, 40)
         start_button_pos = (self.width/2 - 70, self.height/2)
@@ -495,9 +535,7 @@ class Game:
         volume_off_icon = pygame.image.load('assets/volume-off.png')
         volume_icon_pos = (mute_button_pos[0] - 25, mute_button_pos[1] - 25)
         s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
-        title_font = pygame.font.Font('assets/arial.ttf', 75)
-        input_font = pygame.font.Font('assets/arial.ttf', 30)
-        input_box_placeholder = font.render("Enter a name...", True, (96, 93, 93))
+        input_box_placeholder = self.medium_font.render("Enter a name...", True, (96, 93, 93))
         input_box_y =  self.height/2 - 85
         input_box_width = 300
         input_box_x = (self.width - input_box_width)/2
@@ -507,13 +545,14 @@ class Game:
         input_active = False
         input_text = ''
         input_text_width = 0
-        credits_font = pygame.font.Font('assets/arial.ttf', 15)
+        
         controls_button_pos = (0 , self.height - 30)
-        controls_menu_button = pygame.Rect(controls_button_pos[0], controls_button_pos[1], 180, 40)
-        controls_menu_button_text = font.render('EDIT CONTROLS', True, (0, 0, 0))
-        credits_button_text = credits_font.render('CREDITS', True, (255, 255, 255))
-        credits_button_pos = (self.width - 70, self.height - 20)
-        credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 70, 20)
+        controls_menu_button = pygame.Rect(controls_button_pos[0], controls_button_pos[1], 180, 30)
+        controls_menu_button_text = self.medium_font.render('EDIT CONTROLS', True, (0, 0, 0))
+        credits_button_text = self.small_font.render('CREDITS', True, (0, 0, 0))
+        credits_button_height = 30
+        credits_button_pos = (self.width - 70, self.height - credits_button_height)
+        credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 70, credits_button_height)
 
 
         # setting controls
@@ -590,6 +629,10 @@ class Game:
                         #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
                         s.fill((0, 0, 0))
 
+                    elif controls_menu_button.collidepoint(event.pos):
+                        self.pick_controls_screen()
+                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
+                        s.fill((0, 0, 0))
 
 
                     elif input_box.collidepoint(event.pos) and not connected:
@@ -627,30 +670,8 @@ class Game:
             draw_text()
             draw_input_box()
 
-            # for controls on left side
-            for index, values in enumerate(self.left_controls.items()):
-                key, description = values
-
-                text = font.render(f"{key} = {description}", True, (r, g, b))
-                textRect = text.get_rect()
-                textRect.center = (110, (index * - 50) + 725)
-                pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(textRect[0], textRect[1], textRect.width, textRect.height))
-                self.screen.blit(text, textRect)
-
-
-            # for controls on right side
-            for index, values in enumerate(self.right_controls.items()):
-                key, description = values
-
-                text = font.render(f"{key} = {description}", True,  (r, g, b))
-                textRect = text.get_rect()
-                textRect.center = (350, (index *- 50) + 725)
-                coords = (self.width- textRect.center[0] + 60, textRect[1])
-                #I draw a black background box around the text, so the text looks nicer. Without it, it looks all jagged
-                pygame.draw.rect(self.screen, (0,0, 0), pygame.Rect(coords[0], coords[1], textRect.width, textRect.height))
-                self.screen.blit(text, coords)
-
-
+            draw_controls(self.left_controls.items(), 0)
+            draw_controls(self.right_controls.items(), 1)
 
             # checking if game started
             if connected and ( data := self.n.send('get') ).ready:

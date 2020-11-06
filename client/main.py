@@ -115,6 +115,7 @@ def game_over(win: bool):
                     reset()
                     if not opp_disconnected_after:
                         game.n.disconnect()
+
                     game_over = False
 
             elif event.type == pygame.KEYDOWN:
@@ -283,6 +284,7 @@ while True:
 
         if won != None:
             game_over(won)
+            game.screen.fill((0, 0, 0))
             reset()
             won = None
 

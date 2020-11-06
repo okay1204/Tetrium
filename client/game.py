@@ -357,17 +357,20 @@ class Game:
         
 
         def draw_title():
-            self.screen.blit(title_text, (self.width/2 - 200, 100))
+            self.screen.blit(title_text_1, (self.width/2 - 140, 100))
+            self.screen.blit(title_text_2, (self.width/2 - 200, 160))
         
         def draw_prompt():
             if clicked:
                 color = (172, 81, 3) if int(time.time()) % 2 else (5, 139, 142)
                 prompt_text = self.big_font.render('PRESS A KEY', True, color)
-                self.screen.blit(prompt_text, (self.width/2 - 100, 200))
+                self.screen.blit(prompt_text, (self.width/2 - 100, 375))
 
-            
+        def get_key_input():
+            pass
 
-        title_text = self.big_font.render('CHOOSE YOUR CONTROLS', True, (255, 255, 255))
+        title_text_1 = self.big_font.render('CLICK ON A BOX TO', True, (255, 255, 255))
+        title_text_2 = self.big_font.render('CHANGE YOUR CONTROLS', True, (255, 255, 255))
         text_boxes_1 = []
         text_boxes_2 = []
         clicked = False
@@ -383,6 +386,7 @@ class Game:
 
                     pygame.quit()
                     sys.exit()
+
 
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     triggered = False
@@ -409,12 +413,18 @@ class Game:
                         #This makes sure that if we click somewhere else on the screen, clicked becomes false
                         if not triggered:
                             clicked = False
-                                
+
+                elif event.type == pygame.KEYDOWN:
+                    z = pygame.key.name(event.key)
+                    print(z)
+                    x = event.key
+                    print(event.key)
+                    pass
+            
 
 
+                    
 
-                
-               
 
             draw_title()
             draw_prompt()
@@ -706,6 +716,8 @@ class Game:
                         
                         if event.key == pygame.K_RETURN:
                             start()
+                            self.screen.fill((0, 0, 0))
+                                
 
                         elif event.key == pygame.K_BACKSPACE:
                             input_text = input_text[:-1]

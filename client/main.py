@@ -54,10 +54,28 @@ canSwitch = True
 rotation_last = False
 
 
+def reset():
+    global bag, next_bag, avoids, current, held, canSwitch, moving
+
+    game.resting.clear()
+    game.level = 1
+    game.score = 0
+    game.lines = 0
+    bag = pieces.copy()
+    random.shuffle(bag)
+    next_bag = pieces.copy()
+    random.shuffle(next_bag)
+    avoids = 0
+    current = None
+    pygame.mixer.music.set_volume(game.volume)
+    held = None
+    canSwitch = True
+    moving = 0
+    game.meter.clear()
+    game.time_started = time.time()
+
 
 def game_over():
-
-    global bag, next_bag, avoids, current, held, canSwitch, moving
 
     game_over = True
 
@@ -85,24 +103,8 @@ def game_over():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 
                 if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
-
-                    game.resting.clear()
-                    game.level = 1
-                    game.score = 0
-                    game.lines = 0
-                    bag = pieces.copy()
-                    random.shuffle(bag)
-                    next_bag = pieces.copy()
-                    random.shuffle(next_bag)
-                    avoids = 0
-                    current = None
-                    pygame.mixer.music.set_volume(game.volume)
-                    held = None
+                    reset()
                     game_over = False
-                    canSwitch = True
-                    moving = 0
-                    game.meter.clear()
-                    game.time_started = time.time()
 
         if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
             
@@ -216,7 +218,8 @@ while True:
         if disconnected:
             game.running = False
             game.disconnected_screen(*disconnected)
-            disconnected = False
+            reset()
+            disconnected = None
             break
 
 
@@ -453,8 +456,8 @@ while True:
 
             elif event.type == pygame.QUIT:
 
-                game.n.disconnect()
                 game.running = False
+                game.n.disconnect()
                 sys.exit()
 
         if backToTop:

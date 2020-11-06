@@ -73,6 +73,7 @@ class Game:
         # 30px x 30px is one block
 
         self.resting = []
+        self.last_time = 0
     
 
         self.continuous = True
@@ -279,6 +280,39 @@ class Game:
         self.screen.blit(self.back_icon, (-3, -7))
 
 
+    def draw_controls(self, controls, pos, color, keys_bkg_color = (0, 0, 0), second_color = None, underline = False, clicked_index = -1):
+        second_color = color if not second_color else second_color
+        text_rects = []
+       
+        #pos 0 = left side, 1 = right side
+        for index, values in enumerate(controls):
+            key, description = values
+            text_1 = self.big_font.render(key, True, color if not index % 2 else second_color)
+            text_2 = self.medium_font.render(f" = {description}", True, color if not index % 2 else second_color)
+            text_2_rect = text_2.get_rect()
+            text_2_rect.center = ((140 if pos == 0 else self.width - 135), (index * 50) + 530)
+            text_1_rect = text_1.get_rect()
+            text_1_rect.width *= 1.5
+            text_1_rect.center = (text_2_rect.x - 23, text_2_rect.y + 10)
+
+                                                        #Dw about mechanics of this, just know that This only toggles True/False every half a second
+            if underline and index == clicked_index and int(str(round(time.time(), 1))[-1:]) < 5:
+                    pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(text_1_rect.x, text_1_rect.y + 2, text_1_rect.width, text_1_rect.height + 2))
+                   
+
+            pygame.draw.rect(self.screen, keys_bkg_color, text_1_rect)
+            pygame.draw.rect(self.screen, (0, 0, 0), text_2_rect)
+            self.screen.blit(text_1, (text_1_rect.x + 5, text_1_rect.y - (5 if pos == 1 else 0)))
+            self.screen.blit(text_2, (text_2_rect.x + 5, text_2_rect.y))
+
+            text_rects.append(text_1_rect)
+
+   
+
+        return text_rects
+
+
+
     def credits_screen(self, pieces, draw_tetris_pieces):
 
         
@@ -323,12 +357,23 @@ class Game:
         
 
         def draw_title():
-            self.screen.blit(title_text, (self.width/2 - 200, 200))
-            self.screen.blit(zghan_text, (self.width/2 - 70, 300))
+            self.screen.blit(title_text, (self.width/2 - 200, 100))
         
-        title_text = self.big_font.render('CHOOSE YOUR CONTROLS', True, (255, 255, 255))
-        zghan_text = self.big_font.render('Hi zack :)', True, (255, 255, 255))
+        def draw_prompt():
+            if clicked:
+                color = (172, 81, 3) if int(time.time()) % 2 else (5, 139, 142)
+                prompt_text = self.big_font.render('PRESS A KEY', True, color)
+                self.screen.blit(prompt_text, (self.width/2 - 100, 200))
 
+            
+
+        title_text = self.big_font.render('CHOOSE YOUR CONTROLS', True, (255, 255, 255))
+        text_boxes_1 = []
+        text_boxes_2 = []
+        clicked = False
+        clicked_index_1 = -1
+        clicked_index_2 = -1
+    
         running = True
         while running:
             self.screen.fill((0, 0, 0))
@@ -340,13 +385,44 @@ class Game:
                     sys.exit()
 
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    triggered = False
                     if self.back_button.collidepoint(event.pos):
                         running = False
 
+                    else:
+                        for index, text_box in enumerate(text_boxes_1):
+                            if text_box.collidepoint(event.pos):
+                                clicked = True
+                                triggered = True
+                                clicked_index_2 = -1
+                                clicked_index_1 = index
+                             
+
+
+                        for index, text_box in enumerate(text_boxes_2):
+                            if text_box.collidepoint(event.pos):
+                                clicked = True
+                                triggered = True
+                                clicked_index_1 = -1
+                                clicked_index_2 = index
+
+                        #This makes sure that if we click somewhere else on the screen, clicked becomes false
+                        if not triggered:
+                            clicked = False
+                                
+
+
+
+                
+               
 
             draw_title()
+            draw_prompt()
             self.draw_back_button()
             
+            text_boxes_1 = self.draw_controls(self.left_controls.items(), 0, (172, 81, 3), second_color =  (5, 139, 142), keys_bkg_color = (24, 26 , 30), underline = clicked, clicked_index = clicked_index_1)
+            text_boxes_2 = self.draw_controls(self.right_controls.items(), 1,  (5, 139, 142), second_color = (172, 81, 3), keys_bkg_color = (24, 26 ,30), underline = clicked, clicked_index = clicked_index_2)
+
 
 
             pygame.display.update()
@@ -486,24 +562,7 @@ class Game:
             pygame.draw.rect(self.screen, (r, g, b), controls_menu_button)
             self.screen.blit(controls_menu_button_text, (controls_button_pos[0] + 5, controls_button_pos[1] + 3))
         
-        def draw_controls(controls, pos):
-            #pos 0 = left side, 1 = right side
-            for index, values in enumerate(controls):
-                key, description = values
-                text_1 = self.big_font.render(key, True, (r, g, b))
-                text_2 = self.medium_font.render(f" = {description}", True, (r, g, b))
-                text_2_rect = text_2.get_rect()
-                text_2_rect.center = ((135 if pos == 0 else self.width - 135), (index * - 50) + 725)
-                text_1_rect = text_1.get_rect()
-                text_1_rect.center = (text_2_rect.x - 20, text_2_rect.y + 10)
-            
- 
-                pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(text_2_rect[0], text_2_rect[1], text_2_rect.width, text_2_rect.height))
-                pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(text_1_rect[0], text_1_rect[1], text_1_rect.width, text_1_rect.height))
-                self.screen.blit(text_1, text_1_rect)
-                self.screen.blit(text_2, text_2_rect)
-
-
+      
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
         x_pos = [0, 4, 8, 12, 16, 20, 0, 4, 8]
@@ -670,8 +729,8 @@ class Game:
             draw_text()
             draw_input_box()
 
-            draw_controls(self.left_controls.items(), 0)
-            draw_controls(self.right_controls.items(), 1)
+            self.draw_controls(self.left_controls.items(), 0, (r,g,b))
+            self.draw_controls(self.right_controls.items(), 1, (r,g,b))
 
             # checking if game started
             if connected and ( data := self.n.send('get') ).ready:

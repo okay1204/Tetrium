@@ -264,6 +264,52 @@ class Game:
                 meter_block += 1
 
 
+    def credits_screen(self, pieces, draw_tetris_pieces):
+
+        
+        credits_list = ['Made by', 'Zack Ghanbari', 'and Ali Rastegar']
+        text_y = 0
+        text_offset = 80
+        text_scroll_dist = 0.1
+        back_icon = pygame.image.load('assets/arrow-back.png')
+        back_button = pygame.Rect(10, 10, 75, 65)
+
+        def draw_text(tup):
+            index, text = tup
+            rendered_text = self.font.render(text, True, (255,255,255))
+            self.screen.blit(rendered_text, (rendered_text.get_rect(center = (self.width/2, self.height/2))[0], text_y + (index * text_offset)))
+        
+        def draw_back_button():
+            pygame.draw.rect(self.screen, (255,255,255), back_button)
+            self.screen.blit(back_icon, (-3, -7))
+
+
+        running = True
+        while running:
+
+            #Game over loop
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+
+                    pygame.quit()
+                    sys.exit()
+
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if back_button.collidepoint(event.pos):
+                        self.screen.fill((255, 255, 255))
+                        pygame.display.update()
+                        running = False
+
+
+            self.screen.fill((0,0,0))
+            draw_tetris_pieces(pieces)
+            draw_back_button()
+
+            text_y = text_y + text_scroll_dist if text_y <= self.width + 100 else -1 * (len(credits_list) * text_offset)
+
+            list(map(draw_text, enumerate(credits_list)))
+            pygame.display.update()
+            
 
 
     def start_screen(self):
@@ -377,9 +423,22 @@ class Game:
  
                 else:
                     r, g, b = 255, 0, 0
-                
+            
+        def draw_tetris_pieces(pieces):
+            for i, piece in enumerate(pieces):
+                    #means piece is off the screen
+                    if piece.y >= 28:
+                        #Moves it back up
+                        piece.move(0, randint(-35, -30))
 
+                    piece.render(False)
+                    if time.time() > last_falls[i]:
+                        piece.move(0, 1)
+                        last_falls[i] = time.time() + 0.75
 
+        def draw_credits_button():
+            pygame.draw.rect(self.screen, (0, 0, 0), credits_button)
+            self.screen.blit(credits_button_text, (credits_button_pos[0] + 3, credits_button_pos[1]))
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
         x_pos = [0, 4, 8, 12, 16, 20, 0, 4, 8]
@@ -400,6 +459,7 @@ class Game:
         ]
         
         r, g, b = 255, 0, 0
+        font = pygame.font.Font('assets/arial.ttf', 20)
         last_falls = [time.time() for _ in pieces]
         start_button_dimensions = (140, 40)
         start_button_pos = (self.width/2 - 70, self.height/2)
@@ -412,8 +472,7 @@ class Game:
         s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         title_font = pygame.font.Font('assets/arial.ttf', 75)
         input_font = pygame.font.Font('assets/arial.ttf', 30)
-        input_place_holder_font = pygame.font.Font('assets/arial.ttf', 20)
-        input_box_placeholder = input_place_holder_font.render("Enter a name...", True, (96, 93, 93))
+        input_box_placeholder = font.render("Enter a name...", True, (96, 93, 93))
         input_box_y =  self.height/2 - 85
         input_box_width = 300
         input_box_x = (self.width - input_box_width)/2
@@ -423,6 +482,10 @@ class Game:
         input_active = False
         input_text = ''
         input_text_width = 0
+        credits_font = pygame.font.Font('assets/arial.ttf', 15)
+        credits_button_text = credits_font.render('CREDITS', True, (255, 255, 255))
+        credits_button_pos = (self.width - 80, self.height - 30)
+        credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 70, 20)
       
 
         left_controls = {
@@ -440,9 +503,11 @@ class Game:
             "L /←": "Rotate Counter-Clockwise"
         }
 
-        font = pygame.font.Font('assets/arial.ttf', 20)
+        
 
         while True:
+            #NOTE make sure this is at the top
+            s.fill((0,0,0, 2))
 
             mouse = pygame.mouse.get_pos() 
 
@@ -468,6 +533,13 @@ class Game:
                     elif mute_button_pos[0] - mute_button_radius <= mouse[0] <= mute_button_pos[0] + mute_button_radius and mute_button_pos[1] - mute_button_radius <= mouse[1] <=  mute_button_pos[1] + mute_button_radius: 
                         self.muted = not self.muted
                     
+                    elif credits_button.collidepoint(event.pos):
+                        self.credits_screen(pieces, draw_tetris_pieces)
+                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
+                        s.fill((0, 0, 0))
+
+
+
                     elif input_box.collidepoint(event.pos) and not connected:
                         input_active = True
                     
@@ -479,7 +551,6 @@ class Game:
                     if input_active:
                         
                         if event.key == pygame.K_RETURN:
-                            #TODO send name to server
                             start()
 
                         elif event.key == pygame.K_BACKSPACE:
@@ -488,30 +559,14 @@ class Game:
                         else:
                             get_input(event.unicode)
 
-
+                        
            
             pygame.mixer.music.set_volume(self.lowered_volume)
-           
-            
-          
-            s.fill((0,0,0, 1))
             self.screen.blit(s, (0, 0))  
             cycle_colors()
-
-        
-            for i, piece in enumerate(pieces):
-                #means piece is off the screen
-                if piece.y >= 28:
-                    #Moves it back up
-                    piece.move(0, randint(-35, -30))
-
-                piece.render(False)
-                if time.time() > last_falls[i]:
-                    piece.move(0, 1)
-                    last_falls[i] = time.time() + 0.75
-
-            
+            draw_tetris_pieces(pieces)
             check_mute_and_draw_icons()
+            draw_credits_button()
 
             if not connected:
                 draw_start_button()
@@ -526,6 +581,7 @@ class Game:
                 text = font.render(f"{key}: {description}", True, (r, g, b))
                 textRect = text.get_rect()
                 textRect.center = (100, index*-50+750)
+                pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(textRect[0], textRect[1], textRect.width, textRect.height))
                 self.screen.blit(text, textRect)
 
 
@@ -536,7 +592,10 @@ class Game:
                 text = font.render(f"{key} {description}", True,  (r, g, b))
                 textRect = text.get_rect()
                 textRect.center = (350, index*-50+750)
-                self.screen.blit(text, (game.width- textRect.center[0] + 60, textRect[1]))
+                coords = (self.width- textRect.center[0] + 60, textRect[1])
+                #I draw a black background box around the text, so the text looks nicer. Without it, it looks all jagged
+                pygame.draw.rect(self.screen, (0,0, 0), pygame.Rect(coords[0], coords[1], textRect.width, textRect.height))
+                self.screen.blit(text, coords)
 
 
 

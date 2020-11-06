@@ -36,6 +36,7 @@ class Game:
 
         self.volume = 0.05
         self.lowered_volume = 0.015
+     
 
         pygame.init()
         self.font = pygame.font.Font('assets/arial.ttf', 32)
@@ -249,7 +250,7 @@ class Game:
         
         if self.opp_piece_blocks:
             for x, y, color in self.opp_piece_blocks: # noqa pylint: disable=not-an-iterable
-                Block(x, y, color, colorByName=False).render_second()
+                Block(x, y, color, colorByName = False).render_second()
         
         # junk line meter
         pygame.draw.rect(self.screen, (255, 255, 255), (539, 398, 17, 152))
@@ -276,7 +277,7 @@ class Game:
                 if meter_block >= 10:
                     break
                 pygame.draw.rect(self.screen, darkened, (540, 534 - (15 * meter_block), 15, 15))
-                pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11))
+                pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11)) #type: ignore
                 meter_block += 1
 
 
@@ -310,7 +311,7 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if back_button.collidepoint(event.pos):
                         self.screen.fill((255, 255, 255))
                         pygame.display.update()
@@ -337,6 +338,8 @@ class Game:
 
                     pygame.quit()
                     sys.exit()
+
+                
 
 
 
@@ -469,9 +472,13 @@ class Game:
                         last_falls[i] = time.time() + 0.75
 
         def draw_credits_button():
-            pygame.draw.rect(self.screen, (0, 0, 0), credits_button)
-            self.screen.blit(credits_button_text, (credits_button_pos[0] + 3, credits_button_pos[1]))
+            pygame.draw.rect(self.screen, (r, g, b), credits_button)
+            self.screen.blit(credits_button_text, (credits_button_pos[0] + 3, credits_button_pos[1] + 2))   
 
+
+        def draw_controls_menu_button():
+            pygame.draw.rect(self.screen, (r, g, b), controls_menu_button)
+            self.screen.blit(controls_menu_button_text, (controls_button_pos[0] + 5, controls_button_pos[1] + 3))
 
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
@@ -517,10 +524,12 @@ class Game:
         input_text = ''
         input_text_width = 0
         credits_font = pygame.font.Font('assets/arial.ttf', 15)
-        credits_button_text = credits_font.render('CREDITS', True, (255, 255, 255))
-        credits_button_pos = (self.width - 80, self.height - 30)
-        credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 70, 20)
-      
+        credits_button_text = credits_font.render('CREDITS', True, (0, 0, 0))
+        credits_button_pos = (self.width - 70, self.height - 20)
+        credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 85, 25)
+        controls_button_pos = (0 , self.height - 30)
+        controls_menu_button = pygame.Rect(controls_button_pos[0], controls_button_pos[1], 180, 40)
+        controls_menu_button_text = font.render('EDIT CONTROLS', True, (0, 0, 0))
 
 
         while True:
@@ -539,7 +548,7 @@ class Game:
                     pygame.quit()
                     sys.exit()
                     
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                    
                     if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1] and not connected:  
                         
@@ -585,6 +594,7 @@ class Game:
             draw_tetris_pieces(pieces)
             check_mute_and_draw_icons()
             draw_credits_button()
+            draw_controls_menu_button()
 
             if not connected:
                 draw_start_button()

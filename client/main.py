@@ -4,6 +4,7 @@ from game import *
 import time
 import random
 import sys
+import json
 import _thread
 
 
@@ -208,10 +209,19 @@ def server_connection():
                 fall_speed *= 10
         
 
+mouse_number_key = {
+    1: 'left click',
+    2: 'middle click',
+    3: 'right click'
+}
+
 while True:
 
     game.start_screen()
     _thread.start_new_thread(server_connection, ())
+
+    with open('controls.json') as f:
+        controls = json.load(f)
 
     while game.running:
 
@@ -305,10 +315,15 @@ while True:
         backToTop = False
         for event in pygame.event.get():
 
-            if event.type == pygame.KEYDOWN:
+            if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
+                
+                if event.type == pygame.KEYDOWN:
+                    key_name = pygame.key.name(event.key)
+                else:
+                    key_name = mouse_number_key[event.button]
 
-                # move left
-                if event.key == pygame.K_a:
+
+                if key_name == controls['move left']:
 
                     if not game.continuous:
                         if not current.check_left():
@@ -326,8 +341,7 @@ while True:
                     else:
                         moving = -1
                 
-                # move right
-                elif event.key == pygame.K_d:
+                elif key_name == controls['move right']:
 
                     if not game.continuous:
                         if not current.check_right():
@@ -343,8 +357,7 @@ while True:
                     else:
                         moving = 1
 
-                # rotate clockwise
-                elif event.key in (pygame.K_RIGHT, pygame.K_QUOTE):
+                elif key_name == controls['rotate clockwise']:
                     
         
                     current.rotate(0)
@@ -360,8 +373,7 @@ while True:
 
 
 
-                # rotate counter-clockwise
-                elif event.key in (pygame.K_LEFT, pygame.K_l):
+                elif key_name == controls['rotate counter-clockwise']:
                     current.rotate(1)
 
                     current.move(0, 1)
@@ -374,8 +386,7 @@ while True:
 
                     rotation_last = True
             
-                # hold block
-                elif event.key in (pygame.K_UP, pygame.K_p):
+                elif key_name == controls['hold']:
                     
                     
                     if canSwitch:
@@ -396,15 +407,13 @@ while True:
                         
                         backToTop = True
 
-                # speed down
-                elif event.key == pygame.K_s:
+                elif key_name == controls['soft drop']:
                     if not speedUp:
                         fall_speed /= 10
                         speedUp = True
                         last_fall -= 2
                 
-                # force down
-                elif event.key in (pygame.K_DOWN, pygame.K_SEMICOLON):
+                elif key_name == controls['hard drop']:
                     
                     downCount = 0
                     while not current.check_floor():
@@ -423,29 +432,33 @@ while True:
                     if downCount:
                         rotation_last = False
 
-                elif event.key == pygame.K_g:
+                elif key_name == controls['toggle movement']:
                     game.continuous = not game.continuous
                     moving = 0
 
-            elif event.type == pygame.KEYUP:
+            elif event.type in (pygame.KEYUP, pygame.MOUSEBUTTONUP):
 
-                # stop speed down
-                if event.key == pygame.K_s:
+                if event.type == pygame.KEYUP:
+                    key_name = pygame.key.name(event.key)
+                else:
+                    key_name = mouse_number_key[event.button]
+                    
+
+                if key_name == controls['soft drop']:
                     if speedUp:
                         fall_speed *= 10
                         speedUp = False
 
                 
-                # stop hold moving
-                if event.key == pygame.K_a:
+                elif key_name == controls['move left']:
                     if moving == -1:
                         moving = 0
 
-                if event.key == pygame.K_d:
+                elif key_name == controls['move right']:
                     if moving == 1:
                         moving = 0
 
-                if event.key == pygame.K_m:
+                elif key_name == controls['toggle music']:
                     if game.lowered_volume and game.volume:
                         game.lowered_volume, game.volume = 0, 0
 

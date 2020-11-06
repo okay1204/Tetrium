@@ -1,0 +1,11 @@
+{
+	"move right": "d",
+	"move left": "a",
+	"soft drop": "s",
+	"hard drop": "down",
+	"hold": "up",
+	"rotate clockwise": "right",
+	"rotate counter-clockwise": "left",
+	"toggle movement": "g",
+	"toggle music": "z"
+}

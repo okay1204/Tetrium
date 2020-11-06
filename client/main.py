@@ -206,7 +206,7 @@ def server_connection():
             fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
 
             if speedUp:
-                fall_speed *= 10
+                fall_speed /= 10
         
 
 mouse_number_key = {
@@ -253,7 +253,7 @@ while True:
             
                 game.rows_cleared.clear()
 
-            game.render()
+            game.render(bag[:3], held)
             pygame.display.update()
             game.clock.tick(60)
 

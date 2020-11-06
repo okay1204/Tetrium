@@ -223,10 +223,13 @@ while True:
     with open('controls.json') as f:
         controls = json.load(f)
 
+    pygame.mouse.set_visible(False)
+
     while game.running:
 
         if disconnected:
             game.running = False
+            pygame.mouse.set_visible(True)
             game.disconnected_screen(*disconnected)
             reset()
             disconnected = None
@@ -442,7 +445,6 @@ while True:
                     key_name = pygame.key.name(event.key)
                 else:
                     key_name = mouse_number_key[event.button]
-                    
 
                 if key_name == controls['soft drop']:
                     if speedUp:

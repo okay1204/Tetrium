@@ -7,5 +7,5 @@
 	"rotate clockwise": "right",
 	"rotate counter-clockwise": "left",
 	"toggle movement": "g",
-	"toggle music": "z"
+	"toggle music": "m"
 }

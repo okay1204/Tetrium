@@ -7,6 +7,7 @@ import time
 import sys
 from random import shuffle, randint
 from network import Network
+import json
 
 from pieces import preview_piece
 
@@ -34,9 +35,10 @@ class Game:
 
     def __init__(self):
 
-        self.volume = 0.05
-        self.lowered_volume = 0.015
-     
+        # self.volume = 0.05
+        # self.lowered_volume = 0.015
+        self.volume = 0
+        self.lowered_volume = 0
 
         pygame.init()
         self.font = pygame.font.Font('assets/arial.ttf', 32)
@@ -93,24 +95,6 @@ class Game:
         self.opp_name = None
 
         self.rows_cleared = []
-
-        self.left_controls = {
-        "A":"Move Left",
-        "S": "Soft Drop",
-        "D": "Move Right",
-        "G": "Toggle Movement",
-        "M": "Mute Music"
-        }
-
-        self.right_controls = {
-            "'/→":"Rotate Clockwise",
-            "P/↑": "Hold Piece",
-            ";/↓": "Hard Drop",
-            "L /←": "Rotate Counter-Clockwise"
-        }
-
-        
-        
 
 
     def render(self, pieces=None, held=None):
@@ -524,12 +508,53 @@ class Game:
         input_text = ''
         input_text_width = 0
         credits_font = pygame.font.Font('assets/arial.ttf', 15)
-        credits_button_text = credits_font.render('CREDITS', True, (0, 0, 0))
-        credits_button_pos = (self.width - 70, self.height - 20)
-        credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 85, 25)
         controls_button_pos = (0 , self.height - 30)
         controls_menu_button = pygame.Rect(controls_button_pos[0], controls_button_pos[1], 180, 40)
         controls_menu_button_text = font.render('EDIT CONTROLS', True, (0, 0, 0))
+        credits_button_text = credits_font.render('CREDITS', True, (255, 255, 255))
+        credits_button_pos = (self.width - 70, self.height - 20)
+        credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 70, 20)
+
+
+        # setting controls
+        with open('controls.json') as f:
+            temp = json.load(f)
+
+        # styling it 
+        replace_key = {
+            'left click': 'lmb',
+            'middle click': 'mmb',
+            'right click': 'rmb',
+            'up': '↑',
+            'down': '↓',
+            'right': '→',
+            'left': '←'
+        }
+
+        controls = {}
+        for key, value in temp.items():
+            
+            for word, symbol in replace_key.items():
+                value = value.replace(word, symbol)
+            
+            value = value.upper()
+            controls[key] = value
+
+        self.left_controls = {
+            controls["move left"]:"Move Left",
+            controls["move right"]: "Move Right",
+            controls["soft drop"]: "Soft Drop",
+            controls["toggle movement"]: "Toggle Movement",
+            controls["toggle music"]: "Toggle Music"
+        }
+
+        self.right_controls = {
+            controls["rotate clockwise"]:"Rotate Clockwise",
+            controls["rotate counter-clockwise"]: "Rotate Counter-Clockwise",
+            controls["hold"]: "Hold Piece",
+            controls["hard drop"]: "Hard Drop",
+        }
+      
 
 
         while True:
@@ -606,9 +631,9 @@ class Game:
             for index, values in enumerate(self.left_controls.items()):
                 key, description = values
 
-                text = font.render(f"{key}: {description}", True, (r, g, b))
+                text = font.render(f"{key} = {description}", True, (r, g, b))
                 textRect = text.get_rect()
-                textRect.center = (100, index*-50+750)
+                textRect.center = (110, (index * - 50) + 725)
                 pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(textRect[0], textRect[1], textRect.width, textRect.height))
                 self.screen.blit(text, textRect)
 
@@ -617,9 +642,9 @@ class Game:
             for index, values in enumerate(self.right_controls.items()):
                 key, description = values
 
-                text = font.render(f"{key} {description}", True,  (r, g, b))
+                text = font.render(f"{key} = {description}", True,  (r, g, b))
                 textRect = text.get_rect()
-                textRect.center = (350, index*-50+750)
+                textRect.center = (350, (index *- 50) + 725)
                 coords = (self.width- textRect.center[0] + 60, textRect[1])
                 #I draw a black background box around the text, so the text looks nicer. Without it, it looks all jagged
                 pygame.draw.rect(self.screen, (0,0, 0), pygame.Rect(coords[0], coords[1], textRect.width, textRect.height))
@@ -640,14 +665,14 @@ class Game:
         self.time_started = time.time()
         self.running = True
     
-    def disconnected_screen(self, text1, text2):
+def disconnected_screen(self, text1, text2):
 
         def draw_text():
             dc_text_1 = self.font.render(text1, True, (255, 255, 255))
             dc_text_2 = self.font.render(text2,  True, (255, 255, 255))
             self.screen.blit(dc_text_1, (self.width/2 - 225, 200))
             self.screen.blit(dc_text_2, (self.width/2 - 75, 300))
-        
+    
         def cycle_colors():
             
             nonlocal r, g, b

@@ -92,6 +92,22 @@ class Game:
         self.opp_name = None
 
         self.rows_cleared = []
+
+        self.left_controls = {
+        "A":"Move Left",
+        "S": "Soft Drop",
+        "D": "Move Right",
+        "G": "Toggle Movement",
+        "M": "Mute Music"
+        }
+
+        self.right_controls = {
+            "'/→":"Rotate Clockwise",
+            "P/↑": "Hold Piece",
+            ";/↓": "Hard Drop",
+            "L /←": "Rotate Counter-Clockwise"
+        }
+
         
         
 
@@ -136,7 +152,7 @@ class Game:
 
 
         # for continuous movement indication
-        if game.continuous: text = "On"
+        if self.continuous: text = "On"
         else: text = "Off"
 
         text = self.font.render(f"Continuous Movement: {text}", True, (255, 255 ,255))
@@ -310,6 +326,22 @@ class Game:
             list(map(draw_text, enumerate(credits_list)))
             pygame.display.update()
             
+    
+    def pick_controls_screen(self):
+        
+        running = True
+        while running:
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+
+                    pygame.quit()
+                    sys.exit()
+
+
+
+            pygame.display.update()
+
 
 
     def start_screen(self):
@@ -439,6 +471,8 @@ class Game:
         def draw_credits_button():
             pygame.draw.rect(self.screen, (0, 0, 0), credits_button)
             self.screen.blit(credits_button_text, (credits_button_pos[0] + 3, credits_button_pos[1]))
+
+
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
         x_pos = [0, 4, 8, 12, 16, 20, 0, 4, 8]
@@ -488,22 +522,6 @@ class Game:
         credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 70, 20)
       
 
-        left_controls = {
-            "A":"Move Left",
-            "S": "Soft Drop",
-            "D": "Move Right",
-            "G": "Toggle Movement",
-            "M": "Mute Music"
-        }
-
-        right_controls = {
-            "'/→":"Rotate Clockwise",
-            "P/↑": "Hold Piece",
-            ";/↓": "Hard Drop",
-            "L /←": "Rotate Counter-Clockwise"
-        }
-
-        
 
         while True:
             #NOTE make sure this is at the top
@@ -575,7 +593,7 @@ class Game:
             draw_input_box()
 
             # for controls on left side
-            for index, values in enumerate(left_controls.items()):
+            for index, values in enumerate(self.left_controls.items()):
                 key, description = values
 
                 text = font.render(f"{key}: {description}", True, (r, g, b))
@@ -586,7 +604,7 @@ class Game:
 
 
             # for controls on right side
-            for index, values in enumerate(right_controls.items()):
+            for index, values in enumerate(self.right_controls.items()):
                 key, description = values
 
                 text = font.render(f"{key} {description}", True,  (r, g, b))

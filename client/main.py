@@ -216,7 +216,8 @@ while True:
         if disconnected:
             game.running = False
             game.disconnected_screen(*disconnected)
-            disconnected = False
+            reset()
+            disconnected = None
             break
 
 

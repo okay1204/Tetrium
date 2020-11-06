@@ -456,9 +456,13 @@ class Game:
                         last_falls[i] = time.time() + 0.75
 
         def draw_credits_button():
-            pygame.draw.rect(self.screen, (0, 0, 0), credits_button)
-            self.screen.blit(credits_button_text, (credits_button_pos[0] + 3, credits_button_pos[1]))
+            pygame.draw.rect(self.screen, (r, g, b), credits_button)
+            self.screen.blit(credits_button_text, (credits_button_pos[0] + 3, credits_button_pos[1] + 2))   
 
+
+        def draw_controls_menu_button():
+            pygame.draw.rect(self.screen, (r, g, b), controls_menu_button)
+            self.screen.blit(controls_menu_button_text, (controls_button_pos[0] + 5, controls_button_pos[1] + 3))
 
         
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
@@ -504,13 +508,12 @@ class Game:
         input_text = ''
         input_text_width = 0
         credits_font = pygame.font.Font('assets/arial.ttf', 15)
+        controls_button_pos = (0 , self.height - 30)
+        controls_menu_button = pygame.Rect(controls_button_pos[0], controls_button_pos[1], 180, 40)
+        controls_menu_button_text = font.render('EDIT CONTROLS', True, (0, 0, 0))
         credits_button_text = credits_font.render('CREDITS', True, (255, 255, 255))
-        credits_button_pos = (self.width - 80, self.height - 30)
+        credits_button_pos = (self.width - 70, self.height - 20)
         credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 70, 20)
-
-
-        # controls_button_pos = (self.width/2 -100, self.height - 200)
-        # controls_menu_button = pygame.Rect(control_buttons_pos[0], credits_button_pos[1])
 
 
         # setting controls
@@ -616,6 +619,7 @@ class Game:
             draw_tetris_pieces(pieces)
             check_mute_and_draw_icons()
             draw_credits_button()
+            draw_controls_menu_button()
 
             if not connected:
                 draw_start_button()
@@ -627,9 +631,9 @@ class Game:
             for index, values in enumerate(self.left_controls.items()):
                 key, description = values
 
-                text = font.render(f"{key}: {description}", True, (r, g, b))
+                text = font.render(f"{key} = {description}", True, (r, g, b))
                 textRect = text.get_rect()
-                textRect.center = (100, index*-50+750)
+                textRect.center = (110, (index * - 50) + 725)
                 pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect(textRect[0], textRect[1], textRect.width, textRect.height))
                 self.screen.blit(text, textRect)
 
@@ -638,9 +642,9 @@ class Game:
             for index, values in enumerate(self.right_controls.items()):
                 key, description = values
 
-                text = font.render(f"{key}: {description}", True,  (r, g, b))
+                text = font.render(f"{key} = {description}", True,  (r, g, b))
                 textRect = text.get_rect()
-                textRect.center = (350, index*-50+750)
+                textRect.center = (350, (index *- 50) + 725)
                 coords = (self.width- textRect.center[0] + 60, textRect[1])
                 #I draw a black background box around the text, so the text looks nicer. Without it, it looks all jagged
                 pygame.draw.rect(self.screen, (0,0, 0), pygame.Rect(coords[0], coords[1], textRect.width, textRect.height))
@@ -661,14 +665,14 @@ class Game:
         self.time_started = time.time()
         self.running = True
     
-    def disconnected_screen(self, text1, text2):
+def disconnected_screen(self, text1, text2):
 
         def draw_text():
             dc_text_1 = self.font.render(text1, True, (255, 255, 255))
             dc_text_2 = self.font.render(text2,  True, (255, 255, 255))
             self.screen.blit(dc_text_1, (self.width/2 - 225, 200))
             self.screen.blit(dc_text_2, (self.width/2 - 75, 300))
-        
+    
         def cycle_colors():
             
             nonlocal r, g, b

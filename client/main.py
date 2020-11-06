@@ -446,7 +446,6 @@ while True:
                 else:
                     key_name = mouse_number_key[event.button]
 
-
                 if key_name == controls['soft drop']:
                     if speedUp:
                         fall_speed *= 10

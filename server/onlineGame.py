@@ -118,14 +118,6 @@ class OnlineGame:
 
         if loser: self.winner = 0
         else: self.winner = 1
-
-    def _restart(self):
-
-        self.current_piece = [None, None]
-
-        self.resting_blocks = [[], []]
-        self.meters = [[], []]
-        
     
     
     

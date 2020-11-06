@@ -96,8 +96,6 @@ def game_over(win: bool):
 
     while game_over:
 
-        print(opp_disconnected_after)
-
         mouse = pygame.mouse.get_pos()
         #Game over loop
 

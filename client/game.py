@@ -34,8 +34,10 @@ class Game:
 
     def __init__(self):
 
-        self.volume = 0.05
-        self.lowered_volume = 0.015
+        # self.volume = 0.05
+        # self.lowered_volume = 0.015
+        self.volume = 0
+        self.lowered_volume = 0
 
         pygame.init()
         self.font = pygame.font.Font('assets/arial.ttf', 32)
@@ -249,7 +251,7 @@ class Game:
         
         if self.opp_piece_blocks:
             for x, y, color in self.opp_piece_blocks: # noqa pylint: disable=not-an-iterable
-                Block(x, y, color, colorByName=False).render_second()
+                Block(x, y, color, colorByName = False).render_second()
         
         # junk line meter
         pygame.draw.rect(self.screen, (255, 255, 255), (539, 398, 17, 152))
@@ -276,7 +278,7 @@ class Game:
                 if meter_block >= 10:
                     break
                 pygame.draw.rect(self.screen, darkened, (540, 534 - (15 * meter_block), 15, 15))
-                pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11))
+                pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11)) #type: ignore
                 meter_block += 1
 
 
@@ -310,7 +312,7 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if back_button.collidepoint(event.pos):
                         self.screen.fill((255, 255, 255))
                         pygame.display.update()
@@ -337,6 +339,8 @@ class Game:
 
                     pygame.quit()
                     sys.exit()
+
+                
 
 
 
@@ -520,6 +524,10 @@ class Game:
         credits_button_text = credits_font.render('CREDITS', True, (255, 255, 255))
         credits_button_pos = (self.width - 80, self.height - 30)
         credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 70, 20)
+
+
+        # controls_button_pos = (self.width/2 -100, self.height - 200)
+        # controls_menu_button = pygame.Rect(control_buttons_pos[0], credits_button_pos[1])
       
 
 
@@ -539,7 +547,7 @@ class Game:
                     pygame.quit()
                     sys.exit()
                     
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                    
                     if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1] and not connected:  
                         

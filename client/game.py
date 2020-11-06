@@ -7,6 +7,7 @@ import time
 import sys
 from random import shuffle, randint
 from network import Network
+import json
 
 from pieces import preview_piece
 
@@ -94,24 +95,6 @@ class Game:
         self.opp_name = None
 
         self.rows_cleared = []
-
-        self.left_controls = {
-        "A":"Move Left",
-        "S": "Soft Drop",
-        "D": "Move Right",
-        "G": "Toggle Movement",
-        "M": "Mute Music"
-        }
-
-        self.right_controls = {
-            "'/→":"Rotate Clockwise",
-            "P/↑": "Hold Piece",
-            ";/↓": "Hard Drop",
-            "L /←": "Rotate Counter-Clockwise"
-        }
-
-        
-        
 
 
     def render(self, pieces=None, held=None):
@@ -528,6 +511,46 @@ class Game:
 
         # controls_button_pos = (self.width/2 -100, self.height - 200)
         # controls_menu_button = pygame.Rect(control_buttons_pos[0], credits_button_pos[1])
+
+
+        # setting controls
+        with open('controls.json') as f:
+            temp = json.load(f)
+
+        # styling it 
+        replace_key = {
+            'left click': 'lmb',
+            'middle click': 'mmb',
+            'right click': 'rmb',
+            'up': '↑',
+            'down': '↓',
+            'right': '→',
+            'left': '←'
+        }
+
+        controls = {}
+        for key, value in temp.items():
+            
+            for word, symbol in replace_key.items():
+                value = value.replace(word, symbol)
+            
+            value = value.upper()
+            controls[key] = value
+
+        self.left_controls = {
+            controls["move left"]:"Move Left",
+            controls["move right"]: "Move Right",
+            controls["soft drop"]: "Soft Drop",
+            controls["toggle movement"]: "Toggle Movement",
+            controls["toggle music"]: "Toggle Music"
+        }
+
+        self.right_controls = {
+            controls["rotate clockwise"]:"Rotate Clockwise",
+            controls["rotate counter-clockwise"]: "Rotate Counter-Clockwise",
+            controls["hold"]: "Hold Piece",
+            controls["hard drop"]: "Hard Drop",
+        }
       
 
 
@@ -615,7 +638,7 @@ class Game:
             for index, values in enumerate(self.right_controls.items()):
                 key, description = values
 
-                text = font.render(f"{key} {description}", True,  (r, g, b))
+                text = font.render(f"{key}: {description}", True,  (r, g, b))
                 textRect = text.get_rect()
                 textRect.center = (350, index*-50+750)
                 coords = (self.width- textRect.center[0] + 60, textRect[1])

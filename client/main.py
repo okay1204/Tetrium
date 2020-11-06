@@ -278,6 +278,7 @@ while True:
             game.running = False
             pygame.mouse.set_visible(True)
             game.disconnected_screen(*disconnected)
+            game.screen.fill((0, 0, 0))
             reset()
             disconnected = None
             break

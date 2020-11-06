@@ -15,6 +15,8 @@ class OnlineGame:
         # All resting blocks of both players
         self.resting_blocks = [[], []]
 
+        self.winner = None
+
         # Both players junk meter
         self.meters = [[], []]
         self.meter_stages = [1, 1]
@@ -23,6 +25,9 @@ class OnlineGame:
 
 
         self.time_started = time.time()
+
+        self.rematch = [False, False]
+        self.reset = [True, True]
 
     
     def speed_level(self):
@@ -111,13 +116,10 @@ class OnlineGame:
         self.meter_stages[player] = 1
         self.meters[player].pop(0)
 
-    def _restart(self):
+    def _end_game(self, loser):
 
-        self.current_piece = [None, None]
-
-        self.resting_blocks = [[], []]
-        self.meters = [[], []]
-        
+        if loser: self.winner = 0
+        else: self.winner = 1
     
     
     

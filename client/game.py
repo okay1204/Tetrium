@@ -745,7 +745,7 @@ class Game:
         self.time_started = time.time()
         self.running = True
     
-def disconnected_screen(self, text1, text2):
+    def disconnected_screen(self, text1, text2):
 
         def draw_text():
             dc_text_1 = self.font.render(text1, True, (255, 255, 255))

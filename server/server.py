@@ -26,7 +26,8 @@ def threaded_client(conn, player, gameId):
     # send player number to client right after connecting
     conn.send(str.encode(str(player)))
 
-    
+    name = None
+
     while True:
         try:
 
@@ -43,11 +44,11 @@ def threaded_client(conn, player, gameId):
                 data = data.replace(sentinel, b'')
                 data = pickle.loads(data)
             except:
-                print("Player", player, "in game", gameId, "forcefully disconnected")
+                print(f"Player {player} ({name}) in game {gameId} forcefully disconnected")
                 break
 
             if data == "disconnect":
-                print("Player", player, "in game", gameId, "safely disconnected")
+                print(f"Player {player} ({name}) in game {gameId} safely disconnected")
                 break
 
 
@@ -89,8 +90,32 @@ def threaded_client(conn, player, gameId):
 
                                 game._reset_meter(player)
 
+                            elif special == "game over":
+
+                                game._end_game(player)
+
+                                if player: opp = 0
+                                else: opp = 1
+
+                                print(f'Player {opp} ({game.names[opp]}) beat Player {player} ({game.names[player]}) in game {gameId}')
+                            
+                            elif special == "rematch":
+
+                                game.rematch[player] = True
+
+                            elif special == "reset":
+
+                                game.reset[player] = True
+
+                                if all(game.reset):
+                                    game.rematch = [False, False]
+                                    game.reset = [False, False]
+                                    game.winner = None
+
                     elif data.startswith('name '):
                         game.names[player] = data[5:]
+                        name = data[5:]
+                        print(f"Player {player} in game {gameId} is called {name}")
 
                     # dumps data
                     sending = pickle.dumps(game)
@@ -102,7 +127,7 @@ def threaded_client(conn, player, gameId):
 
 
             else: # game doesn't exist
-                print("Player", player, "in game", gameId, "disconnected safely from game closing")
+                print(f"Player {player} ({name}) in game {gameId} disconnected safely from game closing")
 
                 # dumps data
                 sending = pickle.dumps('disconnect')

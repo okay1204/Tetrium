@@ -89,6 +89,10 @@ def threaded_client(conn, player, gameId):
 
                                 game._reset_meter(player)
 
+                            elif special == "game over":
+
+                                game._end_game(player)
+
                     elif data.startswith('name '):
                         game.names[player] = data[5:]
 

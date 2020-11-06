@@ -75,13 +75,18 @@ def reset():
     game.meter.clear()
     game.time_started = time.time()
 
+opp_disconnected_after = False
 
-def game_over():
+def game_over(win: bool):
 
+    global opp_disconnected_after
+
+    if not win:
+        send('game over')
     game_over = True
 
     pygame.mixer.music.set_volume(game.lowered_volume)
-    button_dimensions = (165, 40)
+    button_dimensions = (300, 40)
     button_pos = (int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
    
@@ -90,6 +95,8 @@ def game_over():
     s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
 
     while game_over:
+
+        print(opp_disconnected_after)
 
         mouse = pygame.mouse.get_pos()
         #Game over loop
@@ -103,8 +110,11 @@ def game_over():
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 
+                # find new match
                 if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
                     reset()
+                    if not opp_disconnected_after:
+                        game.n.disconnect()
                     game_over = False
 
         if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
@@ -115,16 +125,22 @@ def game_over():
 
 
         pygame.draw.rect(game.screen, button_color, (button_pos, button_dimensions))
-        s.fill((255,255,255, 2))      
+        s.fill((255,255,255, 2))
         game.screen.blit(s, (0,0))
-        game_over_text = game_over_font.render(f'Game Over', True, (0, 0, 0), game.screen)
-        button_text = button_font.render(f'RESTART', True, button_text_color, game.screen)
+
+        if not win:
+            game_over_text = game_over_font.render(f'You lost..', True, (0, 0, 0))
+        else:
+            game_over_text = game_over_font.render(f'You win!', True, (0, 0, 0))
+
+        button_text = button_font.render(f'FIND NEW MATCH', True, button_text_color)
         textRect = game_over_text.get_rect() 
         textRect.center = (game.width // 2, 200) 
         game.screen.blit(game_over_text, textRect)
         game.screen.blit(button_text, (button_pos[0] + 10, button_pos[1] + 3))
         pygame.display.update()
         game.clock.tick(60)
+
 
 
 
@@ -150,6 +166,7 @@ line_key = [0, 1, 2, 4]
 t_spin_line_key = [2, 4, 6]
 combo_line_key = [(1, 3), (4, 5), (6, 7), (8, 10), (11, 10000000)]
 
+won = None
 
 specials = []
 
@@ -164,7 +181,7 @@ disconnected = None
 
 def server_connection():
     
-    global disconnected, current, specials, display_until, fall_speed
+    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after
 
     while game.running:
 
@@ -187,11 +204,24 @@ def server_connection():
             break
 
         if data == "disconnect":
-            disconnected = ("Opponent disconnected", "You win!")
+            
+            # disconnected after game
+            if won == None:
+                disconnected = ("Opponent disconnected", "You win!")
+            # disconnected in game
+            else:
+                opp_disconnected_after = True
+
             break
+        
+        if data.winner == game.n.p:
+            won = True
+
 
         for special in sent_specials:
             specials.remove(special)
+
+        
         
         game.opp_resting = data.opp_resting(game.n.p)
         game.opp_piece_blocks = data.opp_piece_blocks(game.n.p)
@@ -217,13 +247,15 @@ mouse_number_key = {
 
 while True:
 
+    opp_disconnected_after = False
     game.start_screen()
     _thread.start_new_thread(server_connection, ())
 
     with open('controls.json') as f:
         controls = json.load(f)
 
-    pygame.mouse.set_visible(False)
+    # NOTE uncomment this line after
+    # pygame.mouse.set_visible(False)
 
     while game.running:
 
@@ -233,6 +265,12 @@ while True:
             game.disconnected_screen(*disconnected)
             reset()
             disconnected = None
+            break
+
+        if won != None:
+            game_over(won)
+            reset()
+            won = None
             break
 
 
@@ -282,7 +320,7 @@ while True:
                             current.move(-2, 0)
 
                 if current.overlapping_blocks():
-                    game_over()
+                    won = False
 
         if moving:
 

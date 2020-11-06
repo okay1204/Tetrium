@@ -26,6 +26,9 @@ class OnlineGame:
 
         self.time_started = time.time()
 
+        self.rematch = [False, False]
+        self.reset = [True, True]
+
     
     def speed_level(self):
         level = int(((time.time() - self.time_started) // 30) + 1)
@@ -113,7 +116,6 @@ class OnlineGame:
         self.meter_stages[player] = 1
         self.meters[player].pop(0)
 
-    
     def _end_game(self, loser):
 
         if loser: self.winner = 0

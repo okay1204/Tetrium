@@ -76,13 +76,15 @@ def reset():
     game.time_started = time.time()
 
 opp_disconnected_after = False
+rematch = False
 
 def game_over(win: bool):
 
-    global opp_disconnected_after
+    global opp_disconnected_after, rematch
 
     if not win:
         send('game over')
+
     game_over = True
 
     pygame.mixer.music.set_volume(game.lowered_volume)
@@ -115,10 +117,22 @@ def game_over(win: bool):
                         game.n.disconnect()
                     game_over = False
 
+            elif event.type == pygame.KEYDOWN:
+                
+                # repace this with a button
+                # rematch
+                if event.key == pygame.K_t:
+                    
+                    if not opp_disconnected_after:
+                        send("rematch")
+
         if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
-            
             button_text_color = (0, 0, 0)
             button_color = (255, 255, 255)
+        
+        if rematch:
+            game_over = False
+            send("reset")
 
 
 
@@ -179,7 +193,7 @@ disconnected = None
 
 def server_connection():
     
-    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after
+    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, rematch
 
     while game.running:
 
@@ -215,6 +229,8 @@ def server_connection():
         if data.winner == game.n.p:
             won = True
 
+        if all(data.rematch):
+            rematch = True
 
         for special in sent_specials:
             specials.remove(special)
@@ -269,7 +285,10 @@ while True:
             game_over(won)
             reset()
             won = None
-            break
+
+            if not rematch:
+                rematch = False
+                break
 
 
         # if there are fading blocks, pause the game for a quick moment

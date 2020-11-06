@@ -98,6 +98,19 @@ def threaded_client(conn, player, gameId):
                                 else: opp = 1
 
                                 print(f'Player {opp} ({game.names[opp]}) beat Player {player} ({game.names[player]}) in game {gameId}')
+                            
+                            elif special == "rematch":
+
+                                game.rematch[player] = True
+
+                            elif special == "reset":
+
+                                game.reset[player] = True
+
+                                if all(game.reset):
+                                    game.rematch = [False, False]
+                                    game.reset = [False, False]
+                                    game.winner = None
 
                     elif data.startswith('name '):
                         game.names[player] = data[5:]

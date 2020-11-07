@@ -105,6 +105,27 @@ class Game:
         self.back_button = pygame.Rect(10, 10, 75, 65)
 
 
+        # setting controls
+        with open('controls.json') as f:
+            temp = json.load(f)
+       
+        self.left_controls = {
+            "Move Left": temp["Move Left"],
+            "Move Right": temp["Move Right"],
+            "Soft Drop": temp["Soft Drop"],
+            "Toggle Movement": temp["Toggle Movement"],
+            "Toggle Music": temp["Toggle Music"]
+        }
+
+        self.right_controls = {
+            "Rotate Clockwise": temp["Rotate Clockwise"],
+            "Rotate Counter-Clockwise": temp["Rotate Counter-Clockwise"],
+            "Hold Piece": temp["Hold Piece"],
+            "Hard Drop": temp["Hard Drop"]
+        }
+      
+
+
 
     def render(self, pieces=None, held=None):
         
@@ -265,10 +286,11 @@ class Game:
 
             darkened = (tuple(darken(color) for color in color))
 
-            for block in range(amount): # noqa pylint: disable=unused-variable
+            for _ in range(amount):
 
                 if meter_block >= 10:
                     break
+
                 pygame.draw.rect(self.screen, darkened, (540, 534 - (15 * meter_block), 15, 15))
                 pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11)) #type: ignore
                 meter_block += 1
@@ -281,33 +303,68 @@ class Game:
 
 
     def draw_controls(self, controls, pos, color, keys_bkg_color = (0, 0, 0), second_color = None, underline = False, clicked_index = -1):
+    
+        replace_keys = {
+            'left click': 'l-mb',
+            'middle click': 'm-mb',
+            'right click': 'r-mb',
+            'up': '↑',
+            'down': '↓',
+            'right': '→',
+            'left': '←',
+            'left shift': 'lshft',
+            'right shift': 'rshft',
+            'backspace': 'bks',
+            'caps lock': 'caps',
+            'return': 'entr',
+            'left ctrl': 'lctrl',
+            'right ctrl': 'rctrl',
+            'left meta': 'wn',
+            'right meta': 'wn',
+            'left alt': 'lalt',
+            'right alt': 'ralt',
+            'compose': 'cmp',
+            'space': 'spc',
+            'escape': 'esc',
+            'print screen': 'prnt',
+            'scroll lock': 'scrl',
+            'break': 'brk',
+            'insert': 'insrt',
+            'page up': 'pup',
+            'page down': 'pdwn',
+            'backspace': 'bksp',
+
+        }
+
+        
         second_color = color if not second_color else second_color
         text_rects = []
+    
        
         #pos 0 = left side, 1 = right side
         for index, values in enumerate(controls):
-            key, description = values
-            text_1 = self.big_font.render(key, True, color if not index % 2 else second_color)
+            description, key = values
+            modified_key = replace_keys[key].upper() if key in replace_keys.keys() else key.upper()
+            text_1 = self.big_font.render(modified_key, True, (0, 0, 0))
             text_2 = self.medium_font.render(f" = {description}", True, color if not index % 2 else second_color)
             text_2_rect = text_2.get_rect()
-            text_2_rect.center = ((140 if pos == 0 else self.width - 135), (index * 50) + 530)
+            text_2_rect.center = ((200 if pos == 0 else self.width - 150), (index * 50) + 530)
             text_1_rect = text_1.get_rect()
-            text_1_rect.width *= 1.5
-            text_1_rect.center = (text_2_rect.x - 23, text_2_rect.y + 10)
-
-                                                        #Dw about mechanics of this, just know that This only toggles True/False every half a second
+            text_1_rect.center = (text_2_rect.x - text_1_rect.width/2, text_2_rect.y + 10)
+   
+                                            #Dw about mechanics of this, just know that This only toggles True/False every half a second
             if underline and index == clicked_index and int(str(round(time.time(), 1))[-1:]) < 5:
-                    pygame.draw.rect(self.screen, (255, 255, 255), pygame.Rect(text_1_rect.x, text_1_rect.y + 2, text_1_rect.width, text_1_rect.height + 2))
-                   
+                    pygame.draw.rect(self.screen, (240, 240, 166), pygame.Rect(text_1_rect.x, text_1_rect.y + 2, text_1_rect.width, text_1_rect.height + 2))
+            
+       
 
-            pygame.draw.rect(self.screen, keys_bkg_color, text_1_rect)
-            pygame.draw.rect(self.screen, (0, 0, 0), text_2_rect)
-            self.screen.blit(text_1, (text_1_rect.x + 5, text_1_rect.y - (5 if pos == 1 else 0)))
-            self.screen.blit(text_2, (text_2_rect.x + 5, text_2_rect.y))
+            pygame.draw.rect(self.screen, (123, 127, 162), text_1_rect)
+            pygame.draw.rect(self.screen, keys_bkg_color, text_2_rect)
+            self.screen.blit(text_1, (text_1_rect.x, text_1_rect.y))
+            self.screen.blit(text_2, (text_2_rect.x, text_2_rect.y))
 
             text_rects.append(text_1_rect)
 
-   
 
         return text_rects
 
@@ -362,12 +419,24 @@ class Game:
         
         def draw_prompt():
             if clicked:
-                color = (172, 81, 3) if int(time.time()) % 2 else (5, 139, 142)
+                color = (240, 240, 166) if  int(str(round(time.time(), 1))[-1:]) < 5 else (26, 27, 37)
                 prompt_text = self.big_font.render('PRESS A KEY', True, color)
                 self.screen.blit(prompt_text, (self.width/2 - 100, 375))
 
-        def get_key_input():
-            pass
+        def get_key_input(key):
+
+            if clicked_index_1 >= 0:
+                self.left_controls[list(self.left_controls.keys())[clicked_index_1]] = pygame.key.name(key)
+
+            elif clicked_index_2 >= 0:
+                self.right_controls[list(self.right_controls.keys())[clicked_index_2]] = pygame.key.name(key)
+
+            with open('controls.json', 'w') as f:
+                full_controls = dict(self.left_controls, **self.right_controls)
+                json.dump(full_controls, f)
+
+        
+
 
         title_text_1 = self.big_font.render('CLICK ON A BOX TO', True, (255, 255, 255))
         title_text_2 = self.big_font.render('CHANGE YOUR CONTROLS', True, (255, 255, 255))
@@ -379,7 +448,7 @@ class Game:
     
         running = True
         while running:
-            self.screen.fill((0, 0, 0))
+            self.screen.fill((26, 27, 37))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -415,24 +484,22 @@ class Game:
                             clicked = False
 
                 elif event.type == pygame.KEYDOWN:
-                    z = pygame.key.name(event.key)
-                    print(z)
-                    x = event.key
-                    print(event.key)
-                    pass
-            
-
-
+                    # z = pygame.key.name(event.key)
+                    if clicked:
+                        get_key_input(event.key)
                     
-
-
+                    clicked = False
+                
+        
             draw_title()
             draw_prompt()
             self.draw_back_button()
             
-            text_boxes_1 = self.draw_controls(self.left_controls.items(), 0, (172, 81, 3), second_color =  (5, 139, 142), keys_bkg_color = (24, 26 , 30), underline = clicked, clicked_index = clicked_index_1)
-            text_boxes_2 = self.draw_controls(self.right_controls.items(), 1,  (5, 139, 142), second_color = (172, 81, 3), keys_bkg_color = (24, 26 ,30), underline = clicked, clicked_index = clicked_index_2)
+            # text_boxes_1 = self.draw_controls(self.left_controls.items(), 0, (172, 81, 3), second_color =  (5, 139, 142), keys_bkg_color = (24, 26 , 30), underline = clicked, clicked_index = clicked_index_1)
+            # text_boxes_2 = self.draw_controls(self.right_controls.items(), 1,  (5, 139, 142), second_color = (172, 81, 3), keys_bkg_color = (24, 26 ,30), underline = clicked, clicked_index = clicked_index_2)
 
+            text_boxes_1 = self.draw_controls(self.left_controls.items(), 0, (89, 248, 232), keys_bkg_color = (26, 27, 37), underline = clicked, clicked_index = clicked_index_1)
+            text_boxes_2 = self.draw_controls(self.right_controls.items(), 1,  (89, 248, 232),  keys_bkg_color =(26, 27, 37), underline = clicked, clicked_index = clicked_index_2)
 
 
             pygame.display.update()
@@ -616,53 +683,12 @@ class Game:
         input_text_width = 0
         
         controls_button_pos = (0 , self.height - 30)
-        controls_menu_button = pygame.Rect(controls_button_pos[0], controls_button_pos[1], 180, 30)
-        controls_menu_button_text = self.medium_font.render('EDIT CONTROLS', True, (0, 0, 0))
+        controls_menu_button = pygame.Rect(controls_button_pos[0], controls_button_pos[1], 125, 30)
+        controls_menu_button_text = self.medium_font.render('CONTROLS', True, (0, 0, 0))
         credits_button_text = self.small_font.render('CREDITS', True, (0, 0, 0))
         credits_button_height = 30
         credits_button_pos = (self.width - 70, self.height - credits_button_height)
         credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 70, credits_button_height)
-
-
-        # setting controls
-        with open('controls.json') as f:
-            temp = json.load(f)
-
-        # styling it 
-        replace_key = {
-            'left click': 'lmb',
-            'middle click': 'mmb',
-            'right click': 'rmb',
-            'up': '↑',
-            'down': '↓',
-            'right': '→',
-            'left': '←'
-        }
-
-        controls = {}
-        for key, value in temp.items():
-            
-            for word, symbol in replace_key.items():
-                value = value.replace(word, symbol)
-            
-            value = value.upper()
-            controls[key] = value
-
-        self.left_controls = {
-            controls["move left"]:"Move Left",
-            controls["move right"]: "Move Right",
-            controls["soft drop"]: "Soft Drop",
-            controls["toggle movement"]: "Toggle Movement",
-            controls["toggle music"]: "Toggle Music"
-        }
-
-        self.right_controls = {
-            controls["rotate clockwise"]:"Rotate Clockwise",
-            controls["rotate counter-clockwise"]: "Rotate Counter-Clockwise",
-            controls["hold"]: "Hold Piece",
-            controls["hard drop"]: "Hard Drop",
-        }
-      
 
 
         while True:
@@ -741,9 +767,6 @@ class Game:
             draw_text()
             draw_input_box()
 
-            self.draw_controls(self.left_controls.items(), 0, (r,g,b))
-            self.draw_controls(self.right_controls.items(), 1, (r,g,b))
-
             # checking if game started
             if connected and ( data := self.n.send('get') ).ready:
                 self.opp_name = data.opp_name(self.n.p)
@@ -762,7 +785,7 @@ class Game:
         def draw_text():
             dc_text_1 = self.font.render(text1, True, (255, 255, 255))
             dc_text_2 = self.font.render(text2,  True, (255, 255, 255))
-            self.screen.blit(dc_text_1, (self.width/2 - 225, 200))
+            self.screen.blit(dc_text_1, (self.width/2 - 175, 200))
             self.screen.blit(dc_text_2, (self.width/2 - 75, 300))
     
         def cycle_colors():

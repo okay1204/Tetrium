@@ -379,11 +379,12 @@ while True:
                 
                 if event.type == pygame.KEYDOWN:
                     key_name = pygame.key.name(event.key)
+
                 else:
                     key_name = mouse_number_key[event.button]
 
 
-                if key_name == controls['move left']:
+                if key_name == controls['Move Left']:
 
                     if not game.continuous:
                         if not current.check_left():
@@ -401,7 +402,7 @@ while True:
                     else:
                         moving = -1
                 
-                elif key_name == controls['move right']:
+                elif key_name == controls['Move Right']:
 
                     if not game.continuous:
                         if not current.check_right():
@@ -417,7 +418,7 @@ while True:
                     else:
                         moving = 1
 
-                elif key_name == controls['rotate clockwise']:
+                elif key_name == controls['Rotate Clockwise']:
                     
         
                     current.rotate(0)
@@ -433,7 +434,7 @@ while True:
 
 
 
-                elif key_name == controls['rotate counter-clockwise']:
+                elif key_name == controls['Rotate Counter-Clockwise']:
                     current.rotate(1)
 
                     current.move(0, 1)
@@ -446,7 +447,7 @@ while True:
 
                     rotation_last = True
             
-                elif key_name == controls['hold']:
+                elif key_name == controls['Hold Piece']:
                     
                     
                     if canSwitch:
@@ -467,13 +468,13 @@ while True:
                         
                         backToTop = True
 
-                elif key_name == controls['soft drop']:
+                elif key_name == controls['Soft Drop']:
                     if not speedUp:
                         fall_speed /= 10
                         speedUp = True
                         last_fall -= 2
                 
-                elif key_name == controls['hard drop']:
+                elif key_name == controls['Hard Drop']:
                     
                     downCount = 0
                     while not current.check_floor():
@@ -492,7 +493,7 @@ while True:
                     if downCount:
                         rotation_last = False
 
-                elif key_name == controls['toggle movement']:
+                elif key_name == controls['Toggle Movement']:
                     game.continuous = not game.continuous
                     moving = 0
 
@@ -503,21 +504,22 @@ while True:
                 else:
                     key_name = mouse_number_key[event.button]
 
-                if key_name == controls['soft drop']:
+                if key_name == controls['Soft Drop']:
                     if speedUp:
                         fall_speed *= 10
                         speedUp = False
 
                 
-                elif key_name == controls['move left']:
+                elif key_name == controls['Move Left']:
                     if moving == -1:
                         moving = 0
 
-                elif key_name == controls['move right']:
+                elif key_name == controls['Move Right']:
                     if moving == 1:
                         moving = 0
 
-                elif key_name == controls['toggle music']:
+                elif key_name == controls['Toggle Music']:
+                    
                     if game.lowered_volume and game.volume:
                         game.lowered_volume, game.volume = 0, 0
 

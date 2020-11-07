@@ -1,11 +1,11 @@
 {
-	"Move Left": ",",
-	"Move Right": "j",
-	"Soft Drop": "backspace",
-	"Toggle Movement": "caps lock",
-	"Toggle Music": "up",
-	"Rotate Clockwise": "\\",
-	"Rotate Counter-Clockwise": "escape",
-	"Hold Piece": "up",
-	"Hard Drop": "up"
+  "Move Left": "a",
+  "Move Right": "d",
+  "Soft Drop": "s",
+  "Toggle Movement": "g",
+  "Toggle Music": "m",
+  "Rotate Clockwise": "right",
+  "Rotate Counter-Clockwise": "left",
+  "Hold Piece": "up",
+  "Hard Drop": "down"
 }

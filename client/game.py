@@ -305,9 +305,9 @@ class Game:
     def draw_controls(self, controls, pos, color, keys_bkg_color = (0, 0, 0), second_color = None, underline = False, clicked_index = -1):
     
         replace_keys = {
-            'left click': 'l-mb',
-            'middle click': 'm-mb',
-            'right click': 'r-mb',
+            'left click': 'lmb',
+            'middle click': 'mmb',
+            'right click': 'rmb',
             'up': '↑',
             'down': '↓',
             'right': '→',
@@ -423,19 +423,28 @@ class Game:
                 prompt_text = self.big_font.render('PRESS A KEY', True, color)
                 self.screen.blit(prompt_text, (self.width/2 - 100, 375))
 
-        def get_key_input(key):
+        mouse_number_key = {
+            1: 'left click',
+            2: 'middle click',
+            3: 'right click'
+        }
+
+        def get_key_input(key, mouse_click=False):
+
+            if not mouse_click:
+                name = pygame.key.name(key)
+            else:
+                name = mouse_number_key[key]
 
             if clicked_index_1 >= 0:
-                self.left_controls[list(self.left_controls.keys())[clicked_index_1]] = pygame.key.name(key)
-
+                self.left_controls[list(self.left_controls.keys())[clicked_index_1]] = name
             elif clicked_index_2 >= 0:
-                self.right_controls[list(self.right_controls.keys())[clicked_index_2]] = pygame.key.name(key)
+                self.right_controls[list(self.right_controls.keys())[clicked_index_2]] = name
 
             with open('controls.json', 'w') as f:
                 full_controls = dict(self.left_controls, **self.right_controls)
-                json.dump(full_controls, f)
+                json.dump(full_controls, f, indent=2)
 
-        
 
 
         title_text_1 = self.big_font.render('CLICK ON A BOX TO', True, (255, 255, 255))
@@ -457,34 +466,35 @@ class Game:
                     sys.exit()
 
 
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    triggered = False
-                    if self.back_button.collidepoint(event.pos):
-                        running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
 
-                    else:
-                        for index, text_box in enumerate(text_boxes_1):
-                            if text_box.collidepoint(event.pos):
-                                clicked = True
-                                triggered = True
-                                clicked_index_2 = -1
-                                clicked_index_1 = index
-                             
-
-
-                        for index, text_box in enumerate(text_boxes_2):
-                            if text_box.collidepoint(event.pos):
-                                clicked = True
-                                triggered = True
-                                clicked_index_1 = -1
-                                clicked_index_2 = index
-
-                        #This makes sure that if we click somewhere else on the screen, clicked becomes false
-                        if not triggered:
+                    if clicked:
+                        if 1 <= event.button <= 3:
+                            get_key_input(event.button, mouse_click=True)
                             clicked = False
 
+                    # if left click
+                    elif event.button == 1:
+                    
+                        if self.back_button.collidepoint(event.pos):
+                            running = False
+
+                        else:
+                            for index, text_box in enumerate(text_boxes_1):
+                                if text_box.collidepoint(event.pos):
+                                    clicked = True
+                                    clicked_index_2 = -1
+                                    clicked_index_1 = index
+                                
+
+
+                            for index, text_box in enumerate(text_boxes_2):
+                                if text_box.collidepoint(event.pos):
+                                    clicked = True
+                                    clicked_index_1 = -1
+                                    clicked_index_2 = index
+
                 elif event.type == pygame.KEYDOWN:
-                    # z = pygame.key.name(event.key)
                     if clicked:
                         get_key_input(event.key)
                     

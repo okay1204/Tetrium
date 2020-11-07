@@ -804,6 +804,7 @@ class Game:
                         
                         if event.key == pygame.K_RETURN:
                             start()
+                            pygame.mixer.music.set_volume(self.volume)
                             self.screen.fill((0, 0, 0))
                                 
 

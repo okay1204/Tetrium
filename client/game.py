@@ -86,7 +86,7 @@ class Game:
         # list of numbers, with numbers being attack amounts
         self.meter = []
         self.meter_stage = 1
-
+    #hi
 
         self.opp_resting = self.opp_meter = self.opp_meter_stage = self.opp_piece_blocks = None
         self.opp_name = None

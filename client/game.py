@@ -26,7 +26,7 @@ color_key = {
 }
 
 
-
+en
 class Game:
 
     def __init__(self):
@@ -1414,19 +1414,14 @@ class Piece(Game):
             for block in self.blocks:
                 block.render_preview()
             
-        
             for x in range(downCount): # noqa pylint: disable=unused-variable
                 self.move(0, -1)
 
             self.move(0, 1)
             
-
-
         # for actual piece
         for block in self.blocks:
             block.render()
-
-
 
 
 if __name__ == "__main__":

@@ -8,6 +8,8 @@ import sys
 from random import shuffle, randint
 from network import Network
 import json
+from oooooooooooooooooooooooooooooooooooooooooooootils import darken, lighten
+
 
 from pieces import preview_piece
 
@@ -24,12 +26,6 @@ color_key = {
 }
 
 
-def darken(value):
-
-    value -= 60
-
-    if value < 0: return 0
-    else: return value
 
 class Game:
 
@@ -103,6 +99,19 @@ class Game:
         self.very_big_font = pygame.font.Font('assets/arial.ttf', 75)
         self.back_icon = pygame.image.load('assets/arrow-back.png')
         self.back_button = pygame.Rect(10, 10, 75, 65)
+
+
+        self.default_controls = {
+            "Move Right": "d",
+            "Move Left": "a",
+            "Soft Drop": "s",
+            "Hard Drop": "down",
+            "Hold Piece": "up",
+            "Rotate Clockwise": "right",
+            "Rotate Counter-Clockwise": "left",
+            "Toggle Movement": "g",
+            "Toggle Music": "m"
+        }
 
 
         # setting controls
@@ -297,12 +306,14 @@ class Game:
 
 
 
-    def draw_back_button(self):
-        pygame.draw.rect(self.screen, (255,255,255), self.back_button)
+    def draw_back_button(self, pos = (-10, -10)):
+        white = (255, 255, 255)
+        color = tuple(map(darken, white)) if self.back_button.collidepoint(pos) else white
+        pygame.draw.rect(self.screen, color, self.back_button)
         self.screen.blit(self.back_icon, (-3, -7))
 
 
-    def draw_controls(self, controls, pos, color, keys_bkg_color = (0, 0, 0), second_color = None, underline = False, clicked_index = -1):
+    def draw_controls(self, controls, pos, color, keys_bkg_color = (0, 0, 0), underline = False, clicked_index = -1):
     
         replace_keys = {
             'left click': 'l-mb',
@@ -337,7 +348,6 @@ class Game:
         }
 
         
-        second_color = color if not second_color else second_color
         text_rects = []
     
        
@@ -346,9 +356,9 @@ class Game:
             description, key = values
             modified_key = replace_keys[key].upper() if key in replace_keys.keys() else key.upper()
             text_1 = self.big_font.render(modified_key, True, (0, 0, 0))
-            text_2 = self.medium_font.render(f" = {description}", True, color if not index % 2 else second_color)
+            text_2 = self.medium_font.render(f" = {description}", True, color)
             text_2_rect = text_2.get_rect()
-            text_2_rect.center = ((200 if pos == 0 else self.width - 150), (index * 50) + 530)
+            text_2_rect.center = ((200 if pos == 0 else self.width - 150), (index * 50) + 450)
             text_1_rect = text_1.get_rect()
             text_1_rect.center = (text_2_rect.x - text_1_rect.width/2, text_2_rect.y + 10)
    
@@ -387,7 +397,7 @@ class Game:
 
         running = True
         while running:
-
+            mouse = pygame.mouse.get_pos()
             #Game over loop
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -402,7 +412,7 @@ class Game:
 
             self.screen.fill((0,0,0))
             draw_tetris_pieces(pieces)
-            self.draw_back_button()
+            self.draw_back_button(mouse)
 
             text_y = text_y + text_scroll_dist if text_y <= self.width + 100 else -1 * (len(credits_list) * text_offset)
 
@@ -413,6 +423,36 @@ class Game:
     def pick_controls_screen(self):
         
 
+        def draw_reset_button(pos):
+            white = (255, 255, 255)
+            color = tuple(map(darken, white)) if reset_button.collidepoint(pos) else white
+            pygame.draw.rect(self.screen, color, reset_button)
+            self.screen.blit(reset_text, (self.width/2 - 50 + 20,  self.height - 45 + 12))
+        
+        
+        
+        def reset_controls():
+            with open('controls.json', 'w') as f:
+                json.dump(self.default_controls, f)
+
+
+            self.left_controls = {
+                    
+                "Move Left": self.default_controls["Move Left"],
+                "Move Right": self.default_controls["Move Right"],
+                "Soft Drop": self.default_controls["Soft Drop"],
+                "Toggle Movement": self.default_controls["Toggle Movement"],
+                "Toggle Music": self.default_controls["Toggle Music"]
+
+            }
+           
+            self.right_controls = {
+                    "Rotate Clockwise": self.default_controls["Rotate Clockwise"],
+                    "Rotate Counter-Clockwise": self.default_controls["Rotate Counter-Clockwise"],
+                    "Hold Piece": self.default_controls["Hold Piece"],
+                    "Hard Drop": self.default_controls["Hard Drop"]
+            }
+
         def draw_title():
             self.screen.blit(title_text_1, (self.width/2 - 140, 100))
             self.screen.blit(title_text_2, (self.width/2 - 200, 160))
@@ -421,7 +461,7 @@ class Game:
             if clicked:
                 color = (240, 240, 166) if  int(str(round(time.time(), 1))[-1:]) < 5 else (26, 27, 37)
                 prompt_text = self.big_font.render('PRESS A KEY', True, color)
-                self.screen.blit(prompt_text, (self.width/2 - 100, 375))
+                self.screen.blit(prompt_text, (self.width/2 - 100, 300))
 
         def get_key_input(key):
 
@@ -437,18 +477,22 @@ class Game:
 
         
 
-
         title_text_1 = self.big_font.render('CLICK ON A BOX TO', True, (255, 255, 255))
         title_text_2 = self.big_font.render('CHANGE YOUR CONTROLS', True, (255, 255, 255))
+        reset_text = self.medium_font.render('RESET', True, (0, 0, 0))
         text_boxes_1 = []
         text_boxes_2 = []
         clicked = False
         clicked_index_1 = -1
         clicked_index_2 = -1
+        reset_button = pygame.Rect(self.width/2 - 50, self.height - 35, 100, 27)
     
         running = True
         while running:
+            #bkg color
             self.screen.fill((26, 27, 37))
+
+            mouse = pygame.mouse.get_pos()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -461,6 +505,9 @@ class Game:
                     triggered = False
                     if self.back_button.collidepoint(event.pos):
                         running = False
+
+                    elif reset_button.collidepoint(event.pos):
+                        reset_controls()
 
                     else:
                         for index, text_box in enumerate(text_boxes_1):
@@ -483,21 +530,21 @@ class Game:
                         if not triggered:
                             clicked = False
 
+                        
+
                 elif event.type == pygame.KEYDOWN:
                     # z = pygame.key.name(event.key)
                     if clicked:
                         get_key_input(event.key)
                     
                     clicked = False
-                
-        
+    
+            self.draw_back_button(mouse)
+            draw_reset_button(mouse)
+
             draw_title()
             draw_prompt()
-            self.draw_back_button()
             
-            # text_boxes_1 = self.draw_controls(self.left_controls.items(), 0, (172, 81, 3), second_color =  (5, 139, 142), keys_bkg_color = (24, 26 , 30), underline = clicked, clicked_index = clicked_index_1)
-            # text_boxes_2 = self.draw_controls(self.right_controls.items(), 1,  (5, 139, 142), second_color = (172, 81, 3), keys_bkg_color = (24, 26 ,30), underline = clicked, clicked_index = clicked_index_2)
-
             text_boxes_1 = self.draw_controls(self.left_controls.items(), 0, (89, 248, 232), keys_bkg_color = (26, 27, 37), underline = clicked, clicked_index = clicked_index_1)
             text_boxes_2 = self.draw_controls(self.right_controls.items(), 1,  (89, 248, 232),  keys_bkg_color =(26, 27, 37), underline = clicked, clicked_index = clicked_index_2)
 
@@ -630,17 +677,18 @@ class Game:
                         piece.move(0, 1)
                         last_falls[i] = time.time() + 0.75
 
-        def draw_credits_button():
-            pygame.draw.rect(self.screen, (r, g, b), credits_button)
+        def draw_credits_button(pos):
+            color = tuple(map(lighten, (r,g,b))) if credits_button.collidepoint(pos) else (r, g, b)
+            pygame.draw.rect(self.screen, color, credits_button)
             self.screen.blit(credits_button_text, (credits_button_pos[0] + 3, credits_button_pos[1] + 5))   
 
 
-        def draw_controls_menu_button():
-            pygame.draw.rect(self.screen, (r, g, b), controls_menu_button)
-            self.screen.blit(controls_menu_button_text, (controls_button_pos[0] + 5, controls_button_pos[1] + 3))
+        def draw_controls_button(pos):
+            color = tuple(map(lighten, (r,g,b))) if controls_button.collidepoint(pos) else (r, g, b)
+            pygame.draw.rect(self.screen, color, controls_button)
+            self.screen.blit(controls_button_text, (controls_button_pos[0] + 5, controls_button_pos[1] + 3))
         
       
-        
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
         x_pos = [0, 4, 8, 12, 16, 20, 0, 4, 8]
         shuffle(x_pos)
@@ -683,8 +731,8 @@ class Game:
         input_text_width = 0
         
         controls_button_pos = (0 , self.height - 30)
-        controls_menu_button = pygame.Rect(controls_button_pos[0], controls_button_pos[1], 125, 30)
-        controls_menu_button_text = self.medium_font.render('CONTROLS', True, (0, 0, 0))
+        controls_button = pygame.Rect(controls_button_pos[0], controls_button_pos[1], 125, 30)
+        controls_button_text = self.medium_font.render('CONTROLS', True, (0, 0, 0))
         credits_button_text = self.small_font.render('CREDITS', True, (0, 0, 0))
         credits_button_height = 30
         credits_button_pos = (self.width - 70, self.height - credits_button_height)
@@ -724,7 +772,7 @@ class Game:
                         #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
                         s.fill((0, 0, 0))
 
-                    elif controls_menu_button.collidepoint(event.pos):
+                    elif controls_button.collidepoint(event.pos):
                         self.pick_controls_screen()
                         #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
                         s.fill((0, 0, 0))
@@ -758,8 +806,8 @@ class Game:
             cycle_colors()
             draw_tetris_pieces(pieces)
             check_mute_and_draw_icons()
-            draw_credits_button()
-            draw_controls_menu_button()
+            draw_credits_button(mouse)
+            draw_controls_button(mouse)
 
             if not connected:
                 draw_start_button()

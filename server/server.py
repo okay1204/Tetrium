@@ -111,9 +111,7 @@ def threaded_client(conn, player, gameId):
                                 game.reset[player] = True
 
                                 if all(game.reset):
-                                    game.rematch = [False, False]
-                                    game.reset = [False, False]
-                                    game.winner = None
+                                    game._reset()
 
                     elif data.startswith('name '):
                         game.names[player] = data[5:]

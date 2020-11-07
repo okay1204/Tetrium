@@ -433,7 +433,7 @@ class Game:
         
         def reset_controls():
             with open('controls.json', 'w') as f:
-                json.dump(self.default_controls, f)
+                json.dump(self.default_controls, f, indent=2)
 
 
             self.left_controls = {

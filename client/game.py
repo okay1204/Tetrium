@@ -6,7 +6,7 @@ import math
 import time
 import sys
 from random import shuffle, randint
-from network import Network
+import network
 import json
 from oooooooooooooooooooooooooooooooooooooooooooootils import darken, lighten
 
@@ -563,7 +563,6 @@ class Game:
             pygame.display.update()
 
 
-
     def start_screen(self):
 
         connected = False
@@ -654,8 +653,12 @@ class Game:
             if not input_text:
                 input_text = "Player"
 
-            self.n = Network()
+            self.n = network.Network()
             self.player = self.n.p
+
+            if self.n.p == "outdated version":
+                self.outdated_version_screen()
+
             connected = True
             self.name = input_text
             self.n.send("name " + input_text)
@@ -678,15 +681,15 @@ class Game:
             
         def draw_tetris_pieces(pieces):
             for i, piece in enumerate(pieces):
-                    #means piece is off the screen
-                    if piece.y >= 28:
-                        #Moves it back up
-                        piece.move(0, randint(-35, -30))
+                #means piece is off the screen
+                if piece.y >= 28:
+                    #Moves it back up
+                    piece.move(0, randint(-35, -30))
 
-                    piece.render(False)
-                    if time.time() > last_falls[i]:
-                        piece.move(0, 1)
-                        last_falls[i] = time.time() + 0.75
+                piece.render(False)
+                if time.time() > last_falls[i]:
+                    piece.move(0, 1)
+                    last_falls[i] = time.time() + 0.75
 
         def draw_credits_button(pos):
             color = tuple(map(lighten, (r,g,b))) if credits_button.collidepoint(pos) else (r, g, b)
@@ -838,6 +841,33 @@ class Game:
 
         self.time_started = time.time()
         self.running = True
+
+    def outdated_version_screen(self):
+
+
+        game.screen.fill((0, 0, 0))
+        text1 = self.font.render("You are running an outdated", True, (255, 255, 255))
+        text2 = self.font.render("version of the game", True, (255, 255, 255))
+
+        text3 = self.font.render(f"Your Version: {network.version}", True, (255, 255, 255))
+
+        self.screen.blit(text1, (self.width/2-200, 100))
+        self.screen.blit(text2, (self.width/2-130, 150))
+        self.screen.blit(text3, (self.width/2-140, 250))
+        pygame.display.update()
+
+        while True:
+
+            for event in pygame.event.get():
+
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            # TODO button here for disconnecting
+
+            self.clock.tick(60)
+
     
     def disconnected_screen(self, text1, text2):
 

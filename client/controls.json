@@ -1,11 +1,1 @@
-{
-  "Move Left": "a",
-  "Move Right": "d",
-  "Soft Drop": "s",
-  "Toggle Movement": "g",
-  "Toggle Music": "m",
-  "Rotate Clockwise": "right",
-  "Rotate Counter-Clockwise": "left",
-  "Hold Piece": "up",
-  "Hard Drop": "down"
-}
+{"Move Right": "d", "Move Left": "a", "Soft Drop": "s", "Hard Drop": "down", "Hold Piece": "up", "Rotate Clockwise": "right", "Rotate Counter-Clockwise": "left", "Toggle Movement": "g", "Toggle Music": "m"}

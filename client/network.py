@@ -3,7 +3,7 @@ import pickle
 import traceback
 from ip import IP
 
-
+version = "0.1"
 
 class Network:
     def __init__(self):
@@ -11,7 +11,7 @@ class Network:
         self.server = 'localhost'
         self.port = 6969
         self.addr = (self.server, self.port)
-        self.p = int(self.connect())
+        self.p = self.connect()
 
         self.blocksize = 16
         # marks the end of packet sending
@@ -20,7 +20,15 @@ class Network:
     def connect(self):
         try:
             self.client.connect(self.addr)
-            return self.client.recv(4096)
+            # send version number after connecting
+            self.client.send(str.encode(version))
+
+            response = self.client.recv(64).decode()
+
+            if response.isdigit():
+                response = int(response)
+
+            return response
         except:
             pass
 
@@ -61,3 +69,7 @@ class Network:
             return recieved
         except socket.error as e:
             print(e)
+
+
+if __name__ == "__main__":
+    import main

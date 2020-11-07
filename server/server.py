@@ -19,12 +19,15 @@ s.bind((server, port))
 blocksize = 16
 sentinel = b'\x00\x00END_MESSAGE!\x00\x00'
 
+version = "0.1"
+
 def threaded_client(conn, player, gameId):
 
     global idCount
 
     # send player number to client right after connecting
     conn.send(str.encode(str(player)))
+
 
     name = None
 
@@ -156,6 +159,15 @@ print("Server Started, Waiting for connections")
 while True:
         
     conn, addr = s.accept()
+
+
+    # make sure client is running correct version first
+    client_version = conn.recv(64).decode()
+    if version != client_version:
+        print(f"Player {player} was disconnected because they were running version {client_version}")
+        conn.send(str.encode("outdated version"))
+        continue
+
     
     idCount += 1
     gameId = (idCount - 1)//2

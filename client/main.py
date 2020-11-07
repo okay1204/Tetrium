@@ -382,7 +382,11 @@ while True:
                     key_name = pygame.key.name(event.key)
 
                 else:
-                    key_name = mouse_number_key[event.button]
+                    
+                    if 1 <= event.button <= 3:
+                        key_name = mouse_number_key[event.button]
+                    else:
+                        key_name = None
 
 
                 if key_name == controls['Move Left']:
@@ -503,7 +507,10 @@ while True:
                 if event.type == pygame.KEYUP:
                     key_name = pygame.key.name(event.key)
                 else:
-                    key_name = mouse_number_key[event.button]
+                    if 1 <= event.button <= 3:
+                        key_name = mouse_number_key[event.button]
+                    else:
+                        key_name = None
 
                 if key_name == controls['Soft Drop']:
                     if speedUp:

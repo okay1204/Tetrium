@@ -31,7 +31,7 @@ class OnlineGame:
 
     
     def speed_level(self):
-        level = int(((time.time() - self.time_started) // 30) + 1)
+        level = int(((time.time() - self.time_started) // 3) + 1)
         if level > 15: level = 15
         return level
     

@@ -56,7 +56,7 @@ rotation_last = False
 
 
 def reset():
-    global bag, next_bag, avoids, current, held, canSwitch, moving
+    global bag, next_bag, avoids, current, held, canSwitch, moving, fall_speed
 
     game.resting.clear()
     game.level = 1
@@ -74,6 +74,8 @@ def reset():
     moving = 0
     game.meter.clear()
     game.time_started = time.time()
+    fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
+
 
 opp_disconnected_after = False
 rematch = False

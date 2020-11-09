@@ -848,10 +848,16 @@ class Game:
 
     def outdated_version_screen(self, new_version, download_link):
 
-        button_text_color = (0,0,0)
-        button_dimensions = (300, 40)
-        button_pos = (self.width/2 - button_dimensions[0]/2, self.height/2 - button_dimensions[1]/2)
-        button_rect = pygame.Rect(*button_pos, *button_dimensions)
+        copy_button_text_color = (0,0,0)
+        copy_button_dimensions = (300, 40)
+        copy_button_pos = (self.width/2 - copy_button_dimensions[0]/2, self.height/2 - copy_button_dimensions[1]/2)
+        copy_button_rect = pygame.Rect(*copy_button_pos, *copy_button_dimensions)
+
+
+        quit_button_text_color = (0,0,0)
+        quit_button_dimensions = (80, 40)
+        quit_button_pos = (self.width/2 - quit_button_dimensions[0]/2, 700)
+        quit_button_rect = pygame.Rect(*quit_button_pos, *quit_button_dimensions)
     
 
         def draw_text():
@@ -870,32 +876,53 @@ class Game:
         copied_pos = 0
         copy_animation = False
 
-        def draw_button():
-            nonlocal button_text_color
+        def draw_buttons():
+
+            nonlocal quit_button_text_color
         
-            pygame.draw.rect(self.screen, (255,255,255), button_rect)
-            button_text_color = (0, 0, 0)
+            pygame.draw.rect(self.screen, (255,255,255), copy_button_rect)
                 
-            button_text = self.font.render("Copy download link", True, button_text_color)
-            self.screen.blit(button_text, (button_pos[0] + 10, button_pos[1] + 3))
+            copy_button_text = self.font.render("Copy download link", True, copy_button_text_color)
+            self.screen.blit(copy_button_text, (copy_button_pos[0] + 10, copy_button_pos[1] + 3))
+                
+
+            if quit_button_pos[0] <= mouse[0] <= quit_button_pos[0] + quit_button_dimensions[0] and quit_button_pos[1] <= mouse[1] <= quit_button_pos[1] + quit_button_dimensions[1]: 
+                pygame.draw.rect(self.screen, (0,0,0), quit_button_rect)
+                quit_button_text_color = (255,255,255)
+
+            
+            else: 
+                pygame.draw.rect(self.screen, (255,255,255), quit_button_rect)
+                quit_button_text_color = (0, 0, 0)
+
+
+            quit_button_text = self.font.render("Quit", True, quit_button_text_color)
+            self.screen.blit(quit_button_text, (quit_button_pos[0] + 10, quit_button_pos[1] + 3))
 
 
         def check_click(pos):
 
             nonlocal copied_pos, copy_animation
             
-            pyperclip.copy(download_link)
 
-            copied_pos = self.height/2 - button_dimensions[1]/2
-            copy_animation = True
+            if copy_button_rect.collidepoint(pos):
+                pyperclip.copy(download_link)
+
+                copied_pos = self.height/2 - copy_button_dimensions[1]/2
+                copy_animation = True
+
+            elif quit_button_rect.collidepoint(pos):
+                pygame.quit()
+                sys.exit()
 
 
 
 
         while True:
 
-            mouse = pygame.mouse.get_pos()
             game.screen.fill((0, 0, 0))
+
+            mouse = pygame.mouse.get_pos() 
 
             for event in pygame.event.get():
 
@@ -908,14 +935,13 @@ class Game:
 
 
             draw_text()
-            draw_button()
+            draw_buttons()
 
             if copy_animation:
-
                 copied_pos -= 2
                 
                 copied_text = self.font.render("Copied!", True, (49, 235, 228))
-                self.screen.blit(copied_text, (button_pos[0]+100, copied_pos))
+                self.screen.blit(copied_text, (copy_button_pos[0]+100, copied_pos))
 
                 if copied_pos <= 320:
                     copy_animation = False

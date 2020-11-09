@@ -19,8 +19,6 @@ s.bind((server, port))
 blocksize = 16
 sentinel = b'\x00\x00END_MESSAGE!\x00\x00'
 
-version = "0.1"
-
 def threaded_client(conn, player, gameId):
 
     global idCount
@@ -154,16 +152,20 @@ player = 0
 s.listen()
 print("Server Started, Waiting for connections")
 
+version = "0.4"
+# NOTE replace with download link to newer version
+download_link = "www.google.com"
+
 while True:
         
     conn, addr = s.accept()
 
 
     # make sure client is running correct version first
-    client_version = conn.recv(64).decode()
+    client_version = conn.recv(4096).decode()
     if version != client_version:
-        print(f"Player {player} was disconnected because they were running version {client_version}")
-        conn.send(str.encode("outdated version"))
+        print(f"{addr[0]} was disconnected because they were running version {client_version}")
+        conn.send(str.encode(f"outdated version {version} {download_link}"))
         continue
 
     

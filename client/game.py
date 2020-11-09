@@ -8,6 +8,7 @@ import sys
 from random import shuffle, randint
 import network
 import json
+import pyperclip
 from oooooooooooooooooooooooooooooooooooooooooooootils import darken, lighten
 
 
@@ -656,8 +657,10 @@ class Game:
             self.n = network.Network()
             self.player = self.n.p
 
-            if self.n.p == "outdated version":
-                self.outdated_version_screen()
+            if isinstance(self.n.p, str):
+                outdated_info = self.n.p.split()
+                                            # new version number # download link
+                self.outdated_version_screen(outdated_info[2], outdated_info[3])
 
             connected = True
             self.name = input_text
@@ -843,21 +846,56 @@ class Game:
         self.time_started = time.time()
         self.running = True
 
-    def outdated_version_screen(self):
+    def outdated_version_screen(self, new_version, download_link):
+
+        button_text_color = (0,0,0)
+        button_dimensions = (300, 40)
+        button_pos = (self.width/2 - button_dimensions[0]/2, self.height/2 - button_dimensions[1]/2)
+        button_rect = pygame.Rect(*button_pos, *button_dimensions)
+    
+
+        def draw_text():
+            text1 = self.font.render("You are running an outdated", True, (255, 255, 255))
+            text2 = self.font.render("version of the game", True, (255, 255, 255))
+
+            text3 = self.font.render(f"Your Version: {network.version}", True, (255, 255, 255))
+            text4 = self.font.render(f"New Version: {new_version}", True, (255, 255, 255))
+
+            self.screen.blit(text1, (self.width/2-200, 100))
+            self.screen.blit(text2, (self.width/2-130, 150))
+            self.screen.blit(text3, (self.width/2-140, 250))
+            self.screen.blit(text4, (self.width/2-140, 290))
 
 
-        game.screen.fill((0, 0, 0))
-        text1 = self.font.render("You are running an outdated", True, (255, 255, 255))
-        text2 = self.font.render("version of the game", True, (255, 255, 255))
+        copied_pos = 0
+        copy_animation = False
 
-        text3 = self.font.render(f"Your Version: {network.version}", True, (255, 255, 255))
+        def draw_button():
+            nonlocal button_text_color
+        
+            pygame.draw.rect(self.screen, (255,255,255), button_rect)
+            button_text_color = (0, 0, 0)
+                
+            button_text = self.font.render("Copy download link", True, button_text_color)
+            self.screen.blit(button_text, (button_pos[0] + 10, button_pos[1] + 3))
 
-        self.screen.blit(text1, (self.width/2-200, 100))
-        self.screen.blit(text2, (self.width/2-130, 150))
-        self.screen.blit(text3, (self.width/2-140, 250))
-        pygame.display.update()
+
+        def check_click(pos):
+
+            nonlocal copied_pos, copy_animation
+            
+            pyperclip.copy(download_link)
+
+            copied_pos = self.height/2 - button_dimensions[1]/2
+            copy_animation = True
+
+
+
 
         while True:
+
+            mouse = pygame.mouse.get_pos()
+            game.screen.fill((0, 0, 0))
 
             for event in pygame.event.get():
 
@@ -865,8 +903,24 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-            # TODO button here for disconnecting
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    check_click(event.pos)
 
+
+            draw_text()
+            draw_button()
+
+            if copy_animation:
+
+                copied_pos -= 2
+                
+                copied_text = self.font.render("Copied!", True, (49, 235, 228))
+                self.screen.blit(copied_text, (button_pos[0]+100, copied_pos))
+
+                if copied_pos <= 320:
+                    copy_animation = False
+
+            pygame.display.update()
             self.clock.tick(60)
 
     

@@ -23,7 +23,7 @@ class Network:
             # send version number after connecting
             self.client.send(str.encode(version))
 
-            response = self.client.recv(64).decode()
+            response = self.client.recv(4096).decode()
 
             if response.isdigit():
                 response = int(response)

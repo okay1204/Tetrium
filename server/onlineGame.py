@@ -120,6 +120,12 @@ class OnlineGame:
 
         if loser: self.winner = 0
         else: self.winner = 1
+
+    def _reset(self):
+        self.rematch = [False, False]
+        self.reset = [False, False]
+        self.winner = None
+        self.time_started = time.time()
     
     
     

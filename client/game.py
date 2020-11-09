@@ -8,6 +8,7 @@ import sys
 from random import shuffle, randint
 import network
 import json
+import pyperclip
 from oooooooooooooooooooooooooooooooooooooooooooootils import darken, lighten
 
 
@@ -59,7 +60,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((self.width, self.height))
 
-        self.icon = pygame.image.load('./tetris.jpg')
+        self.icon = pygame.image.load('./assets/tetris.jpg')
         pygame.display.set_icon(self.icon)
 
         self.caption = "Tetrium"
@@ -324,7 +325,6 @@ class Game:
             'left': '←',
             'left shift': 'lshft',
             'right shift': 'rshft',
-            'backspace': 'bks',
             'caps lock': 'caps',
             'return': 'entr',
             'left ctrl': 'lctrl',
@@ -655,8 +655,10 @@ class Game:
             self.n = network.Network()
             self.player = self.n.p
 
-            if self.n.p == "outdated version":
-                self.outdated_version_screen()
+            if isinstance(self.n.p, str):
+                outdated_info = self.n.p.split()
+                                            # new version number # download link
+                self.outdated_version_screen(outdated_info[2], outdated_info[3])
 
             connected = True
             self.name = input_text
@@ -842,21 +844,83 @@ class Game:
         self.time_started = time.time()
         self.running = True
 
-    def outdated_version_screen(self):
+    def outdated_version_screen(self, new_version, download_link):
+
+        copy_button_text_color = (0,0,0)
+        copy_button_dimensions = (300, 40)
+        copy_button_pos = (self.width/2 - copy_button_dimensions[0]/2, self.height/2 - copy_button_dimensions[1]/2)
+        copy_button_rect = pygame.Rect(*copy_button_pos, *copy_button_dimensions)
 
 
-        game.screen.fill((0, 0, 0))
-        text1 = self.font.render("You are running an outdated", True, (255, 255, 255))
-        text2 = self.font.render("version of the game", True, (255, 255, 255))
+        quit_button_text_color = (0,0,0)
+        quit_button_dimensions = (80, 40)
+        quit_button_pos = (self.width/2 - quit_button_dimensions[0]/2, 700)
+        quit_button_rect = pygame.Rect(*quit_button_pos, *quit_button_dimensions)
+    
 
-        text3 = self.font.render(f"Your Version: {network.version}", True, (255, 255, 255))
+        def draw_text():
+            text1 = self.font.render("You are running an outdated", True, (255, 255, 255))
+            text2 = self.font.render("version of the game", True, (255, 255, 255))
 
-        self.screen.blit(text1, (self.width/2-200, 100))
-        self.screen.blit(text2, (self.width/2-130, 150))
-        self.screen.blit(text3, (self.width/2-140, 250))
-        pygame.display.update()
+            text3 = self.font.render(f"Your Version: {network.version}", True, (255, 255, 255))
+            text4 = self.font.render(f"New Version: {new_version}", True, (255, 255, 255))
+
+            self.screen.blit(text1, (self.width/2-200, 100))
+            self.screen.blit(text2, (self.width/2-130, 150))
+            self.screen.blit(text3, (self.width/2-140, 250))
+            self.screen.blit(text4, (self.width/2-140, 290))
+
+
+        copied_pos = 0
+        copy_animation = False
+
+        def draw_buttons():
+
+            nonlocal quit_button_text_color
+        
+            pygame.draw.rect(self.screen, (255,255,255), copy_button_rect)
+                
+            copy_button_text = self.font.render("Copy download link", True, copy_button_text_color)
+            self.screen.blit(copy_button_text, (copy_button_pos[0] + 10, copy_button_pos[1] + 3))
+                
+
+            if quit_button_pos[0] <= mouse[0] <= quit_button_pos[0] + quit_button_dimensions[0] and quit_button_pos[1] <= mouse[1] <= quit_button_pos[1] + quit_button_dimensions[1]: 
+                pygame.draw.rect(self.screen, (0,0,0), quit_button_rect)
+                quit_button_text_color = (255,255,255)
+
+            
+            else: 
+                pygame.draw.rect(self.screen, (255,255,255), quit_button_rect)
+                quit_button_text_color = (0, 0, 0)
+
+
+            quit_button_text = self.font.render("Quit", True, quit_button_text_color)
+            self.screen.blit(quit_button_text, (quit_button_pos[0] + 10, quit_button_pos[1] + 3))
+
+
+        def check_click(pos):
+
+            nonlocal copied_pos, copy_animation
+            
+
+            if copy_button_rect.collidepoint(pos):
+                pyperclip.copy(download_link)
+
+                copied_pos = self.height/2 - copy_button_dimensions[1]/2
+                copy_animation = True
+
+            elif quit_button_rect.collidepoint(pos):
+                pygame.quit()
+                sys.exit()
+
+
+
 
         while True:
+
+            game.screen.fill((0, 0, 0))
+
+            mouse = pygame.mouse.get_pos() 
 
             for event in pygame.event.get():
 
@@ -864,8 +928,23 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-            # TODO button here for disconnecting
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    check_click(event.pos)
 
+
+            draw_text()
+            draw_buttons()
+
+            if copy_animation:
+                copied_pos -= 2
+                
+                copied_text = self.font.render("Copied!", True, (49, 235, 228))
+                self.screen.blit(copied_text, (copy_button_pos[0]+100, copied_pos))
+
+                if copied_pos <= 320:
+                    copy_animation = False
+
+            pygame.display.update()
             self.clock.tick(60)
 
     

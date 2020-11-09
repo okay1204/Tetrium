@@ -2,12 +2,14 @@ Countdown when game starts
 
 Restart function
 
-Outdated version detection button to exit
-
 Rematch button
 
 Meter sound effects
 
 Meter animations
 
-Start Button doesn't disappear when pressing enter
+Opponents name sometimes doesn't show
+
+Serverside anticheat
+
+Make sure game doesn't crash if can't connect to server

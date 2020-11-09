@@ -56,7 +56,7 @@ rotation_last = False
 
 
 def reset():
-    global bag, next_bag, avoids, current, held, canSwitch, moving
+    global bag, next_bag, avoids, current, held, canSwitch, moving, fall_speed
 
     game.resting.clear()
     game.level = 1
@@ -74,6 +74,8 @@ def reset():
     moving = 0
     game.meter.clear()
     game.time_started = time.time()
+    fall_speed = 1
+
 
 opp_disconnected_after = False
 rematch = False
@@ -113,6 +115,7 @@ def game_over(win: bool):
                 # find new match
                 if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
                     reset()
+                    game.running = False
                     if not opp_disconnected_after:
                         game.n.disconnect()
 

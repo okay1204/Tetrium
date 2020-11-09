@@ -342,9 +342,9 @@ while True:
             
                 game.rows_cleared.clear()
 
-            play_meter_animations()
-
             game.render(bag[:3], held)
+            play_meter_animations()
+            
             pygame.display.update()
             game.clock.tick(60)
 

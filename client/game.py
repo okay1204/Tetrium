@@ -53,6 +53,9 @@ class Game:
 
         self.width = 750
         self.height = 800
+        self.background_color = (0, 0, 0)
+        self.foreground_color = (93, 110, 105)
+
 
         self.running = True
         self.muted = False
@@ -138,15 +141,15 @@ class Game:
 
     def render(self, pieces=None, held=None):
         
-        self.screen.fill((0, 0, 0))
-        pygame.draw.rect(self.screen, (93, 110, 105), (100, 100, 300, 600))
+        self.screen.fill(self.background_color)
+        pygame.draw.rect(self.screen, self.foreground_color, (100, 100, 300, 600))
 
         for block in self.resting:
             block.render()
 
         # for piece order
         for x in range(1, 4):
-            pygame.draw.circle(self.screen, (93, 110, 105), (450, 130*x), 40)
+            pygame.draw.circle(self.screen, self.foreground_color, (450, 130*x), 40)
 
         text = self.font.render('Next', True, (255, 255 ,255))
         textRect = text.get_rect()
@@ -164,7 +167,7 @@ class Game:
                 position += 1
     
         # for hold area
-        pygame.draw.circle(self.screen, (93, 110, 105), (50, 130), 40)
+        pygame.draw.circle(self.screen, self.foreground_color, (50, 130), 40)
         text = self.font.render('Hold', True, (255, 255 ,255))
         textRect = text.get_rect()
         textRect.center = (50, 60)
@@ -231,7 +234,7 @@ class Game:
 
         # junk line meter
         pygame.draw.rect(self.screen, (255, 255, 255), (32, 394, 36, 306))
-        pygame.draw.rect(self.screen, (93, 110, 105), (35, 397, 30, 300))
+        pygame.draw.rect(self.screen, self.foreground_color, (35, 397, 30, 300))
 
         meter_block = 0
 
@@ -262,7 +265,7 @@ class Game:
 
 
     def render_second_screen(self):
-        pygame.draw.rect(self.screen, (93, 110, 105), (570, 250, 150, 300))
+        pygame.draw.rect(self.screen, self.foreground_color, (570, 250, 150, 300))
 
         if self.time_started + 1 > time.time():
             return
@@ -277,7 +280,7 @@ class Game:
         
         # junk line meter
         pygame.draw.rect(self.screen, (255, 255, 255), (539, 398, 17, 152))
-        pygame.draw.rect(self.screen, (93, 110, 105), (540, 399, 15, 150))
+        pygame.draw.rect(self.screen, self.foreground_color, (540, 399, 15, 150))
 
 
         meter_block = 0
@@ -1120,7 +1123,7 @@ class Block(Game):
     def render_preview(self):
 
         pygame.draw.rect(game.screen, (255, 255, 255), ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-        pygame.draw.rect(game.screen, (93, 110, 105), ((self.x-1) * self.size + 103, (self.y-1)* self.size + 103, 24, 24))
+        pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + 103, (self.y-1)* self.size + 103, 24, 24))
 
 
 

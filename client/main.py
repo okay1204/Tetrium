@@ -263,6 +263,34 @@ mouse_number_key = {
     3: 'right click'
 }
 
+meter_animations = []
+
+def play_meter_animations():
+    global meter_animations
+
+    # animation should take 1 seconds long
+    removed = []
+
+    for pos, start_time in meter_animations:
+
+        print(time.time() - start_time)
+
+        if time.time() - start_time > 1:
+            removed.append((pos, start_time))
+            continue
+
+        start_time = time.time() - start_time
+
+        distance = (550 - pos[0], 550 - pos[1])
+        traveled = (distance[0]/1 * start_time + pos[0], distance[1]/1 * start_time + pos[1])
+
+        print(traveled)
+        pygame.draw.circle(game.screen, (255, 255, 255), traveled, 10)
+    
+    for remove in removed:
+        meter_animations.remove(remove)
+
+
 while True:
 
     opp_disconnected_after = False
@@ -315,6 +343,8 @@ while True:
                 game.rows_cleared.clear()
 
             game.render(bag[:3], held)
+            play_meter_animations()
+            
             pygame.display.update()
             game.clock.tick(60)
 
@@ -749,6 +779,16 @@ while True:
 
                     if lines_sent:
                         send(f"junk {lines_sent}")
+
+                        # getting the block with the highest y
+                        highest_y = 0
+                        chosen_block = None
+                        for block in current.blocks:
+                            if block.y > highest_y:
+                                highest_y = block.y
+                                chosen_block = block
+
+                        meter_animations.append((((block.x-1) * block.size + 100, (block.y-1) * block.size + 100), time.time()))
                         
                     
                     if not lines_cleared:
@@ -798,6 +838,9 @@ while True:
 
         if current:
             current.render()
+
+        play_meter_animations()
+
 
         if display_until > time.time():
             text = game.font.render(f'Speed Level {game.level}', True, (0, 0 ,0))

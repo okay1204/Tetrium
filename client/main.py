@@ -74,7 +74,7 @@ def reset():
     moving = 0
     game.meter.clear()
     game.time_started = time.time()
-    fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
+    fall_speed = 1
 
 
 opp_disconnected_after = False
@@ -115,6 +115,7 @@ def game_over(win: bool):
                 # find new match
                 if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
                     reset()
+                    game.running = False
                     if not opp_disconnected_after:
                         game.n.disconnect()
 

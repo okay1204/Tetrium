@@ -1,8 +1,4 @@
 __pycache__/
 .vscode/
-<<<<<<< HEAD
-ip.py
-=======
 ip.py
 controls.json
->>>>>>> dc4227508f992e3ea5adfce852c7b499dfc1fa4e

@@ -8,7 +8,7 @@ version = "0.1"
 class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = 'localhost'
+        self.server = IP
         self.port = 6969
         self.addr = (self.server, self.port)
         self.p = self.connect()

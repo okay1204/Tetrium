@@ -326,7 +326,6 @@ class Game:
             'left': '←',
             'left shift': 'lshft',
             'right shift': 'rshft',
-            'backspace': 'bks',
             'caps lock': 'caps',
             'return': 'entr',
             'left ctrl': 'lctrl',

@@ -608,7 +608,7 @@ class Game:
                 
             
             else:
-                start_button_text = self.font.render('Waiting for opponent...', True, start_button_text_color)
+                start_button_text = self.font.render('Waiting for opponent...', True, (r, g, b))
                 start_button_rect.x = start_button_rect_x - 100
                 
 

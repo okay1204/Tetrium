@@ -177,6 +177,7 @@ while True:
         player = 0
     else:
         games[gameId].ready = True
+        games[gameId]._reset()
         player = 1
     
     print(addr[0], "connected to game", gameId, "as player", player)

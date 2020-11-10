@@ -383,7 +383,7 @@ def play_meter_animations():
 while True:
 
     opp_disconnected_after = False
-    game.start_screen()
+    start_screen.main()
     _thread.start_new_thread(server_connection, ())
 
     with open('controls.json') as f:

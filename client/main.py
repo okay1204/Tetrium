@@ -84,8 +84,7 @@ def game_over(win: bool):
 
     global opp_disconnected_after, rematch
 
-    if not win:
-        send('game over')
+
 
     game_over = True
 
@@ -94,17 +93,46 @@ def game_over(win: bool):
     button_pos = (int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
    
+   
+    restart_button_font  = pygame.font.Font('assets/arial.ttf', 32)
+    restart_button_rect = pygame.Rect(button_pos, button_dimensions)
+    restart_button_color = (255, 255, 255)
+    restart_button_text = restart_button_font.render(f'FIND NEW MATCH', True, (0, 0, 0))
     game_over_font = pygame.font.Font('assets/arial.ttf', 60)
-    button_font  = pygame.font.Font('assets/arial.ttf', 32)
-    s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
+    s = pygame.Surface((game.width, game.height), pygame.SRCALPHA)
+
+
+    if not win:
+        send('game over')
+        game_over_text = game_over_font.render(f'You lost...', True, (0, 0, 0))
+
+
+    
+    else:
+        game_over_text = game_over_font.render(f'You win!', True, (0, 0, 0))
+
+    
+    textRect = game_over_text.get_rect() 
+    textRect.center = (game.width // 2, 200) 
+   
+
+  
+    def draw_restart_button():
+    
+        pygame.draw.rect(game.screen, restart_button_color, restart_button_rect)
+        game.screen.blit(restart_button_text, (button_pos[0] + 10, button_pos[1] + 3))
+
+            
 
     while game_over:
 
         mouse = pygame.mouse.get_pos()
+        s.fill((255,255,255, 1))
+       
+       
+
         #Game over loop
 
-        button_color = (0, 0, 0)
-        button_text_color = (255, 255, 255)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -113,7 +141,7 @@ def game_over(win: bool):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 
                 # find new match
-                if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
+                if restart_button_rect.collidepoint(event.pos):
                     reset()
                     game.running = False
                     if not opp_disconnected_after:
@@ -130,30 +158,25 @@ def game_over(win: bool):
                     if not opp_disconnected_after:
                         send("rematch")
 
-        if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
-            button_text_color = (0, 0, 0)
-            button_color = (255, 255, 255)
+        if restart_button_rect.collidepoint(mouse):
+            restart_button_color = tuple(map(darken, (255, 255, 255)))
+        
+        else:
+            restart_button_color = (255, 255, 255)
         
         if rematch:
             game_over = False
             send("reset")
 
 
-
-        pygame.draw.rect(game.screen, button_color, (button_pos, button_dimensions))
-        s.fill((255,255,255, 2))
-        game.screen.blit(s, (0,0))
-
-        if not win:
-            game_over_text = game_over_font.render(f'You lost..', True, (0, 0, 0))
-        else:
-            game_over_text = game_over_font.render(f'You win!', True, (0, 0, 0))
-
-        button_text = button_font.render(f'FIND NEW MATCH', True, button_text_color)
-        textRect = game_over_text.get_rect() 
-        textRect.center = (game.width // 2, 200) 
+       
         game.screen.blit(game_over_text, textRect)
-        game.screen.blit(button_text, (button_pos[0] + 10, button_pos[1] + 3))
+        game.screen.blit(s, (0, 0), special_flags = pygame.BLEND_RGBA_MULT)  
+        
+        draw_restart_button()
+   
+  
+
         pygame.display.update()
         game.clock.tick(60)
 

@@ -6,6 +6,7 @@ import random
 import sys
 import json
 import _thread
+import socket
 
 
 # in order to get classes from a different folder
@@ -245,6 +246,10 @@ def server_connection():
             # lost connection unexpectedly
             disconnected = ("You disconnected", "Try again?")
             break
+
+        # lost connection unexpectedly
+        if not data:
+            disconnected = ("You disconnected", "Try again?")
 
         if data == "disconnect":
             

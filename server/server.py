@@ -1,6 +1,6 @@
 import socket
 import _thread
-from onlineGame import OnlineGame
+from onlineGame import OnlineGame #type: ignore
 import pickle
 import traceback
 

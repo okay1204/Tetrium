@@ -285,7 +285,7 @@ def start_meter_animation(pos, against):
     meter_animations.append((pos, time.time(), 15, against))
 
     for _ in range(randint(3, 5)):
-        random_pos = pos[0] + random.randint(-30, 30), pos[1] + random.randint(-30, 30)
+        random_pos = pos[0] + random.randint(-60, 60), pos[1] + random.randint(-60, 60)
         random_size = random.randint(3, 10)
 
         meter_animations.append((random_pos, time.time(), random_size, against))

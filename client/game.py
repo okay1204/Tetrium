@@ -307,10 +307,6 @@ class Game:
                 pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11)) #type: ignore
                 meter_block += 1
 
-        if int(time.time()) % 2:
-            self.width += 1
-            pygame.display.set_mode((self.width, self.height))
-
     def draw_back_button(self, pos = (-10, -10)):
         white = (255, 255, 255)
         color = tuple(map(darken, white)) if self.back_button.collidepoint(pos) else white

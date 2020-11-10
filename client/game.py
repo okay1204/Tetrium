@@ -106,6 +106,7 @@ class Game:
         self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
         self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
         self.grid_color =  tuple(map(lambda x: x - 10, self.foreground_color))
+        self.opaque_bkg = pygame.image.load('assets/opaque_bkg.png')
 
 
         self.default_controls = {
@@ -314,11 +315,12 @@ class Game:
                 meter_block += 1
 
     def draw_grid(self, rect, block_size, color):
+        #I subtract 3 in both ones because if not it overlaps a tiny bit and triggeres OCD
         for x_pos in range(rect.x, rect.x + rect.width, block_size):
-            pygame.draw.line(self.screen,  color, (x_pos, rect.y), (x_pos, rect.y + rect.height), 1)
+            pygame.draw.line(self.screen,  color, (x_pos, rect.y), (x_pos, rect.y + rect.height - 3), 1)
         
         for y_pos in range(rect.y, rect.y + rect.height, block_size):
-            pygame.draw.line(self.screen, color, (rect.x, y_pos), (rect.x + rect.width, y_pos), 1)
+            pygame.draw.line(self.screen, color, (rect.x, y_pos), (rect.x + rect.width - 3, y_pos), 1)
 
 
     def draw_back_button(self, pos = (-10, -10)):

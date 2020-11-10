@@ -93,13 +93,12 @@ def game_over(win: bool):
     button_pos = (int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
    
-   
     restart_button_font  = pygame.font.Font('assets/arial.ttf', 32)
     restart_button_rect = pygame.Rect(button_pos, button_dimensions)
     restart_button_color = (255, 255, 255)
     restart_button_text = restart_button_font.render(f'FIND NEW MATCH', True, (0, 0, 0))
     game_over_font = pygame.font.Font('assets/arial.ttf', 60)
-    s = pygame.Surface((game.width, game.height), pygame.SRCALPHA)
+    
 
 
     if not win:
@@ -121,16 +120,18 @@ def game_over(win: bool):
     
         pygame.draw.rect(game.screen, restart_button_color, restart_button_rect)
         game.screen.blit(restart_button_text, (button_pos[0] + 10, button_pos[1] + 3))
-
+    
+    def draw_bkg():
+        game.screen.blit(game.opaque_bkg, (0, 0))
+        game.opaque_bkg.set_alpha(120)
             
 
     while game_over:
 
         mouse = pygame.mouse.get_pos()
-        s.fill((255,255,255, 1))
+        
        
        
-
         #Game over loop
 
         for event in pygame.event.get():
@@ -170,10 +171,10 @@ def game_over(win: bool):
 
 
        
-        game.screen.blit(game_over_text, textRect)
-        game.screen.blit(s, (0, 0), special_flags = pygame.BLEND_RGBA_MULT)  
+        game.screen.blit(game_over_text, textRect) 
         
         draw_restart_button()
+        draw_bkg()
    
   
 

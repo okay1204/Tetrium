@@ -675,8 +675,8 @@ while True:
 
 
         current.move(0, 1)
-        if current.check_floor() and not touched_floor:
-            last_touched = time.time() + 0.95
+        if current.check_floor() and not touched_floor and not rotation_last:
+            fall = time.time() + 0.95
             touched_floor = True
         elif not current.check_floor():
             touched_floor = False
@@ -698,8 +698,7 @@ while True:
 
             if current.check_floor():
 
-
-                if time.time() > fall and time.time() > last_touched:
+                if time.time() > fall:
 
                     current.flash()
                     # turn piece into resting blocks

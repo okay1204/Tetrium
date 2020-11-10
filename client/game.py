@@ -636,7 +636,7 @@ class StartScreen(Game):
             self.start_button_text = game.font.render('START', True, self.start_button_text_color)
         
         else:
-            self.start_button_text = game.font.render('Waiting for opponent...', True, self.start_button_text_color)
+            self.start_button_text = game.font.render('Waiting for opponent...', True, (self.r, self.g, self.b))
             self.start_button_rect.x = game.width/2-60 - 100
             if self.disconnect_button_rect.collidepoint(mouse):
                 color = tuple(map(darken, (255, 255, 255)))

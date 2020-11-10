@@ -878,6 +878,8 @@ class Game:
             
             if data.ready:
                 self.ready = True
+
+                time.sleep(1)
                 self.opp_name = data.opp_name(self.n.p)
                 break
 

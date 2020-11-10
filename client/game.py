@@ -584,32 +584,46 @@ class Game:
         connected = False
 
         def draw_start_button():
-            nonlocal start_button_text_color, connected
+            nonlocal start_button_text_color
 
-            if not connected:
-                #if mouse hovering make it lighter
-                if start_button_rect.collidepoint(mouse): 
-                    colooooooooor = (255,255,255)
-                    start_button_text_color = (r, g, b)
-                
-                else: 
-                    colooooooooor = (0, 0, 0)
-                    start_button_text_color = (255, 255, 255)
+            #if mouse hovering make it lighter
+            if start_button_rect.collidepoint(mouse): 
+                colooooooooor = (255,255,255)
+                start_button_text_color = (r, g, b)
+            
+            else: 
+                colooooooooor = (0, 0, 0)
+                start_button_text_color = (255, 255, 255)
 
-                pygame.draw.rect(self.screen, colooooooooor, start_button_rect)
+            pygame.draw.rect(self.screen, colooooooooor, start_button_rect)
+
+        
+        def draw_disconnect_button():
+            nonlocal start_button_text_color
+
+            #if mouse hovering make it lighter
+            if disconnect_button_rect.collidepoint(mouse): 
+                colooooooooor = (255,255,255)
+                start_button_text_color = (r, g, b)
+            
+            else: 
+                colooooooooor = (0, 0, 0)
+                start_button_text_color = (255, 255, 255)
+            pygame.draw.rect(self.screen, colooooooooor, disconnect_button_rect)
+
+        
 
         def draw_text():
 
-            nonlocal connected
-
             if not connected:
                 start_button_text = self.font.render('START', True, start_button_text_color)
-              
-                
             
             else:
                 start_button_text = self.font.render('Waiting for opponent...', True, (r, g, b))
                 start_button_rect.x = start_button_rect_x - 100
+
+                disconnect_button_text = self.font.render('Disconnect', True, (r, g, b))
+                self.screen.blit(disconnect_button_text, (disconnect_button_rect.x + 7, disconnect_button_rect.y + 3))
                 
 
             title_text = self.very_big_font.render('TETRIUM', True, (r, g, b)) 
@@ -758,6 +772,7 @@ class Game:
         mute_button_pos = (int(self.width/2), int(self.height/2 + 100))
         start_button_rect_x = self.width/2 - 60
         start_button_rect = pygame.Rect(start_button_rect_x, self.height/2, 120, 40)
+        disconnect_button_rect = pygame.Rect(self.width/2-90, self.height/2+200, 175, 40)
         mute_button_radius = 35
         volume_on_icon = pygame.image.load('assets/volume-high.png')
         volume_off_icon = pygame.image.load('assets/volume-off.png')
@@ -789,7 +804,7 @@ class Game:
 
             mouse = pygame.mouse.get_pos() 
 
-            #Game over loop
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
 
@@ -807,6 +822,10 @@ class Game:
 
                         pygame.mixer.music.set_volume(self.volume)
                         self.screen.fill((0, 0, 0))
+
+                    if disconnect_button_rect.collidepoint(event.pos) and connected:
+                        self.n.disconnect()
+                        connected = False
 
                     elif mute_button_pos[0] - mute_button_radius <= mouse[0] <= mute_button_pos[0] + mute_button_radius and mute_button_pos[1] - mute_button_radius <= mouse[1] <=  mute_button_pos[1] + mute_button_radius: 
                         self.muted = not self.muted
@@ -856,6 +875,8 @@ class Game:
 
             if not connected:
                 draw_start_button()
+            else:
+                draw_disconnect_button()
                 
             draw_text()
             draw_input_box()
@@ -876,11 +897,16 @@ class Game:
         while True:
             data = self.n.send('get')
             
-            if data.ready:
-                self.ready = True
+            try:
+                if data.ready:
+                    self.ready = True
 
-                time.sleep(1)
-                self.opp_name = data.opp_name(self.n.p)
+                    time.sleep(1)
+                    self.opp_name = data.opp_name(self.n.p)
+                    break
+            except Exception as e:
+                if not isinstance(e, AttributeError):
+                    raise e
                 break
 
     def outdated_version_screen(self, new_version, download_link):

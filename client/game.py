@@ -649,11 +649,16 @@ class Game:
             nonlocal connected, input_active, input_text
             input_active = False
 
+            self.n = network.Network()
+            if self.n.p == "no connection":
+                print("no connection") # TODO no connection screen here
+                return            
+
+
             input_text = input_text.strip()
             if not input_text:
                 input_text = "Player"
 
-            self.n = network.Network()
             self.player = self.n.p
 
             if isinstance(self.n.p, str):

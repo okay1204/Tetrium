@@ -26,6 +26,8 @@ def threaded_client(conn, player, gameId):
     # send player number to client right after connecting
     conn.send(str.encode(str(player)))
 
+    conn.settimeout(2.0)
+
 
     name = None
 
@@ -44,6 +46,9 @@ def threaded_client(conn, player, gameId):
                 data = b''.join(blocks)
                 data = data.replace(sentinel, b'')
                 data = pickle.loads(data)
+            except socket.timeout:
+                print(f"Player {player} ({name}) in game {gameId} disconnected from timeout")
+                break
             except:
                 print(f"Player {player} ({name}) in game {gameId} forcefully disconnected")
                 break
@@ -177,6 +182,7 @@ while True:
         player = 0
     else:
         games[gameId].ready = True
+        games[gameId]._reset()
         player = 1
     
     print(addr[0], "connected to game", gameId, "as player", player)

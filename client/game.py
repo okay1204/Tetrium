@@ -9,6 +9,7 @@ from random import shuffle, randint
 import network
 import json
 import pyperclip
+import _thread
 from oooooooooooooooooooooooooooooooooooooooooooootils import darken, lighten
 
 
@@ -31,10 +32,8 @@ class Game:
 
     def __init__(self):
 
-        # self.volume = 0.05
-        # self.lowered_volume = 0.015
-        self.volume = 0
-        self.lowered_volume = 0
+        self.volume = 0.05
+        self.lowered_volume = 0.015
 
         pygame.init()
         self.font = pygame.font.Font('assets/arial.ttf', 32)
@@ -58,6 +57,7 @@ class Game:
 
 
         self.running = True
+        self.ready = False
         self.muted = False
 
         self.clock = pygame.time.Clock()

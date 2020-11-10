@@ -4,14 +4,10 @@ Rematch button
 
 Meter sound effects
 
-Opponents name sometimes doesn't show
-
-Serverside anticheat
-
-Make sure game doesn't crash if can't connect to server
-
 Outdated version improvement
 
 Fix end screen
 
-Couldn't connect to server screen
+Glitch if game starts in credits screen
+
+Server not found screen

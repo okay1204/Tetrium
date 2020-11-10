@@ -23,9 +23,6 @@ class OnlineGame:
 
         self._id = game_id
 
-
-        self.time_started = time.time()
-
         self.rematch = [False, False]
         self.reset = [True, True]
 

@@ -6,6 +6,7 @@ import random
 import sys
 import json
 import _thread
+import socket
 
 
 # in order to get classes from a different folder
@@ -246,6 +247,10 @@ def server_connection():
             disconnected = ("You disconnected", "Try again?")
             break
 
+        # lost connection unexpectedly
+        if not data:
+            disconnected = ("You disconnected", "Try again?")
+
         if data == "disconnect":
             
             # disconnected after game
@@ -383,6 +388,7 @@ def play_meter_animations():
 while True:
 
     opp_disconnected_after = False
+    game.ready = False
     start_screen.main()
     _thread.start_new_thread(server_connection, ())
 
@@ -675,8 +681,8 @@ while True:
 
 
         current.move(0, 1)
-        if current.check_floor() and not touched_floor:
-            last_touched = time.time() + 0.95
+        if current.check_floor() and not touched_floor and not rotation_last:
+            fall = time.time() + 0.95
             touched_floor = True
         elif not current.check_floor():
             touched_floor = False
@@ -698,8 +704,7 @@ while True:
 
             if current.check_floor():
 
-
-                if time.time() > fall and time.time() > last_touched:
+                if time.time() > fall:
 
                     current.flash()
                     # turn piece into resting blocks

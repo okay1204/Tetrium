@@ -20,6 +20,7 @@ class Network:
     def connect(self):
         try:
             self.client.connect(self.addr)
+
             # send version number after connecting
             self.client.send(str.encode(version))
 
@@ -28,6 +29,7 @@ class Network:
             if response.isdigit():
                 response = int(response)
 
+            self.client.settimeout(2.0)
             return response
         except:
             return "no connection"

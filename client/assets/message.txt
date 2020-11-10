@@ -10,7 +10,6 @@ import network
 import json
 import pyperclip
 from oooooooooooooooooooooooooooooooooooooooooooootils import darken, lighten
-import _thread
 
 
 from pieces import preview_piece
@@ -32,8 +31,10 @@ class Game:
 
     def __init__(self):
 
-        self.volume = 0.05
-        self.lowered_volume = 0.015
+        # self.volume = 0.05
+        # self.lowered_volume = 0.015
+        self.volume = 0
+        self.lowered_volume = 0
 
         pygame.init()
         self.font = pygame.font.Font('assets/arial.ttf', 32)
@@ -99,7 +100,8 @@ class Game:
         self.medium_font = pygame.font.Font('assets/arial.ttf', 20)
         self.big_font = pygame.font.Font('assets/arial.ttf', 30)
         self.very_big_font = pygame.font.Font('assets/arial.ttf', 75)
-       
+        self.back_icon = pygame.image.load('assets/arrow-back.png')
+        self.back_button = pygame.Rect(10, 10, 75, 65)
 
         self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
         self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
@@ -321,6 +323,553 @@ class Game:
             pygame.draw.line(self.screen, color, (rect.x, y_pos), (rect.x + rect.width - 3, y_pos), 1)
 
 
+    def draw_back_button(self, pos = (-10, -10)):
+        white = (255, 255, 255)
+        color = tuple(map(darken, white)) if self.back_button.collidepoint(pos) else white
+        pygame.draw.rect(self.screen, color, self.back_button)
+        self.screen.blit(self.back_icon, (-3, -7))
+
+
+    def draw_controls(self, controls, pos, color, keys_bkg_color = (0, 0, 0), underline = False, clicked_index = -1):
+    
+        replace_keys = {
+            'left click': 'lmb',
+            'middle click': 'mmb',
+            'right click': 'rmb',
+            'up': '↑',
+            'down': '↓',
+            'right': '→',
+            'left': '←',
+            'left shift': 'lshft',
+            'right shift': 'rshft',
+            'caps lock': 'caps',
+            'return': 'entr',
+            'left ctrl': 'lctrl',
+            'right ctrl': 'rctrl',
+            'left meta': 'wn',
+            'right meta': 'wn',
+            'left alt': 'lalt',
+            'right alt': 'ralt',
+            'compose': 'cmp',
+            'space': 'spc',
+            'escape': 'esc',
+            'print screen': 'prnt',
+            'scroll lock': 'scrl',
+            'break': 'brk',
+            'insert': 'insrt',
+            'page up': 'pup',
+            'page down': 'pdwn',
+            'backspace': 'bksp',
+
+        }
+
+        
+        text_rects = []
+    
+       
+        #pos 0 = left side, 1 = right side
+        for index, values in enumerate(controls):
+            description, key = values
+            modified_key = replace_keys[key].upper() if key in replace_keys.keys() else key.upper()
+            text_1 = self.big_font.render(modified_key, True, (0, 0, 0))
+            text_2 = self.medium_font.render(f" = {description}", True, color)
+            text_2_rect = text_2.get_rect()
+            text_2_rect.center = ((200 if pos == 0 else self.width - 150), (index * 50) + 450)
+            text_1_rect = text_1.get_rect()
+            text_1_rect.center = (text_2_rect.x - text_1_rect.width/2, text_2_rect.y + 10)
+   
+                                            #Dw about mechanics of this, just know that This only toggles True/False every half a second
+            if underline and index == clicked_index and int(str(round(time.time(), 1))[-1:]) < 5:
+                    pygame.draw.rect(self.screen, (240, 240, 166), pygame.Rect(text_1_rect.x, text_1_rect.y + 2, text_1_rect.width, text_1_rect.height + 2))
+            
+       
+
+            pygame.draw.rect(self.screen, (123, 127, 162), text_1_rect)
+            pygame.draw.rect(self.screen, keys_bkg_color, text_2_rect)
+            self.screen.blit(text_1, (text_1_rect.x, text_1_rect.y))
+            self.screen.blit(text_2, (text_2_rect.x, text_2_rect.y))
+
+            text_rects.append(text_1_rect)
+
+
+        return text_rects
+
+
+
+    def credits_screen(self, pieces, draw_tetris_pieces):
+
+        
+        credits_list = ['Made by', 'Zack Ghanbari', 'and Ali Rastegar']
+        text_y = 0
+        text_offset = 80
+        text_scroll_dist = 0.1
+        
+        def draw_text(tup):
+            index, text = tup
+            rendered_text = self.font.render(text, True, (255,255,255))
+            self.screen.blit(rendered_text, (rendered_text.get_rect(center = (self.width/2, self.height/2))[0], text_y + (index * text_offset)))
+        
+       
+
+        running = True
+        while running:
+            mouse = pygame.mouse.get_pos()
+            #Game over loop
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+
+                    pygame.quit()
+                    sys.exit()
+
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if self.back_button.collidepoint(event.pos):
+                        running = False
+
+
+            self.screen.fill((0,0,0))
+            draw_tetris_pieces(pieces)
+            self.draw_back_button(mouse)
+
+            text_y = text_y + text_scroll_dist if text_y <= self.width + 100 else -1 * (len(credits_list) * text_offset)
+
+            list(map(draw_text, enumerate(credits_list)))
+            pygame.display.update()
+            
+    
+    def pick_controls_screen(self):
+        
+
+        def draw_reset_button(pos):
+            white = (255, 255, 255)
+            color = tuple(map(darken, white)) if reset_button.collidepoint(pos) else white
+            pygame.draw.rect(self.screen, color, reset_button)
+            self.screen.blit(reset_text, (self.width/2 - 50 + 20,  self.height - 45 + 12))
+        
+        
+        
+        def reset_controls():
+            with open('controls.json', 'w') as f:
+                json.dump(self.default_controls, f, indent=2)
+
+
+            self.left_controls = {
+                    
+                "Move Left": self.default_controls["Move Left"],
+                "Move Right": self.default_controls["Move Right"],
+                "Soft Drop": self.default_controls["Soft Drop"],
+                "Toggle Movement": self.default_controls["Toggle Movement"],
+                "Toggle Music": self.default_controls["Toggle Music"]
+
+            }
+           
+            self.right_controls = {
+                    "Rotate Clockwise": self.default_controls["Rotate Clockwise"],
+                    "Rotate Counter-Clockwise": self.default_controls["Rotate Counter-Clockwise"],
+                    "Hold Piece": self.default_controls["Hold Piece"],
+                    "Hard Drop": self.default_controls["Hard Drop"]
+            }
+
+        def draw_title():
+            self.screen.blit(title_text_1, (self.width/2 - 140, 100))
+            self.screen.blit(title_text_2, (self.width/2 - 200, 160))
+        
+        def draw_prompt():
+            if clicked:
+                color = (240, 240, 166) if  int(str(round(time.time(), 1))[-1:]) < 5 else (26, 27, 37)
+                prompt_text = self.big_font.render('PRESS A KEY', True, color)
+                self.screen.blit(prompt_text, (self.width/2 - 100, 300))
+
+        mouse_number_key = {
+            1: 'left click',
+            2: 'middle click',
+            3: 'right click'
+        }
+
+        def get_key_input(key, mouse_clicked=False):
+
+            if not mouse_clicked:
+                key = pygame.key.name(key)
+            else:
+                key = mouse_number_key[key]
+
+            if clicked_index_1 >= 0:
+                self.left_controls[list(self.left_controls.keys())[clicked_index_1]] = key
+
+            elif clicked_index_2 >= 0:
+                self.right_controls[list(self.right_controls.keys())[clicked_index_2]] = key
+
+            with open('controls.json', 'w') as f:
+                full_controls = dict(self.left_controls, **self.right_controls)
+                json.dump(full_controls, f, indent=2)
+
+        
+
+        title_text_1 = self.big_font.render('CLICK ON A BOX TO', True, (255, 255, 255))
+        title_text_2 = self.big_font.render('CHANGE YOUR CONTROLS', True, (255, 255, 255))
+        reset_text = self.medium_font.render('RESET', True, (0, 0, 0))
+        text_boxes_1 = []
+        text_boxes_2 = []
+        clicked = False
+        clicked_index_1 = -1
+        clicked_index_2 = -1
+        reset_button = pygame.Rect(self.width/2 - 50, self.height - 35, 100, 27)
+    
+        running = True
+        while running:
+            #bkg color
+            self.screen.fill((26, 27, 37))
+
+            mouse = pygame.mouse.get_pos()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+
+                    pygame.quit()
+                    sys.exit()
+
+
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+
+                    if clicked:
+                        if 1 <= event.button <= 3:
+                            get_key_input(event.button, mouse_clicked=True)
+                            clicked = False
+                            
+                    elif event.button == 1:
+ 
+                        if self.back_button.collidepoint(event.pos):
+                            running = False
+
+                        elif reset_button.collidepoint(event.pos):
+                            reset_controls()
+
+                        else:
+                            for index, text_box in enumerate(text_boxes_1):
+                                if text_box.collidepoint(event.pos):
+                                    clicked = True
+                                    clicked_index_2 = -1
+                                    clicked_index_1 = index
+                                
+
+
+                            for index, text_box in enumerate(text_boxes_2):
+                                if text_box.collidepoint(event.pos):
+                                    clicked = True
+                                    clicked_index_1 = -1
+                                    clicked_index_2 = index
+                        
+
+                elif event.type == pygame.KEYDOWN:
+                    # z = pygame.key.name(event.key)
+                    if clicked:
+                        get_key_input(event.key)
+                    
+                    clicked = False
+    
+            self.draw_back_button(mouse)
+            draw_reset_button(mouse)
+
+            draw_title()
+            draw_prompt()
+            
+            text_boxes_1 = self.draw_controls(self.left_controls.items(), 0, (89, 248, 232), keys_bkg_color = (26, 27, 37), underline = clicked, clicked_index = clicked_index_1)
+            text_boxes_2 = self.draw_controls(self.right_controls.items(), 1,  (89, 248, 232),  keys_bkg_color =(26, 27, 37), underline = clicked, clicked_index = clicked_index_2)
+
+
+            pygame.display.update()
+
+
+    def start_screen(self):
+
+        connected = False
+
+        def draw_start_button():
+            nonlocal start_button_text_color, connected
+
+            if not connected:
+                #if mouse hovering make it lighter
+                if start_button_rect.collidepoint(mouse): 
+                    colooooooooor = (255,255,255)
+                    start_button_text_color = (r, g, b)
+                
+                else: 
+                    colooooooooor = (0, 0, 0)
+                    start_button_text_color = (255, 255, 255)
+
+                pygame.draw.rect(self.screen, colooooooooor, start_button_rect)
+
+        def draw_text():
+
+            nonlocal connected
+
+            if not connected:
+                start_button_text = self.font.render('START', True, start_button_text_color)
+              
+                
+            
+            else:
+                start_button_text = self.font.render('Waiting for opponent...', True, start_button_text_color)
+                start_button_rect.x = start_button_rect_x - 100
+                
+
+            title_text = self.very_big_font.render('TETRIUM', True, (r, g, b)) 
+            self.screen.blit(start_button_text, (start_button_rect.x + 7, start_button_rect.y + 3))
+            self.screen.blit(title_text, (self.width/2 - 165, self.height/2 - 200)) 
+         
+
+
+        def draw_mute_button_background():
+            pygame.draw.circle(self.screen, (255,255,255), mute_button_pos,  mute_button_radius)
+           
+
+        def check_mute_and_draw_icons():
+            draw_mute_button_background()
+            if self.muted:
+                self.lowered_volume, self.volume = 0, 0
+                self.screen.blit(volume_off_icon, volume_icon_pos)
+            
+            else:
+                self.lowered_volume, self.volume = 0.03, 0.1
+                self.screen.blit(volume_on_icon, volume_icon_pos)
+
+       
+        def draw_input_text():
+            nonlocal input_text_width
+
+            if not input_text:
+                self.screen.blit(input_box_placeholder, (input_box_x + 25, input_box_y + 12))
+
+
+            input_text_render = self.big_font.render(input_text, True, (0, 0, 0))
+            input_text_width = input_text_render.get_rect().width
+            self.screen.blit(input_text_render, (input_box_x + 5, input_box_y + 6))
+
+
+        def draw_input_box():
+            if input_active:
+                input_bkg_color = (0, 0, 255)
+
+            else:
+                input_bkg_color = (0, 0, 0)
+
+            pygame.draw.rect(self.screen, input_bkg_color, input_box, 10)
+            pygame.draw.rect(self.screen, (255,255,255), input_box_bkg)
+
+            draw_input_text()
+            
+           
+
+        def get_input(key):
+            nonlocal input_text
+            if input_text_width < input_box_width - 15:
+                input_text += key
+    
+        def start():
+            nonlocal connected, input_active, input_text
+            input_active = False
+
+            self.n = network.Network()
+            if self.n.p == "no connection":
+                print("no connection") # TODO no connection screen here
+                return            
+
+
+            input_text = input_text.strip()
+            if not input_text:
+                input_text = "Player"
+
+            self.player = self.n.p
+
+            if isinstance(self.n.p, str):
+                outdated_info = self.n.p.split()
+                                            # new version number # download link
+                self.outdated_version_screen(outdated_info[2], outdated_info[3])
+
+            connected = True
+            self.name = input_text
+            self.n.send("name " + input_text)
+
+        def cycle_colors():
+        
+            nonlocal r, g, b
+      
+            if g < 255 and r > 0:
+                g += 1
+                r -= 1
+
+            else:
+                if b < 255 and g > 0:
+                    b += 1
+                    g -= 1
+ 
+                else:
+                    r, g, b = 255, 0, 0
+            
+        def draw_tetris_pieces(pieces):
+            for i, piece in enumerate(pieces):
+                #means piece is off the screen
+                if piece.y >= 28:
+                    #Moves it back up
+                    piece.move(0, randint(-35, -30))
+
+                piece.render(False)
+                if time.time() > last_falls[i]:
+                    piece.move(0, 1)
+                    last_falls[i] = time.time() + 0.75
+
+        def draw_credits_button(pos):
+            color = tuple(map(lighten, (r,g,b))) if credits_button.collidepoint(pos) else (r, g, b)
+            pygame.draw.rect(self.screen, color, credits_button)
+            self.screen.blit(credits_button_text, (credits_button_pos[0] + 3, credits_button_pos[1] + 5))   
+
+
+        def draw_controls_button(pos):
+            color = tuple(map(lighten, (r,g,b))) if controls_button.collidepoint(pos) else (r, g, b)
+            pygame.draw.rect(self.screen, color, controls_button)
+            self.screen.blit(controls_button_text, (controls_button_pos[0] + 5, controls_button_pos[1] + 3))
+        
+      
+        #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
+        x_pos = [0, 4, 8, 12, 16, 20, 0, 4, 8]
+        shuffle(x_pos)
+
+        pieces = [
+
+            Piece(x_pos[0], randint(-9, -6), 'T'), 
+            Piece(x_pos[1], randint(-6, -3), 'L'), 
+            Piece(x_pos[2], randint(-3, 0), 'J'), 
+            Piece(x_pos[3], randint(0, 3), 'S'), 
+            Piece(x_pos[4], randint(3, 6), 'Z'), 
+            Piece(x_pos[5], randint(6, 9), 'I'),
+            Piece(x_pos[6], randint(9, 12), 'T'),
+            Piece(x_pos[7], randint(12, 15), 'L'),
+            Piece(x_pos[8], randint(-15, -12), 'J'),
+         
+        ]
+        
+        r, g, b = 255, 0, 0
+
+        last_falls = [time.time() for _ in pieces]
+ 
+      
+        start_button_text_color = (255, 255, 255)
+        mute_button_pos = (int(self.width/2), int(self.height/2 + 100))
+        start_button_rect_x = self.width/2 - 60
+        start_button_rect = pygame.Rect(start_button_rect_x, self.height/2, 120, 40)
+        mute_button_radius = 35
+        volume_on_icon = pygame.image.load('assets/volume-high.png')
+        volume_off_icon = pygame.image.load('assets/volume-off.png')
+        volume_icon_pos = (mute_button_pos[0] - 25, mute_button_pos[1] - 25)
+        s = pygame.Surface((self.width, self.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
+        input_box_placeholder = self.medium_font.render("Enter a name...", True, (96, 93, 93))
+        input_box_y =  self.height/2 - 85
+        input_box_width = 300
+        input_box_x = (self.width - input_box_width)/2
+        input_box_height = 50
+        input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
+        input_box_bkg = pygame.Rect((self.width - input_box_width)/2 , self.height/2 - 85, input_box_width, input_box_height)
+        input_active = False
+        input_text = ''
+        input_text_width = 0
+        
+        controls_button_pos = (0 , self.height - 30)
+        controls_button = pygame.Rect(0, self.height - 30, 125, 30)
+        controls_button_text = self.medium_font.render('CONTROLS', True, (0, 0, 0))
+        credits_button_text = self.small_font.render('CREDITS', True, (0, 0, 0))
+        credits_button_height = 30
+        credits_button_pos = (self.width - 70, self.height - credits_button_height)
+        credits_button = pygame.Rect(credits_button_pos[0], credits_button_pos[1], 70, credits_button_height)
+
+
+        while True:
+            #NOTE make sure this is at the top
+            s.fill((0,0,0, 2))
+
+            mouse = pygame.mouse.get_pos() 
+
+            #Game over loop
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+
+                    if connected:
+                        self.n.disconnect()
+
+                    pygame.quit()
+                    sys.exit()
+                    
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                   
+                    if start_button_rect.collidepoint(event.pos) and not connected:  
+    
+                        start()
+
+                        pygame.mixer.music.set_volume(self.volume)
+                        self.screen.fill((0, 0, 0))
+
+                    elif mute_button_pos[0] - mute_button_radius <= mouse[0] <= mute_button_pos[0] + mute_button_radius and mute_button_pos[1] - mute_button_radius <= mouse[1] <=  mute_button_pos[1] + mute_button_radius: 
+                        self.muted = not self.muted
+                    
+                    elif credits_button.collidepoint(event.pos):
+                        self.credits_screen(pieces, draw_tetris_pieces)
+                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
+                        s.fill((0, 0, 0))
+
+                    elif controls_button.collidepoint(event.pos):
+                        self.pick_controls_screen()
+                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
+                        s.fill((0, 0, 0))
+
+
+                    elif input_box.collidepoint(event.pos) and not connected:
+                        input_active = True
+                    
+                    else: 
+                        input_active = False
+
+                elif event.type == pygame.KEYDOWN:
+                    
+                    if input_active:
+                        
+                        if event.key == pygame.K_RETURN:
+                            start()
+                            pygame.mixer.music.set_volume(self.volume)
+                            self.screen.fill((0, 0, 0))
+                                
+
+                        elif event.key == pygame.K_BACKSPACE:
+                            input_text = input_text[:-1]
+
+                        else:
+                            get_input(event.unicode)
+
+                        
+           
+            pygame.mixer.music.set_volume(self.lowered_volume)
+            self.screen.blit(s, (0, 0))  
+            cycle_colors()
+            draw_tetris_pieces(pieces)
+            check_mute_and_draw_icons()
+            draw_credits_button(mouse)
+            draw_controls_button(mouse)
+
+            if not connected:
+                draw_start_button()
+                
+            draw_text()
+            draw_input_box()
+
+            # checking if game started
+            if connected and ( data := self.n.send('get') ).ready:
+                self.opp_name = data.opp_name(self.n.p)
+                break
+            
+                
+            pygame.display.update()
+
+            self.clock.tick(60)
+
+        self.time_started = time.time()
+        self.running = True
 
     def outdated_version_screen(self, new_version, download_link):
 
@@ -505,601 +1054,6 @@ class Game:
 
 
 game = Game()
-
-
-
-class StartScreen(Game):
-
-    def __init__(self):
-
-        self.ready = False
-
-        #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
-        self.x_pos = [0, 4, 8, 12, 16, 20, 0, 4, 8]
-        shuffle(self.x_pos)
-
-        self.pieces = [
-
-            Piece(self.x_pos[0], randint(-9, -6), 'T'), 
-            Piece(self.x_pos[1], randint(-6, -3), 'L'), 
-            Piece(self.x_pos[2], randint(-3, 0), 'J'), 
-            Piece(self.x_pos[3], randint(0, 3), 'S'), 
-            Piece(self.x_pos[4], randint(3, 6), 'Z'), 
-            Piece(self.x_pos[5], randint(6, 9), 'I'),
-            Piece(self.x_pos[6], randint(9, 12), 'T'),
-            Piece(self.x_pos[7], randint(12, 15), 'L'),
-            Piece(self.x_pos[8], randint(-15, -12), 'J'),
-            
-        ]
-    
-        
-        self.r, self.g, self.b = 255, 0, 0
-        self.last_falls = [time.time() for _ in self.pieces]
-        self.start_button_text_color = (255, 255, 255)
-        self.mute_button_pos = (int(game.width/2), int(game.height/2 + 100))
-        self.start_button_rect = pygame.Rect(game.width/2-60, game.height/2, 120, 40)
-        self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
-
-        self.mute_button_radius = 35
-        self.volume_on_icon = pygame.image.load('assets/volume-high.png')
-        self.volume_off_icon = pygame.image.load('assets/volume-off.png')
-        self.volume_icon_pos = (self.mute_button_pos[0] - 25, self.mute_button_pos[1] - 25)
-        self.s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
-        self.input_box_placeholder = game.medium_font.render("Enter a name...", True, (96, 93, 93))
-        self.input_box_y =  game.height/2 - 85
-        self.input_box_width = 300
-        self.input_box_x = (game.width - self.input_box_width)/2
-        self.input_box_height = 50
-        self.input_box = pygame.Rect(self.input_box_x, self.input_box_y, self.input_box_width, self.input_box_height)
-        self.input_box_bkg = pygame.Rect((game.width - self.input_box_width)/2 , game.height/2 - 85, self.input_box_width, self.input_box_height)
-        self.input_active = False
-        self.input_text = ''
-        self.input_text_width = 0
-        self.controls_button_pos = (0 , game.height - 30)
-        self.controls_button = pygame.Rect(0, game.height - 30, 125, 30)
-        self.controls_button_text = game.medium_font.render('CONTROLS', True, (0, 0, 0))
-        self.credits_button_text = game.small_font.render('CREDITS', True, (0, 0, 0))
-        self.credits_button_height = 30
-        self.credits_button_pos = (game.width - 70, game.height - self.credits_button_height)
-        self.credits_button = pygame.Rect(self.credits_button_pos[0], self.credits_button_pos[1], 70, self.credits_button_height)
-        self.connected = False
-        self.back_icon = pygame.image.load('assets/arrow-back.png')
-        self.back_button = pygame.Rect(10, 10, 75, 65)
-
-
-    def draw_back_button(self, pos = (-10, -10)):
-        white = (255, 255, 255)
-        color = tuple(map(darken, white)) if self.back_button.collidepoint(pos) else white
-        pygame.draw.rect(game.screen, color, self.back_button)
-        game.screen.blit(self.back_icon, (-3, -7))
-
-    def draw_start_button(self):
-       
-        if not self.connected:
-            #if mouse hovering make it lighter
-            if self.start_button_rect.collidepoint(self.mouse): 
-                colooooooooor = (255,255,255)
-                self.start_button_text_color = (self.r, self.g, self.b)
-            
-            else: 
-                colooooooooor = (0, 0, 0)
-                self.start_button_text_color = (255, 255, 255)
-
-            pygame.draw.rect(game.screen, colooooooooor, self.start_button_rect)
-
-    def draw_disconnect_button(self):
-
-        #if mouse hovering make it lighter
-        if self.disconnect_button_rect.collidepoint(self.mouse): 
-            colooooooooor = (255,255,255)
-            self.start_button_text_color = (self.r, self.g, self.b)
-        
-        else: 
-            colooooooooor = (0, 0, 0)
-            self.start_button_text_color = (255, 255, 255)
-        pygame.draw.rect(game.screen, colooooooooor, self.disconnect_button_rect)
-
-    def draw_text(self):
-
-
-        if not self.connected:
-            self.start_button_text = game.font.render('START', True, self.start_button_text_color)
-        
-        else:
-            self.start_button_text = game.font.render('Waiting for opponent...', True, (self.r, self.g, self.b))
-
-
-            self.disconnect_button_text = game.font.render('Disconnect', True, (self.r, self.g, self.b))
-            game.screen.blit(self.disconnect_button_text, (self.disconnect_button_rect.x + 7, self.disconnect_button_rect.y + 3))
-            
-
-        title_text = game.very_big_font.render('TETRIUM', True, (self.r, self.g, self.b)) 
-        game.screen.blit(self.start_button_text, (self.start_button_rect.x + 7, self.start_button_rect.y + 3))
-        game.screen.blit(title_text, (game.width/2 - 165, game.height/2 - 200)) 
-        
-
-
-    def draw_mute_button_background(self):
-        pygame.draw.circle(game.screen, (255,255,255), self.mute_button_pos,  self.mute_button_radius)
-        
-
-    def check_mute_and_draw_icons(self):
-        self.draw_mute_button_background()
-        if game.muted:
-            game.lowered_volume, game.volume = 0, 0
-            game.screen.blit(self.volume_off_icon, self.volume_icon_pos)
-        
-        else:
-            game.lowered_volume, game.volume = 0.03, 0.1
-            game.screen.blit(self.volume_on_icon, self.volume_icon_pos)
-
-    
-    def draw_input_text(self):
-       
-        if not self.input_text:
-            game.screen.blit(self.input_box_placeholder, (self.input_box_x + 25, self.input_box_y + 12))
-
-
-        input_text_render = game.big_font.render(self.input_text, True, (0, 0, 0))
-        self.input_text_width = input_text_render.get_rect().width
-        game.screen.blit(input_text_render, (self.input_box_x + 5, self.input_box_y + 6))
-
-
-    def draw_input_box(self):
-        if self.input_active:
-            input_bkg_color = (0, 0, 255)
-
-        else:
-            input_bkg_color = (0, 0, 0)
-
-        pygame.draw.rect(game.screen, input_bkg_color, self.input_box, 10)
-        pygame.draw.rect(game.screen, (255,255,255), self.input_box_bkg)
-
-        self.draw_input_text()
-        
-        
-
-    def get_input(self, key):
-       
-        if self.input_text_width < self.input_box_width - 15:
-            self.input_text += key
-
-    def start(self):
-        
-        self.input_active = False
-
-        game.n = network.Network()
-        if game.n.p == "no connection":
-            print("no connection") # TODO no connection screen here
-            return            
-
-        self.start_button_rect.x -=  100
-
-
-        self.input_text = self.input_text.strip()
-        if not self.input_text:
-            self.input_text = "Player"
-
-        if isinstance(game.n.p, str):
-            outdated_info = game.n.p.split()
-                                        # new version number # download link
-            game.outdated_version_screen(outdated_info[2], outdated_info[3])
-
-        self.connected = True
-        game.name = self.input_text
-        game.n.send("name " + self.input_text)
-
-    def cycle_colors(self, rgb):
-        r, g, b = rgb
-    
-        if g < 255 and r > 0:
-            g += 1
-            r -= 1
-
-        else:
-            if b < 255 and g > 0:
-                b += 1
-                g -= 1
-
-            else:
-                r, g, b = 255, 0, 0
-        
-        return (r, g, b)
-        
-    def draw_tetris_pieces(self, pieces):
-        for i, piece in enumerate(pieces):
-            #means piece is off the screen
-            if piece.y >= 28:
-                #Moves it back up
-                piece.move(0, randint(-35, -30))
-
-            piece.render(False)
-            if time.time() > self.last_falls[i]:
-                piece.move(0, 1)
-                self.last_falls[i] = time.time() + 0.75
-
-    def draw_credits_button(self, pos):
-        color = tuple(map(lighten, (self.r,self.g, self.b))) if self.credits_button.collidepoint(pos) else (self.r, self.g, self.b)
-        pygame.draw.rect(game.screen, color, self.credits_button)
-        game.screen.blit(self.credits_button_text, (self.credits_button_pos[0] + 3, self.credits_button_pos[1] + 5))   
-
-
-    def draw_controls_button(self, pos):
-        color = tuple(map(lighten, (self.r,self.g, self.b))) if self.controls_button.collidepoint(pos) else (self.r, self.g, self.b)
-        pygame.draw.rect(game.screen, color, self.controls_button)
-        game.screen.blit(self.controls_button_text, (self.controls_button_pos[0] + 5, self.controls_button_pos[1] + 3))
-    
-    
-    
-    def draw_controls(self, controls, pos, color, keys_bkg_color = (0, 0, 0), underline = False, clicked_index = -1):
-    
-        replace_keys = {
-            'left click': 'lmb',
-            'middle click': 'mmb',
-            'right click': 'rmb',
-            'up': '↑',
-            'down': '↓',
-            'right': '→',
-            'left': '←',
-            'left shift': 'lshft',
-            'right shift': 'rshft',
-            'caps lock': 'caps',
-            'return': 'entr',
-            'left ctrl': 'lctrl',
-            'right ctrl': 'rctrl',
-            'left meta': 'wn',
-            'right meta': 'wn',
-            'left alt': 'lalt',
-            'right alt': 'ralt',
-            'compose': 'cmp',
-            'space': 'spc',
-            'escape': 'esc',
-            'print screen': 'prnt',
-            'scroll lock': 'scrl',
-            'break': 'brk',
-            'insert': 'insrt',
-            'page up': 'pup',
-            'page down': 'pdwn',
-            'backspace': 'bksp',
-
-        }
-
-        
-        text_rects = []
-    
-       
-        #pos 0 = left side, 1 = right side
-        for index, values in enumerate(controls):
-            description, key = values
-            modified_key = replace_keys[key].upper() if key in replace_keys.keys() else key.upper()
-            text_1 = game.big_font.render(modified_key, True, (0, 0, 0))
-            text_2 = game.medium_font.render(f" = {description}", True, color)
-            text_2_rect = text_2.get_rect()
-            text_2_rect.center = ((200 if pos == 0 else game.width - 150), (index * 50) + 450)
-            text_1_rect = text_1.get_rect()
-            text_1_rect.center = (text_2_rect.x - text_1_rect.width/2, text_2_rect.y + 10)
-   
-                                            #Dw about mechanics of this, just know that This only toggles True/False every half a second
-            if underline and index == clicked_index and int(str(round(time.time(), 1))[-1:]) < 5:
-                    pygame.draw.rect(game.screen, (240, 240, 166), pygame.Rect(text_1_rect.x, text_1_rect.y + 2, text_1_rect.width, text_1_rect.height + 2))
-            
-       
-
-            pygame.draw.rect(game.screen, (123, 127, 162), text_1_rect)
-            pygame.draw.rect(game.screen, keys_bkg_color, text_2_rect)
-            game.screen.blit(text_1, (text_1_rect.x, text_1_rect.y))
-            game.screen.blit(text_2, (text_2_rect.x, text_2_rect.y))
-
-            text_rects.append(text_1_rect)
-
-
-        return text_rects
-
-
-
-    def credits_screen(self, pieces, draw_tetris_pieces):
-
-        
-        credits_list = ['Made by', 'Zack Ghanbari', 'and Ali Rastegar']
-        text_y = 0
-        text_offset = 80
-        text_scroll_dist = 0.1
-        
-        def draw_text(tup):
-            index, text = tup
-            rendered_text = game.font.render(text, True, (255,255,255))
-            game.screen.blit(rendered_text, (rendered_text.get_rect(center = (game.width/2, game.height/2))[0], text_y + (index * text_offset)))
-        
-       
-
-        running = True
-        while running:
-            mouse = pygame.mouse.get_pos()
-            #Game over loop
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-
-                    pygame.quit()
-                    sys.exit()
-
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if self.back_button.collidepoint(event.pos):
-                        running = False
-
-
-            game.screen.fill((0,0,0))
-            draw_tetris_pieces(pieces)
-            self.draw_back_button(mouse)
-            text_y = text_y + text_scroll_dist if text_y <= game.width + 100 else -1 * (len(credits_list) * text_offset)
-            list(map(draw_text, enumerate(credits_list)))
-            pygame.display.update()
-            
-    
-    def pick_controls_screen(self):
-        
-
-        def draw_reset_button(pos):
-            white = (255, 255, 255)
-            color = tuple(map(darken, white)) if reset_button.collidepoint(pos) else white
-            pygame.draw.rect(game.screen, color, reset_button)
-            game.screen.blit(reset_text, (game.width/2 - 50 + 20,  game.height - 45 + 12))
-        
-        
-        
-        def reset_controls():
-            with open('controls.json', 'w') as f:
-                json.dump(game.default_controls, f, indent=2)
-
-
-            game.left_controls = {
-                    
-                "Move Left": game.default_controls["Move Left"],
-                "Move Right": game.default_controls["Move Right"],
-                "Soft Drop": game.default_controls["Soft Drop"],
-                "Toggle Movement": game.default_controls["Toggle Movement"],
-                "Toggle Music": game.default_controls["Toggle Music"]
-
-            }
-           
-            game.right_controls = {
-                    "Rotate Clockwise": game.default_controls["Rotate Clockwise"],
-                    "Rotate Counter-Clockwise": game.default_controls["Rotate Counter-Clockwise"],
-                    "Hold Piece": game.default_controls["Hold Piece"],
-                    "Hard Drop": game.default_controls["Hard Drop"]
-            }
-
-        def draw_title():
-            game.screen.blit(title_text_1, (game.width/2 - 140, 100))
-            game.screen.blit(title_text_2, (game.width/2 - 200, 160))
-        
-        def draw_prompt():
-            if clicked:
-                color = (240, 240, 166) if  int(str(round(time.time(), 1))[-1:]) < 5 else (26, 27, 37)
-                prompt_text = game.big_font.render('PRESS A KEY', True, color)
-                game.screen.blit(prompt_text, (game.width/2 - 100, 300))
-
-        mouse_number_key = {
-            1: 'left click',
-            2: 'middle click',
-            3: 'right click'
-        }
-
-        def get_key_input(key, mouse_clicked=False):
-
-            if not mouse_clicked:
-                key = pygame.key.name(key)
-            else:
-                key = mouse_number_key[key]
-
-            if clicked_index_1 >= 0:
-                game.left_controls[list(game.left_controls.keys())[clicked_index_1]] = key
-
-            elif clicked_index_2 >= 0:
-                game.right_controls[list(game.right_controls.keys())[clicked_index_2]] = key
-
-            with open('controls.json', 'w') as f:
-                full_controls = dict(game.left_controls, **game.right_controls)
-                json.dump(full_controls, f, indent=2)
-
-        
-
-        title_text_1 = game.big_font.render('CLICK ON A BOX TO', True, (255, 255, 255))
-        title_text_2 = game.big_font.render('CHANGE YOUR CONTROLS', True, (255, 255, 255))
-        reset_text = game.medium_font.render('RESET', True, (0, 0, 0))
-        text_boxes_1 = []
-        text_boxes_2 = []
-        clicked = False
-        clicked_index_1 = -1
-        clicked_index_2 = -1
-        reset_button = pygame.Rect(game.width/2 - 50, game.height - 35, 100, 27)
-    
-        running = True
-        while running:
-            #bkg color
-            game.screen.fill((26, 27, 37))
-
-            mouse = pygame.mouse.get_pos()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-
-                    pygame.quit()
-                    sys.exit()
-
-
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-
-                    if clicked:
-                        if 1 <= event.button <= 3:
-                            get_key_input(event.button, mouse_clicked=True)
-                            clicked = False
-                            
-                    elif event.button == 1:
- 
-                        if self.back_button.collidepoint(event.pos):
-                            running = False
-
-                        elif reset_button.collidepoint(event.pos):
-                            reset_controls()
-
-                        else:
-                            for index, text_box in enumerate(text_boxes_1):
-                                if text_box.collidepoint(event.pos):
-                                    clicked = True
-                                    clicked_index_2 = -1
-                                    clicked_index_1 = index
-                                
-
-
-                            for index, text_box in enumerate(text_boxes_2):
-                                if text_box.collidepoint(event.pos):
-                                    clicked = True
-                                    clicked_index_1 = -1
-                                    clicked_index_2 = index
-                        
-
-                elif event.type == pygame.KEYDOWN:
-                    # z = pygame.key.name(event.key)
-                    if clicked:
-                        get_key_input(event.key)
-                    
-                    clicked = False
-    
-            self.draw_back_button(mouse)
-            draw_reset_button(mouse)
-
-            draw_title()
-            draw_prompt()
-            
-            text_boxes_1 = self.draw_controls(game.left_controls.items(), 0, (89, 248, 232), keys_bkg_color = (26, 27, 37), underline = clicked, clicked_index = clicked_index_1)
-            text_boxes_2 = self.draw_controls(game.right_controls.items(), 1,  (89, 248, 232),  keys_bkg_color =(26, 27, 37), underline = clicked, clicked_index = clicked_index_2)
-            pygame.display.update()
-
-
-    
-    def main(self):
-
-        while True:
-            #NOTE make sure this is at the top
-            self.s.fill((0,0,0, 2))
-
-            self.mouse = pygame.mouse.get_pos() 
-
-            #Game over loop
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-
-                    if self.connected:
-                        game.n.disconnect()
-
-                    pygame.quit()
-                    sys.exit()
-                    
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    
-                    if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
-
-                        self.start()
-                        self.connected = True
-                        _thread.start_new_thread(self.wait_for_game, ())
-                        game.screen.fill((0, 0, 0))
-
-                    if self.disconnect_button_rect.collidepoint(event.pos) and self.connected:
-                        self.status = 'disconnect'
-                        self.start_button_rect.x += 100
-                        game.screen.fill((0, 0, 0))
-                        self.connected = False
-
-                    elif self.mute_button_pos[0] - self.mute_button_radius <= self.mouse[0] <= self.mute_button_pos[0] + self.mute_button_radius and self.mute_button_pos[1] - self.mute_button_radius <= self.mouse[1] <=  self.mute_button_pos[1] + self.mute_button_radius: 
-                        game.muted = not game.muted
-                    
-                    elif self.credits_button.collidepoint(event.pos):
-                        self.credits_screen(self.pieces, self.draw_tetris_pieces)
-                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
-                        self.s.fill((0, 0, 0))
-
-                    elif self.controls_button.collidepoint(event.pos):
-                        self.pick_controls_screen()
-                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
-                        self.s.fill((0, 0, 0))
-
-
-                    elif self.input_box.collidepoint(event.pos) and not self.connected:
-                        self.input_active = True
-                    
-                    else: 
-                        self.input_active = False
-
-                elif event.type == pygame.KEYDOWN:
-                    
-                    if self.input_active:
-                        
-                        if event.key == pygame.K_RETURN:
-                            self.start()
-                            self.screen.fill((0, 0, 0))
-                                
-
-                        elif event.key == pygame.K_BACKSPACE:
-                            self.input_text = self.input_text[:-1]
-
-                        else:
-                            self.get_input(event.unicode)
-
-                        
-            
-            pygame.mixer.music.set_volume(game.lowered_volume)
-            game.screen.blit(self.s, (0, 0))  
-            self.r, self.g, self.b = self.cycle_colors((self.r, self.g, self.b))
-            self.draw_tetris_pieces(self.pieces)
-            self.check_mute_and_draw_icons()
-            self.draw_credits_button(self.mouse)
-            self.draw_controls_button(self.mouse)
-
-            if not self.connected:
-                self.draw_start_button()
-            else:
-                self.draw_disconnect_button()
-                
-            self.draw_text()
-            self.draw_input_box()
-
-            # checking if game started
-            if self.connected and self.ready:
-                self.connected = False
-                break
-            
-            pygame.display.update()
-
-            game.clock.tick(60)
-
-        game.time_started = time.time()
-        game.running = True
-
-    def wait_for_game(self):
-
-        self.status = 'get'
-        while True:
-
-            if self.status == 'get':
-                data = game.n.send('get')
-            elif self.status == 'disconnect':
-                game.n.disconnect()
-                break
-            
-            try:
-                if data.ready:
-
-                    time.sleep(1)
-                    data = game.n.send('get')
-                    game.opp_name = data.opp_name(game.n.p)
-                    self.ready = True
-                    break
-            except Exception as e:
-                if not isinstance(e, AttributeError):
-                    raise e
-                break
-
-
 
 
 class Block(Game):
@@ -1617,11 +1571,5 @@ class Piece(Game):
             block.render()
 
 
-start_screen = StartScreen()
-
-
-
 if __name__ == "__main__":
     import main
-
-    

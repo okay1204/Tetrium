@@ -1,5 +1,6 @@
 # pylint: disable=no-member
 
+from math import ceil
 import pygame
 import pieces as pieces_lib
 import math
@@ -509,6 +510,7 @@ game = Game()
 
 
 
+
 class StartScreen(Game):
 
     def __init__(self):
@@ -530,7 +532,6 @@ class StartScreen(Game):
             
         ]
     
-        
         self.r, self.g, self.b = 255, 0, 0
         self.last_falls = [time.time() for _ in self.pieces]
         self.start_button_text_color = (255, 255, 255)
@@ -552,9 +553,9 @@ class StartScreen(Game):
         self.input_active = False
         self.input_text = ''
         self.input_text_width = 0
-        self.controls_button_pos = (0 , game.height - 30)
-        self.controls_button = pygame.Rect(0, game.height - 30, 125, 30)
-        self.controls_button_text = game.medium_font.render('CONTROLS', True, (0, 0, 0))
+        self.settings_button_pos = (0 , game.height - 30)
+        self.settings_button = pygame.Rect(0, game.height - 30, 125, 30)
+        self.settings_button_text = game.medium_font.render('SETTINGS', True, (0, 0, 0))
         self.credits_button_text = game.small_font.render('CREDITS', True, (0, 0, 0))
         self.credits_button_height = 30
         self.credits_button_pos = (game.width - 70, game.height - self.credits_button_height)
@@ -562,6 +563,8 @@ class StartScreen(Game):
         self.connected = False
         self.back_icon = pygame.image.load('assets/arrow-back.png')
         self.back_button = pygame.Rect(10, 10, 75, 65)
+        self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
+        self.disconnect_button_text = game.font.render('Disconnect', True, (self.r, self.g, self.b))
 
 
     def draw_back_button(self, pos = (-10, -10)):
@@ -584,7 +587,46 @@ class StartScreen(Game):
 
             pygame.draw.rect(game.screen, colooooooooor, self.start_button_rect)
 
-    def draw_text(self):
+    
+    def credits_screen(self, pieces, draw_tetris_pieces):
+
+        
+        credits_list = ['Made by', 'Zack Ghanbari', 'and Ali Rastegar']
+        text_y = 0
+        text_offset = 80
+        text_scroll_dist = 0.1
+        
+        def draw_text(tup):
+            index, text = tup
+            rendered_text = game.font.render(text, True, (255,255,255))
+            game.screen.blit(rendered_text, (rendered_text.get_rect(center = (game.width/2, game.height/2))[0], text_y + (index * text_offset)))
+        
+       
+
+        running = True
+        while running:
+            mouse = pygame.mouse.get_pos()
+            #Game over loop
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+
+                    pygame.quit()
+                    sys.exit()
+
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if self.back_button.collidepoint(event.pos):
+                        running = False
+
+
+            game.screen.fill((0,0,0))
+            draw_tetris_pieces(pieces)
+            self.draw_back_button(mouse)
+            text_y = text_y + text_scroll_dist if text_y <= game.width + 100 else -1 * (len(credits_list) * text_offset)
+            list(map(draw_text, enumerate(credits_list)))
+            pygame.display.update()
+    
+    
+    def draw_text(self, mouse):
 
 
         if not self.connected:
@@ -593,8 +635,15 @@ class StartScreen(Game):
             
         
         else:
-            self.start_button_text = game.font.render('Waiting for opponent...', True, start_button_text_color)
+            self.start_button_text = game.font.render('Waiting for opponent...', True, self.start_button_text_color)
             self.start_button_rect.x = self.start_button_rect_x - 100
+            if self.disconnect_button_rect.collidepoint(mouse):
+                color = tuple(map(darken, (255, 255, 255)))
+            else:
+                color = (255, 255, 255)
+                
+            pygame.draw.rect(game.screen, color, self.disconnect_button_rect)
+            game.screen.blit(self.disconnect_button_text, (self.disconnect_button_rect.x + 7, self.disconnect_button_rect.y + 1))
             
 
         title_text = game.very_big_font.render('TETRIUM', True, (self.r, self.g, self.b)) 
@@ -697,10 +746,13 @@ class StartScreen(Game):
                 #Moves it back up
                 piece.move(0, randint(-35, -30))
 
+
             piece.render(False)
             if time.time() > self.last_falls[i]:
                 piece.move(0, 1)
                 self.last_falls[i] = time.time() + 0.75
+
+
 
     def draw_credits_button(self, pos):
         color = tuple(map(lighten, (self.r,self.g, self.b))) if self.credits_button.collidepoint(pos) else (self.r, self.g, self.b)
@@ -708,10 +760,10 @@ class StartScreen(Game):
         game.screen.blit(self.credits_button_text, (self.credits_button_pos[0] + 3, self.credits_button_pos[1] + 5))   
 
 
-    def draw_controls_button(self, pos):
-        color = tuple(map(lighten, (self.r,self.g, self.b))) if self.controls_button.collidepoint(pos) else (self.r, self.g, self.b)
-        pygame.draw.rect(game.screen, color, self.controls_button)
-        game.screen.blit(self.controls_button_text, (self.controls_button_pos[0] + 5, self.controls_button_pos[1] + 3))
+    def draw_settings_button(self, pos):
+        color = tuple(map(lighten, (self.r,self.g, self.b))) if self.settings_button.collidepoint(pos) else (self.r, self.g, self.b)
+        pygame.draw.rect(game.screen, color, self.settings_button)
+        game.screen.blit(self.settings_button_text, (self.settings_button_pos[0] + 10, self.settings_button_pos[1] + 3))
     
     
     
@@ -763,7 +815,7 @@ class StartScreen(Game):
             text_1_rect = text_1.get_rect()
             text_1_rect.center = (text_2_rect.x - text_1_rect.width/2, text_2_rect.y + 10)
    
-                                            #Dw about mechanics of this, just know that This only toggles True/False every half a second
+                                            #Dw about mechanics of this, just know that This just toggles True/False every half a second
             if underline and index == clicked_index and int(str(round(time.time(), 1))[-1:]) < 5:
                     pygame.draw.rect(game.screen, (240, 240, 166), pygame.Rect(text_1_rect.x, text_1_rect.y + 2, text_1_rect.width, text_1_rect.height + 2))
             
@@ -779,45 +831,220 @@ class StartScreen(Game):
 
         return text_rects
 
+    def wait_for_game(self):
+
+        self.status = 'get'
+        while True:
+
+            if self.status == 'get':
+                data = game.n.send('get')
+            elif self.status == 'disconnect':
+                game.n.disconnect()
+                break
+            
+            try:
+                if data.ready: #type: ignore
+
+                    time.sleep(1)
+                    data = game.n.send('get')
+                    game.opp_name = data.opp_name(game.n.p)
+                    self.ready = True
+                    break
+            except Exception as e:
+                if not isinstance(e, AttributeError):
+                    raise e
+                break
 
 
-    def credits_screen(self, pieces, draw_tetris_pieces):
 
+
+    
+    def main(self):
+
+        while True:
+            #NOTE make sure this is at the top
+            self.s.fill((0,0,0, 2))
+
+            self.mouse = pygame.mouse.get_pos() 
+
+            #Game over loop
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+
+                    if self.connected:
+                        self.n.disconnect()
+
+                    pygame.quit()
+                    sys.exit()
+                    
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    
+                    if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
+
+                        self.start()
+                        self.connected = True
+                        _thread.start_new_thread(self.wait_for_game, ())
+                        game.screen.fill((0, 0, 0))
+                        pygame.mixer.music.set_volume(game.volume)
+                      
+                    
+                    if self.disconnect_button_rect.collidepoint(event.pos) and self.connected:
+                        self.status = 'disconnect'
+                        self.start_button_rect.x += 100
+                        game.screen.fill((0, 0, 0))
+                        self.connected = False
+
+
+                    elif self.mute_button_pos[0] - self.mute_button_radius <= self.mouse[0] <= self.mute_button_pos[0] + self.mute_button_radius and self.mute_button_pos[1] - self.mute_button_radius <= self.mouse[1] <=  self.mute_button_pos[1] + self.mute_button_radius: 
+                        game.muted = not game.muted
+                    
+                    elif self.credits_button.collidepoint(event.pos):
+                        self.credits_screen(self.pieces, self.draw_tetris_pieces)
+                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
+                        self.s.fill((0, 0, 0))
+
+                    elif self.settings_button.collidepoint(event.pos):
+                        settings_screen.main()
+                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
+                        self.s.fill((0, 0, 0))
+
+
+                    elif self.input_box.collidepoint(event.pos) and not self.connected:
+                        self.input_active = True
+                    
+                    else: 
+                        self.input_active = False
+
+                elif event.type == pygame.KEYDOWN:
+                    
+                    if self.input_active:
+                        
+                        if event.key == pygame.K_RETURN:
+                            self.start()
+                            pygame.mixer.music.set_volume(self.volume)
+                            self.screen.fill((0, 0, 0))
+                                
+
+                        elif event.key == pygame.K_BACKSPACE:
+                            self.input_text = self.input_text[:-1]
+
+                        else:
+                            self.get_input(event.unicode)
+
+                        
+            
+            pygame.mixer.music.set_volume(game.lowered_volume)
+            game.screen.blit(self.s, (0, 0))  
+            self.r, self.g, self.b = self.cycle_colors((self.r, self.g, self.b))
+            self.draw_tetris_pieces(self.pieces)
+            self.check_mute_and_draw_icons()
+            self.draw_credits_button(self.mouse)
+            self.draw_settings_button(self.mouse)
+
+            if not self.connected:
+                self.draw_start_button()
+                
+            self.draw_text(self.mouse)
+            self.draw_input_box()
+
+            # checking if game started
+            if self.connected and ( data := self.n.send('get') ).ready:
+                self.opp_name = data.opp_name(self.n.p)
+                break
+            
+                
+            pygame.display.update()
+
+            game.clock.tick(60)
+
+        game.time_started = time.time()
+        game.running = True
+
+
+class SettingsScreen(StartScreen):
+
+
+    def __init__(self):
+        super().__init__()
+        self.buttons_color = (255, 255, 255)
+        self.buttons = [
+            [
+                pygame.Rect(game.width/2 - 200/2, game.height/2 - 100, 200, 50), 
+                game.big_font.render('CONTROLS', True, (0, 0, 0)),
+                self.buttons_color,
+                self.pick_controls_screen
+            ], 
+
+            [
+                pygame.Rect(game.width/2 - 200/2, game.height/2, 200, 50), 
+                game.big_font.render('THEMES', True, (0, 0, 0)), 
+                self.buttons_color,
+                self.pick_themes_screen
+            ]
+            
+        ]
+
+   
+
+    
+
+
+    def pick_themes_screen(self):
+        def render_preview(bkg_color, fgd_color):
+            
+            pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, 0, game.width, game.height))
+            pygame.draw.rect(game.screen, fgd_color, new_playing_field_rect)
+            self.draw_tetris_pieces(pieces)
+           
         
-        credits_list = ['Made by', 'Zack Ghanbari', 'and Ali Rastegar']
-        text_y = 0
-        text_offset = 80
-        text_scroll_dist = 0.1
-        
-        def draw_text(tup):
-            index, text = tup
-            rendered_text = game.font.render(text, True, (255,255,255))
-            game.screen.blit(rendered_text, (rendered_text.get_rect(center = (game.width/2, game.height/2))[0], text_y + (index * text_offset)))
-        
+            #It was a lot of work to change the start and end position of the blocks, so i just cover them with a rect so look like theyre not going off screen
+            pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, 0, game.width, (game.height - new_playing_field_rect.height)/2))
+            pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, new_playing_field_rect.y + new_playing_field_rect.height, game.width, (game.height - new_playing_field_rect.height)/2))
+
+        new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
+        x_pos = [8, 9, 10, 11, 13]
+        shuffle(x_pos)
+
+        pieces = [
+
+            Piece(x_pos[0], randint(-9, -6), 'T'), 
+            Piece(x_pos[1], randint(-5, -1), 'J'), 
+            Piece(x_pos[2], randint(0, 4), 'S'), 
+            Piece(x_pos[3], randint(5, 9), 'Z'), 
+            Piece(x_pos[4], randint(10, 13), 'I'),
+            
+        ]
+       
        
 
+       
+       
         running = True
         while running:
+            #bkg color
+            background_color = game.background_color
+            fore_ground_color = game.foreground_color
+            game.screen.fill((26, 27, 37))
+
             mouse = pygame.mouse.get_pos()
-            #Game over loop
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
 
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     if self.back_button.collidepoint(event.pos):
                         running = False
 
-
-            game.screen.fill((0,0,0))
-            draw_tetris_pieces(pieces)
+                    
+            render_preview(background_color, fore_ground_color)
             self.draw_back_button(mouse)
-            text_y = text_y + text_scroll_dist if text_y <= game.width + 100 else -1 * (len(credits_list) * text_offset)
-            list(map(draw_text, enumerate(credits_list)))
             pygame.display.update()
-            
+
+
     
     def pick_controls_screen(self):
         
@@ -958,101 +1185,63 @@ class StartScreen(Game):
             text_boxes_1 = self.draw_controls(game.left_controls.items(), 0, (89, 248, 232), keys_bkg_color = (26, 27, 37), underline = clicked, clicked_index = clicked_index_1)
             text_boxes_2 = self.draw_controls(game.right_controls.items(), 1,  (89, 248, 232),  keys_bkg_color =(26, 27, 37), underline = clicked, clicked_index = clicked_index_2)
             pygame.display.update()
+    
 
+    def draw_buttons(self):
+
+        for button, text, color, _ in self.buttons:
+            pygame.draw.rect(game.screen, color, button)
+            text_rect = text.get_rect(center = (button.x + button.width/2, button.y +button.height/2))
+            game.screen.blit(text, text_rect)
+
+       
+
+
+    def buttons_hover(self, mouse):
+        for index, button in enumerate(self.buttons):
+              
+                if button[0].collidepoint(mouse):
+                                                                    #2 is the color index
+                    self.buttons[index][2] = tuple(map(darken, self.buttons_color))
+                
+                else:
+                    self.buttons[index][2] = self.buttons_color
 
     
+
+
     def main(self):
 
-        while True:
-            #NOTE make sure this is at the top
-            self.s.fill((0,0,0, 2))
+        running = True
+        while running:
+            #bkg color
+            game.screen.fill((0, 0, 0))
 
-            self.mouse = pygame.mouse.get_pos() 
+            mouse = pygame.mouse.get_pos()
 
-            #Game over loop
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
 
-                    if self.connected:
-                        self.n.disconnect()
-
                     pygame.quit()
                     sys.exit()
+
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    
-                    if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
+                    for button, _, _, func in self.buttons:
+                        if button.collidepoint(event.pos):
+                            func()
 
-                        self.start()
-
-                        pygame.mixer.music.set_volume(self.volume)
-                        game.screen.fill((0, 0, 0))
-
-                    elif self.mute_button_pos[0] - self.mute_button_radius <= self.mouse[0] <= self.mute_button_pos[0] + self.mute_button_radius and self.mute_button_pos[1] - self.mute_button_radius <= self.mouse[1] <=  self.mute_button_pos[1] + self.mute_button_radius: 
-                        game.muted = not game.muted
-                    
-                    elif self.credits_button.collidepoint(event.pos):
-                        self.credits_screen(self.pieces, self.draw_tetris_pieces)
-                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
-                        self.s.fill((0, 0, 0))
-
-                    elif self.controls_button.collidepoint(event.pos):
-                        self.pick_controls_screen()
-                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
-                        self.s.fill((0, 0, 0))
+                    if self.back_button.collidepoint(event.pos):
+                        running = False
 
 
-                    elif self.input_box.collidepoint(event.pos) and not self.connected:
-                        self.input_active = True
-                    
-                    else: 
-                        self.input_active = False
-
-                elif event.type == pygame.KEYDOWN:
-                    
-                    if self.input_active:
-                        
-                        if event.key == pygame.K_RETURN:
-                            self.start()
-                            pygame.mixer.music.set_volume(self.volume)
-                            self.screen.fill((0, 0, 0))
-                                
-
-                        elif event.key == pygame.K_BACKSPACE:
-                            self.input_text = self.input_text[:-1]
-
-                        else:
-                            self.get_input(event.unicode)
-
-                        
-            
-            pygame.mixer.music.set_volume(game.lowered_volume)
-            game.screen.blit(self.s, (0, 0))  
-            self.r, self.g, self.b = self.cycle_colors((self.r, self.g, self.b))
-            self.draw_tetris_pieces(self.pieces)
-            self.check_mute_and_draw_icons()
-            self.draw_credits_button(self.mouse)
-            self.draw_controls_button(self.mouse)
-
-            if not self.connected:
-                self.draw_start_button()
-                
-            self.draw_text()
-            self.draw_input_box()
-
-            # checking if game started
-            if self.connected and ( data := self.n.send('get') ).ready:
-                self.opp_name = data.opp_name(self.n.p)
-                break
-            
-                
+            self.buttons_hover(mouse)
+            self.draw_back_button(mouse)
+            self.draw_buttons()
             pygame.display.update()
-
             game.clock.tick(60)
 
-        game.time_started = time.time()
-        game.running = True
-
+        
 
 
 
@@ -1072,9 +1261,8 @@ class Block(Game):
 
         self.flash_start = 0
         self.direction = 0
-
-
         self.fade_start = 0
+        
     
     def render(self):
 
@@ -1572,6 +1760,7 @@ class Piece(Game):
 
 
 start_screen = StartScreen()
+settings_screen = SettingsScreen()
 
 
 

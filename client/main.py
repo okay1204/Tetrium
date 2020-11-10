@@ -791,8 +791,6 @@ while True:
                         game.score += 50 * combo * (21 - lowest_y)
 
                         
-
-
                         if not tspin:
 
                             lines_sent += line_key[lines_cleared-1]

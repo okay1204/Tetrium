@@ -55,6 +55,8 @@ display_until = 0
 canSwitch = True
 rotation_last = False
 
+gameOver = False
+
 
 def reset():
     global bag, next_bag, avoids, current, held, canSwitch, moving, fall_speed
@@ -79,15 +81,14 @@ def reset():
 
 
 opp_disconnected_after = False
-rematch = False
 
 def game_over(win: bool):
 
-    global opp_disconnected_after, rematch
+    global gameOver, opp_disconnected_after
 
 
 
-    game_over = True
+    gameOver = True
 
     pygame.mixer.music.set_volume(game.lowered_volume)
     button_dimensions = (300, 40)
@@ -127,7 +128,7 @@ def game_over(win: bool):
         game.opaque_bkg.set_alpha(120)
             
 
-    while game_over:
+    while gameOver:
 
         mouse = pygame.mouse.get_pos()
         
@@ -140,7 +141,7 @@ def game_over(win: bool):
                 pygame.quit()
                 sys.exit()
 
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 
                 # find new match
                 if restart_button_rect.collidepoint(event.pos):
@@ -149,7 +150,7 @@ def game_over(win: bool):
                     if not opp_disconnected_after:
                         game.n.disconnect()
 
-                    game_over = False
+                    gameOver = False
 
             elif event.type == pygame.KEYDOWN:
                 
@@ -165,11 +166,9 @@ def game_over(win: bool):
         
         else:
             restart_button_color = (255, 255, 255)
-        
-        if rematch:
-            game_over = False
-            send("reset")
 
+        if won == None:
+            break
 
        
         game.screen.blit(game_over_text, textRect) 
@@ -225,7 +224,7 @@ attacked = True
 
 def server_connection():
     
-    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, rematch, attacked
+    global disconnected, current, specials, display_until, fall_speed, attacked
 
     while game.running:
 
@@ -265,8 +264,6 @@ def server_connection():
         if data.winner == game.n.p:
             won = True
 
-        if all(data.rematch):
-            rematch = True
 
         for special in sent_specials:
             specials.remove(special)
@@ -388,7 +385,7 @@ def play_meter_animations():
 while True:
 
     opp_disconnected_after = False
-    game.ready = False
+    start_screen.ready = False
     start_screen.main()
     _thread.start_new_thread(server_connection, ())
 
@@ -410,14 +407,10 @@ while True:
             break
 
         if won != None:
+            game.running = False
             game_over(won)
             game.screen.fill((0, 0, 0))
             reset()
-            won = None
-
-            if not rematch:
-                rematch = False
-                break
 
 
         # if there are fading blocks, pause the game for a quick moment

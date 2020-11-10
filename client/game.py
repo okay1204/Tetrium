@@ -637,7 +637,7 @@ class StartScreen(Game):
         
         else:
             self.start_button_text = game.font.render('Waiting for opponent...', True, self.start_button_text_color)
-            self.start_button_rect.x = self.start_button_rect_x - 100
+            self.start_button_rect.x = game.width/2-60 - 100
             if self.disconnect_button_rect.collidepoint(mouse):
                 color = tuple(map(darken, (255, 255, 255)))
             else:
@@ -891,7 +891,7 @@ class StartScreen(Game):
                     
                     if self.disconnect_button_rect.collidepoint(event.pos) and self.connected:
                         self.status = 'disconnect'
-                        self.start_button_rect.x += 100
+                        self.start_button_rect.x = game.width/2-60
                         game.screen.fill((0, 0, 0))
                         self.connected = False
 
@@ -949,8 +949,8 @@ class StartScreen(Game):
             self.draw_input_box()
 
             # checking if game started
-            if self.connected and ( data := self.n.send('get') ).ready:
-                self.opp_name = data.opp_name(self.n.p)
+            if self.connected and self.ready:
+                self.connected = False
                 break
             
                 

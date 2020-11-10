@@ -1008,16 +1008,15 @@ class SettingsScreen(StartScreen):
 
         pieces = [
 
-            Piece(x_pos[0], randint(-9, -6), 'T'), 
-            Piece(x_pos[1], randint(-5, -1), 'J'), 
-            Piece(x_pos[2], randint(0, 4), 'S'), 
-            Piece(x_pos[3], randint(5, 9), 'Z'), 
+            Piece(x_pos[0], randint(-9, -7), 'T'), 
+            Piece(x_pos[1], randint(-5, -2), 'J'), 
+            Piece(x_pos[2], randint(0, 3), 'S'), 
+            Piece(x_pos[3], randint(5, 8), 'Z'), 
             Piece(x_pos[4], randint(10, 13), 'I'),
             
         ]
        
        
-
        
        
         running = True
@@ -1248,7 +1247,7 @@ class SettingsScreen(StartScreen):
 
 class Block(Game):
 
-    def __init__(self, x, y, color, colorByName=True):
+    def __init__(self, x, y, color, colorByName = True):
 
         self.x, self.y = x, y
 

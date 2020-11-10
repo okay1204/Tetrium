@@ -30,7 +30,7 @@ class Network:
 
             return response
         except:
-            pass
+            return "no connection"
 
     def disconnect(self):
         # dumps data

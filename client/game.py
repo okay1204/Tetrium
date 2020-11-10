@@ -666,11 +666,16 @@ class Game:
             nonlocal connected, input_active, input_text
             input_active = False
 
+            self.n = network.Network()
+            if self.n.p == "no connection":
+                print("no connection") # TODO no connection screen here
+                return            
+
+
             input_text = input_text.strip()
             if not input_text:
                 input_text = "Player"
 
-            self.n = network.Network()
             self.player = self.n.p
 
             if isinstance(self.n.p, str):
@@ -975,7 +980,7 @@ class Game:
             dc_text_2 = self.font.render(text2,  True, (255, 255, 255))
             self.screen.blit(dc_text_1, (self.width/2 - 175, 200))
             self.screen.blit(dc_text_2, (self.width/2 - 75, 300))
-    
+
         def cycle_colors():
             
             nonlocal r, g, b
@@ -992,7 +997,7 @@ class Game:
                 else:
                     r, g, b = 255, 0, 0
 
-           
+            
         def draw_button():
             nonlocal button_text_color
 
@@ -1036,7 +1041,7 @@ class Game:
                     
                     check_click(event.pos)
 
-    
+
             self.screen.fill((0,0,0))
 
             draw_text()

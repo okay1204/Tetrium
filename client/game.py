@@ -620,7 +620,7 @@ class Game:
             
             else:
                 start_button_text = self.font.render('Waiting for opponent...', True, (r, g, b))
-                start_button_rect.x = start_button_rect_x - 100
+
 
                 disconnect_button_text = self.font.render('Disconnect', True, (r, g, b))
                 self.screen.blit(disconnect_button_text, (disconnect_button_rect.x + 7, disconnect_button_rect.y + 3))
@@ -687,6 +687,7 @@ class Game:
                 print("no connection") # TODO no connection screen here
                 return            
 
+            start_button_rect.x -=  100
 
             input_text = input_text.strip()
             if not input_text:
@@ -770,8 +771,8 @@ class Game:
       
         start_button_text_color = (255, 255, 255)
         mute_button_pos = (int(self.width/2), int(self.height/2 + 100))
-        start_button_rect_x = self.width/2 - 60
-        start_button_rect = pygame.Rect(start_button_rect_x, self.height/2, 120, 40)
+  
+        start_button_rect = pygame.Rect(self.width/2-60, self.height/2, 120, 40)
         disconnect_button_rect = pygame.Rect(self.width/2-90, self.height/2+200, 175, 40)
         mute_button_radius = 35
         volume_on_icon = pygame.image.load('assets/volume-high.png')
@@ -825,6 +826,8 @@ class Game:
 
                     if disconnect_button_rect.collidepoint(event.pos) and connected:
                         self.n.disconnect()
+                        start_button_rect.x += 100
+                        self.screen.fill((0, 0, 0))
                         connected = False
 
                     elif mute_button_pos[0] - mute_button_radius <= mouse[0] <= mute_button_pos[0] + mute_button_radius and mute_button_pos[1] - mute_button_radius <= mouse[1] <=  mute_button_pos[1] + mute_button_radius: 

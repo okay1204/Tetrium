@@ -10,8 +10,8 @@ from random import shuffle, randint
 import network
 import json
 import pyperclip
-import _thread
 from oooooooooooooooooooooooooooooooooooooooooooootils import darken, lighten
+import _thread
 
 
 from pieces import preview_piece
@@ -58,7 +58,6 @@ class Game:
 
 
         self.running = True
-        self.ready = False
         self.muted = False
 
         self.clock = pygame.time.Clock()
@@ -514,6 +513,9 @@ game = Game()
 class StartScreen(Game):
 
     def __init__(self):
+
+        self.ready = False
+
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
         self.x_pos = [0, 4, 8, 12, 16, 20, 0, 4, 8]
         shuffle(self.x_pos)
@@ -536,8 +538,9 @@ class StartScreen(Game):
         self.last_falls = [time.time() for _ in self.pieces]
         self.start_button_text_color = (255, 255, 255)
         self.mute_button_pos = (int(game.width/2), int(game.height/2 + 100))
-        self.start_button_rect_x = game.width/2 - 60
-        self.start_button_rect = pygame.Rect(self.start_button_rect_x, game.height/2, 120, 40)
+        self.start_button_rect = pygame.Rect(game.width/2-60, game.height/2, 120, 40)
+        self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
+
         self.mute_button_radius = 35
         self.volume_on_icon = pygame.image.load('assets/volume-high.png')
         self.volume_off_icon = pygame.image.load('assets/volume-off.png')
@@ -631,8 +634,6 @@ class StartScreen(Game):
 
         if not self.connected:
             self.start_button_text = game.font.render('START', True, self.start_button_text_color)
-            
-            
         
         else:
             self.start_button_text = game.font.render('Waiting for opponent...', True, self.start_button_text_color)
@@ -701,26 +702,26 @@ class StartScreen(Game):
         
         self.input_active = False
 
-        self.n = network.Network()
-        if self.n.p == "no connection":
+        game.n = network.Network()
+        if game.n.p == "no connection":
             print("no connection") # TODO no connection screen here
             return            
+
+        self.start_button_rect.x -=  100
 
 
         self.input_text = self.input_text.strip()
         if not self.input_text:
             self.input_text = "Player"
 
-        self.player = self.n.p
-
-        if isinstance(self.n.p, str):
-            outdated_info = self.n.p.split()
+        if isinstance(game.n.p, str):
+            outdated_info = game.n.p.split()
                                         # new version number # download link
             game.outdated_version_screen(outdated_info[2], outdated_info[3])
 
         self.connected = True
-        self.name = self.input_text
-        self.n.send("name " + self.input_text)
+        game.name = self.input_text
+        game.n.send("name " + self.input_text)
 
     def cycle_colors(self, rgb):
         r, g, b = rgb

@@ -8,6 +8,7 @@ import traceback
 server = "localhost"
 port = 6969
 
+timeout = 3.0
 
 idCount = 0
 games = {}
@@ -25,9 +26,6 @@ def threaded_client(conn, player, gameId):
 
     # send player number to client right after connecting
     conn.send(str.encode(str(player)))
-
-    conn.settimeout(2.0)
-
 
     name = None
 
@@ -66,6 +64,11 @@ def threaded_client(conn, player, gameId):
                     break
                 
                 else:
+
+                    if game.ready and conn.gettimeout() != timeout:
+                        conn.settimeout(timeout)
+
+
                     # data will be in order of
                     # resting, piece, meter, meter stage
 
@@ -164,7 +167,6 @@ download_link = "www.google.com"
 while True:
         
     conn, addr = s.accept()
-
 
     # make sure client is running correct version first
     client_version = conn.recv(4096).decode()

@@ -53,8 +53,8 @@ class Game:
 
         self.width = 750
         self.height = 800
-        self.background_color = (0, 0, 0)
-        self.foreground_color = (93, 110, 105)
+        self.background_color = (0, 20, 39)
+        self.foreground_color = (101, 142, 156)
 
 
         self.running = True
@@ -89,7 +89,7 @@ class Game:
         # list of numbers, with numbers being attack amounts
         self.meter = []
         self.meter_stage = 1
-    #hi
+ 
 
         self.opp_resting = self.opp_meter = self.opp_meter_stage = self.opp_piece_blocks = None
         self.opp_name = None
@@ -307,7 +307,9 @@ class Game:
                 pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11)) #type: ignore
                 meter_block += 1
 
-
+        # if int(time.time()) % 2:
+        #     self.width += 1
+        #     pygame.display.set_mode((self.width, self.height))
 
     def draw_back_button(self, pos = (-10, -10)):
         white = (255, 255, 255)

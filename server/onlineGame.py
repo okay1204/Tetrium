@@ -24,7 +24,6 @@ class OnlineGame:
         self._id = game_id
 
         self.rematch = [False, False]
-        self.reset = [True, True]
 
     
     def speed_level(self):
@@ -120,7 +119,6 @@ class OnlineGame:
 
     def _reset(self):
         self.rematch = [False, False]
-        self.reset = [False, False]
         self.winner = None
         self.time_started = time.time()
     

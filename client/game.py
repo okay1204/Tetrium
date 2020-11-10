@@ -103,6 +103,10 @@ class Game:
         self.back_icon = pygame.image.load('assets/arrow-back.png')
         self.back_button = pygame.Rect(10, 10, 75, 65)
 
+        self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
+        self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
+        self.grid_color =  tuple(map(lambda x: x - 10, self.foreground_color))
+
 
         self.default_controls = {
             "Move Right": "d",
@@ -142,7 +146,8 @@ class Game:
     def render(self, pieces=None, held=None):
         
         self.screen.fill(self.background_color)
-        pygame.draw.rect(self.screen, self.foreground_color, (100, 100, 300, 600))
+        pygame.draw.rect(self.screen, self.foreground_color, self.playing_field_rect)
+        self.draw_grid(self.playing_field_rect, 30, self.grid_color)
 
         for block in self.resting:
             block.render()
@@ -257,7 +262,7 @@ class Game:
                 if meter_block >= 10:
                     break
                 pygame.draw.rect(self.screen, darkened, (35, 667 - (30 * meter_block), 30, 30))
-                pygame.draw.rect(self.screen, color, (40, 672 - (30 * meter_block), 20, 20))
+                pygame.draw.rect(self.screen, color, (40, 672 - (30 * meter_block), 20, 20)) #type: ignore
                 meter_block += 1
 
         
@@ -265,7 +270,8 @@ class Game:
 
 
     def render_second_screen(self):
-        pygame.draw.rect(self.screen, self.foreground_color, (570, 250, 150, 300))
+        pygame.draw.rect(self.screen, self.foreground_color, self.second_screen_rect)
+        self.draw_grid(self.second_screen_rect, 15, self.grid_color)
 
         if self.time_started + 1 > time.time():
             return
@@ -296,7 +302,7 @@ class Game:
             else:
                 color = color_key["gray"]
 
-            darkened = (tuple(darken(color) for color in color))
+            darkened = tuple(map(darken, color)) #type: ignore
 
             for _ in range(amount):
 
@@ -307,9 +313,13 @@ class Game:
                 pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11)) #type: ignore
                 meter_block += 1
 
-        if int(time.time()) % 2:
-            self.width += 1
-            pygame.display.set_mode((self.width, self.height))
+    def draw_grid(self, rect, block_size, color):
+        for x_pos in range(rect.x, rect.x + rect.width, block_size):
+            pygame.draw.line(self.screen,  color, (x_pos, rect.y), (x_pos, rect.y + rect.height), 1)
+        
+        for y_pos in range(rect.y, rect.y + rect.height, block_size):
+            pygame.draw.line(self.screen, color, (rect.x, y_pos), (rect.x + rect.width, y_pos), 1)
+
 
     def draw_back_button(self, pos = (-10, -10)):
         white = (255, 255, 255)
@@ -576,14 +586,15 @@ class Game:
 
             if not connected:
                 #if mouse hovering make it lighter
-                if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1]: 
-                    pygame.draw.rect(self.screen, (255,255,255), (start_button_pos, start_button_dimensions)) 
+                if start_button_rect.collidepoint(mouse): 
+                    colooooooooor = (255,255,255)
                     start_button_text_color = (r, g, b)
                 
                 else: 
-                    pygame.draw.rect(self.screen, (0,0,0), (start_button_pos, start_button_dimensions))
+                    colooooooooor = (0, 0, 0)
                     start_button_text_color = (255, 255, 255)
 
+                pygame.draw.rect(self.screen, colooooooooor, start_button_rect)
 
         def draw_text():
 
@@ -591,14 +602,16 @@ class Game:
 
             if not connected:
                 start_button_text = self.font.render('START', True, start_button_text_color)
-                start_button_coords = (start_button_pos[0] + 20, start_button_pos[1] + 3)
+              
+                
             
             else:
                 start_button_text = self.font.render('Waiting for opponent...', True, start_button_text_color)
-                start_button_coords = (start_button_pos[0] - 80, start_button_pos[1])
+                start_button_rect.x = start_button_rect_x - 100
+                
 
             title_text = self.very_big_font.render('TETRIUM', True, (r, g, b)) 
-            self.screen.blit(start_button_text, start_button_coords)
+            self.screen.blit(start_button_text, (start_button_rect.x + 7, start_button_rect.y + 3))
             self.screen.blit(title_text, (self.width/2 - 165, self.height/2 - 200)) 
          
 
@@ -730,10 +743,12 @@ class Game:
         r, g, b = 255, 0, 0
 
         last_falls = [time.time() for _ in pieces]
-        start_button_dimensions = (140, 40)
-        start_button_pos = (self.width/2 - 70, self.height/2)
+ 
+      
         start_button_text_color = (255, 255, 255)
         mute_button_pos = (int(self.width/2), int(self.height/2 + 100))
+        start_button_rect_x = self.width/2 - 60
+        start_button_rect = pygame.Rect(start_button_rect_x, self.height/2, 120, 40)
         mute_button_radius = 35
         volume_on_icon = pygame.image.load('assets/volume-high.png')
         volume_off_icon = pygame.image.load('assets/volume-off.png')
@@ -751,7 +766,7 @@ class Game:
         input_text_width = 0
         
         controls_button_pos = (0 , self.height - 30)
-        controls_button = pygame.Rect(controls_button_pos[0], controls_button_pos[1], 125, 30)
+        controls_button = pygame.Rect(0, self.height - 30, 125, 30)
         controls_button_text = self.medium_font.render('CONTROLS', True, (0, 0, 0))
         credits_button_text = self.small_font.render('CREDITS', True, (0, 0, 0))
         credits_button_height = 30
@@ -777,8 +792,8 @@ class Game:
                     
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                    
-                    if start_button_pos[0] <= mouse[0] <= start_button_pos[0] + start_button_dimensions[0] and start_button_pos[1] <= mouse[1] <= start_button_pos[1] + start_button_dimensions[1] and not connected:  
-                        
+                    if start_button_rect.collidepoint(event.pos) and not connected:  
+    
                         start()
 
                         pygame.mixer.music.set_volume(self.volume)

@@ -195,9 +195,12 @@ def send(string):
 # for getting information about opponent
 disconnected = None
 
+
+attacked = True
+
 def server_connection():
     
-    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, rematch
+    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, rematch, attacked
 
     while game.running:
 
@@ -243,9 +246,20 @@ def server_connection():
         
         game.opp_resting = data.opp_resting(game.n.p)
         game.opp_piece_blocks = data.opp_piece_blocks(game.n.p)
-        game.opp_meter = list(map(lambda value: int(value), data.opp_meter(game.n.p)))
+        game.opp_meter = data.opp_meter(game.n.p)
         game.opp_meter_stage = data.opp_meter_stage(game.n.p)
-        game.meter = list(map(lambda value: int(value), data.own_meter(game.n.p)))
+
+
+        meter = data.own_meter(game.n.p)
+        if len(meter) > len(game.meter):
+
+            if attacked:
+                meter_animations.append(((700, 600), time.time(), 0))
+            else:
+                attacked = True
+
+        game.meter = meter
+
         game.meter_stage = data.own_meter_stage(game.n.p)
 
         if game.level != data.speed_level():
@@ -268,24 +282,40 @@ meter_animations = []
 def play_meter_animations():
     global meter_animations
 
-    # animation should take 1 seconds long
+    duration = 0.5
+
     removed = []
 
-    for pos, start_time in meter_animations:
+    for pos, start_time, against in meter_animations:
 
-        print(time.time() - start_time)
+        # going to opponent
+        if against == 1:
+            destination = (550, 550)
+        # coming from opponent
+        else:
+            destination = (50, 700)
 
-        if time.time() - start_time > 1:
-            removed.append((pos, start_time))
+        if time.time() - start_time > duration:
+            removed.append((pos, start_time, against))
             continue
 
         start_time = time.time() - start_time
 
-        distance = (550 - pos[0], 550 - pos[1])
-        traveled = (distance[0]/1 * start_time + pos[0], distance[1]/1 * start_time + pos[1])
+        distance = (destination[0] - pos[0], destination[1] - pos[1])
+        traveled = (distance[0]/duration * start_time + pos[0], distance[1]/duration * start_time + pos[1])
 
-        print(traveled)
-        pygame.draw.circle(game.screen, (255, 255, 255), traveled, 10)
+        pos_size = traveled[0], traveled[1], 20, 20
+        pygame.draw.rect(game.screen, random.choice(list(color_key.values())), pos_size)
+
+        for _ in range(randint(3, 5)):
+            random_pos = traveled[0] + random.randint(-30, 30), traveled[1] + random.randint(-30, 30)
+            
+            random_size = random.randint(15, 20)
+            random_size = random_size, random_size
+
+            pos_size = random_pos[0], random_pos[1], random_size[0], random_size[1]
+
+            pygame.draw.rect(game.screen, random.choice(list(color_key.values())), pos_size)
     
     for remove in removed:
         meter_animations.remove(remove)
@@ -788,7 +818,7 @@ while True:
                                 highest_y = block.y
                                 chosen_block = block
 
-                        meter_animations.append((((block.x-1) * block.size + 100, (block.y-1) * block.size + 100), time.time()))
+                        meter_animations.append((((block.x-1) * block.size + 100, (block.y-1) * block.size + 100), time.time(), 1))
                         
                     
                     if not lines_cleared:
@@ -802,7 +832,7 @@ while True:
                             meter_stage = game.meter_stage
 
                             if meter_stage >= 3:
-                                
+                                attacked = False
                                 send("meter reset")
 
                                 amount = game.meter[0]

@@ -278,6 +278,7 @@ mouse_number_key = {
 }
 
 meter_animations = []
+number_animations = []
 
 def start_meter_animation(pos, against):
     global meter_animations
@@ -290,8 +291,38 @@ def start_meter_animation(pos, against):
 
         meter_animations.append((random_pos, time.time(), random_size, against))
 
+def start_number_animation(pos, number):
+    global number_animations
 
+    number_animations.append((pos, time.time(), number))
+
+def play_number_animations():
+    global number_animations
+
+    duration = 0.5
+    travel_distance = 30
+
+    removed = []
+
+    for pos, start_time, number in number_animations:
+
+
+        if time.time() - start_time > duration:
+            removed.append((pos, start_time, number))
+            continue
+
+        start_time = time.time() - start_time
+
+
+        traveled = (pos[0], (travel_distance/duration * start_time * -1) + pos[1])
+
+        text = game.font.render(str(number), True, (0, 0, 0))
+        game.screen.blit(text, traveled)
+
+        
     
+    for remove in removed:
+        number_animations.remove(remove)
 
 def play_meter_animations():
     global meter_animations
@@ -316,7 +347,7 @@ def play_meter_animations():
         start_time = time.time() - start_time
 
         distance = (destination[0] - pos[0], destination[1] - pos[1])
-        traveled = (distance[0]/duration * start_time + pos[0], distance[1]/duration * start_time + pos[1])
+        traveled = ((distance[0]/duration * start_time) + pos[0], (distance[1]/duration * start_time) + pos[1])
 
         pos_size = traveled[0], traveled[1], size, size
         pygame.draw.rect(game.screen, (255, 255, 255), pos_size)
@@ -377,7 +408,9 @@ while True:
                 game.rows_cleared.clear()
 
             game.render(bag[:3], held)
+
             play_meter_animations()
+            play_number_animations()
             
             pygame.display.update()
             game.clock.tick(60)
@@ -822,8 +855,10 @@ while True:
                                 highest_y = block.y
                                 chosen_block = block
 
-                        start_meter_animation(((block.x-1) * block.size + 100, (block.y-1) * block.size + 100), 1)
-                        
+                        pos = (block.x-1) * block.size + 100, (block.y-1) * block.size + 100
+
+                        start_meter_animation(pos, 1)
+                        start_number_animation(pos, lines_sent)
                     
                     if not lines_cleared:
                         combo = -1
@@ -874,6 +909,7 @@ while True:
             current.render()
 
         play_meter_animations()
+        play_number_animations()
 
 
         if display_until > time.time():

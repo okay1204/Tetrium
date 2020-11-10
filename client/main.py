@@ -254,7 +254,7 @@ def server_connection():
         if len(meter) > len(game.meter):
 
             if attacked:
-                meter_animations.append(((700, 600), time.time(), 0))
+                start_meter_animation((700, 600), 0)
             else:
                 attacked = True
 
@@ -279,6 +279,20 @@ mouse_number_key = {
 
 meter_animations = []
 
+def start_meter_animation(pos, against):
+    global meter_animations
+
+    meter_animations.append((pos, time.time(), 15, against))
+
+    for _ in range(randint(3, 5)):
+        random_pos = pos[0] + random.randint(-30, 30), pos[1] + random.randint(-30, 30)
+        random_size = random.randint(3, 10)
+
+        meter_animations.append((random_pos, time.time(), random_size, against))
+
+
+    
+
 def play_meter_animations():
     global meter_animations
 
@@ -286,7 +300,7 @@ def play_meter_animations():
 
     removed = []
 
-    for pos, start_time, against in meter_animations:
+    for pos, start_time, size, against in meter_animations:
 
         # going to opponent
         if against == 1:
@@ -296,7 +310,7 @@ def play_meter_animations():
             destination = (50, 700)
 
         if time.time() - start_time > duration:
-            removed.append((pos, start_time, against))
+            removed.append((pos, start_time, size, against))
             continue
 
         start_time = time.time() - start_time
@@ -304,18 +318,8 @@ def play_meter_animations():
         distance = (destination[0] - pos[0], destination[1] - pos[1])
         traveled = (distance[0]/duration * start_time + pos[0], distance[1]/duration * start_time + pos[1])
 
-        pos_size = traveled[0], traveled[1], 20, 20
-        pygame.draw.rect(game.screen, random.choice(list(color_key.values())), pos_size)
-
-        for _ in range(randint(3, 5)):
-            random_pos = traveled[0] + random.randint(-30, 30), traveled[1] + random.randint(-30, 30)
-            
-            random_size = random.randint(15, 20)
-            random_size = random_size, random_size
-
-            pos_size = random_pos[0], random_pos[1], random_size[0], random_size[1]
-
-            pygame.draw.rect(game.screen, random.choice(list(color_key.values())), pos_size)
+        pos_size = traveled[0], traveled[1], size, size
+        pygame.draw.rect(game.screen, (255, 255, 255), pos_size)
     
     for remove in removed:
         meter_animations.remove(remove)
@@ -818,7 +822,7 @@ while True:
                                 highest_y = block.y
                                 chosen_block = block
 
-                        meter_animations.append((((block.x-1) * block.size + 100, (block.y-1) * block.size + 100), time.time(), 1))
+                        start_meter_animation(((block.x-1) * block.size + 100, (block.y-1) * block.size + 100), 1)
                         
                     
                     if not lines_cleared:

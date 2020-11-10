@@ -383,6 +383,7 @@ def play_meter_animations():
 while True:
 
     opp_disconnected_after = False
+    game.ready = False
     game.start_screen()
     _thread.start_new_thread(server_connection, ())
 

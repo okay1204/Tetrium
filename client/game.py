@@ -951,6 +951,7 @@ class StartScreen(Game):
             # checking if game started
             if self.connected and self.ready:
                 self.connected = False
+                self.start_button_rect = pygame.Rect(game.width/2-60, game.height/2, 120, 40)
                 break
             
                 

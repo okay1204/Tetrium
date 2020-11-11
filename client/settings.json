@@ -1,7 +1,7 @@
 {
   "controls": {
-    "Move Left": "a",
-    "Move Right": "d",
+    "Move Left": "left click",
+    "Move Right": "j",
     "Soft Drop": "s",
     "Toggle Movement": "g",
     "Toggle Music": "m",

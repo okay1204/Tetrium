@@ -1228,6 +1228,14 @@ class SettingsScreen(StartScreen):
     def pick_controls_screen(self):
         
 
+        def key_exists_err():
+            text = game.big_font.render('KEY ALREADY IN USE', True, (255, 0, 0))
+            text_rect = text.get_rect(center = (game.width/2, game.height/2 - 100))
+            start_time = time.time()
+            while time.time() - start_time <= 0.5:
+                game.screen.blit(text, (text_rect.x, text_rect.y))
+                pygame.display.update()
+
         def draw_reset_button(pos):
             white = (255, 255, 255)
             color = tuple(darken(i) for i in white) if reset_button.collidepoint(pos) else white
@@ -1279,14 +1287,28 @@ class SettingsScreen(StartScreen):
 
             if not mouse_clicked:
                 key = pygame.key.name(key)
+
             else:
                 key = mouse_number_key[key]
 
+
+
+            keys = list(list(game.left_controls.values()) + list(game.right_controls.values()))
+
             if clicked_index_1 >= 0:
-                game.left_controls[list(game.left_controls.keys())[clicked_index_1]] = key
+                
+                if key not in keys:
+                    game.left_controls[list(game.left_controls.keys())[clicked_index_1]] = key
+
+                else:
+                    key_exists_err()
 
             elif clicked_index_2 >= 0:
-                game.right_controls[list(game.right_controls.keys())[clicked_index_2]] = key
+                if key not in keys:
+                    game.right_controls[list(game.right_controls.keys())[clicked_index_2]] = key
+                
+                else:
+                    key_exists_err()
 
             with open('settings.json', 'w') as f:
                 full_controls = dict(game.left_controls, **game.right_controls)

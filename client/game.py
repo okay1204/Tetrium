@@ -68,8 +68,6 @@ class Game:
 
         self.resting = []
         self.last_time = 0
-    
-
         self.continuous = True
 
         self.round = 1
@@ -96,7 +94,9 @@ class Game:
         self.small_font = pygame.font.Font('assets/arial.ttf', 15)
         self.medium_font = pygame.font.Font('assets/arial.ttf', 20)
         self.big_font = pygame.font.Font('assets/arial.ttf', 30)
+        self.very_big_medium_font = pygame.font.Font('assets/arial.ttf', 70)
         self.very_big_font = pygame.font.Font('assets/arial.ttf', 75)
+        
        
 
         self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
@@ -138,16 +138,16 @@ class Game:
 
         #first tuple is rgb of background color, second is foreground
         self.themes = [
-            ['default', (0, 0, 0), (101, 142, 156)],
-            ['blue mystique', (0, 20, 39), (101, 142, 156)],
-            ['placeholder 1', (39, 38, 53), (177, 229, 242)],
-            ['placeholder 2', (1, 38, 34), (184, 242, 230)],   
-            ['placeholder 3', (30, 47, 35), (179, 156, 77)],
-            ['placeholder 4', (61, 64, 91), (202, 156, 225)],
-            ['placeholder 5', (17, 20, 25), (92, 200, 255)],
-            ['placeholder 6', (0, 0, 0), (0, 20, 39)],
-            ['placeholder 7', (38, 70, 83), (42, 157, 143)],
-            ['placeholder 8', (38, 70, 83), (233, 196, 106)],
+            ['Default', (0, 0, 0), (101, 142, 156)],
+            ['Blue Mystique', (0, 20, 39), (101, 142, 156)],
+            ['Sky High', (39, 38, 53), (177, 229, 242)],
+            ['Jungle Adventure', (1, 38, 34), (184, 242, 230)],   
+            ['Sahara Desert', (30, 47, 35), (179, 156, 77)],
+            ['Cotton Candy', (61, 64, 91), (202, 156, 225)],
+            ['Road to Heaven', (17, 20, 25), (92, 200, 255)],
+            ['Night Sky', (0, 0, 0), (0, 20, 39)],
+            ['Coral Reef', (38, 70, 83), (42, 157, 143)],
+            ['Tropical Sands', (38, 70, 83), (233, 196, 106)],
         ]
 
       
@@ -1121,9 +1121,6 @@ class SettingsScreen(StartScreen):
                 pygame.draw.rect(game.screen, new_left_arrow_rect_color, new_left_arrow_rect)
                 pygame.draw.rect(game.screen, new_right_arrow_rect_color, new_right_arrow_rect)
 
-
-
-
             game.screen.blit(new_left_arrow, left_arrow_pos)
             game.screen.blit(new_right_arrow, right_arrow_pos)
 
@@ -1165,7 +1162,7 @@ class SettingsScreen(StartScreen):
 
 
         def draw_title():
-            title = game.very_big_font.render(game.theme_text, True, game.foreground_color)
+            title = game.very_big_medium_font.render(game.theme_text, True, game.foreground_color)
             title_rect = title.get_rect()
             game.screen.blit(title, (game.width/2 - title_rect.width/2, 10))
             

@@ -1,6 +1,5 @@
 # pylint: disable=no-member
 
-from math import ceil
 import pygame
 import pieces as pieces_lib
 import math
@@ -13,8 +12,6 @@ import pyperclip
 from oooooooooooooooooooooooooooooooooooooooooooootils import darken, lighten
 import _thread
 
-
-from pieces import preview_piece
 
 
 color_key = {
@@ -778,7 +775,7 @@ class StartScreen(Game):
             #means piece is off the screen
             if piece.y >= 28:
                 #Moves it back up
-                piece.move(0, randint(-35, -30))
+                piece.move(0, -30)
 
 
             piece.render(False)
@@ -1023,7 +1020,8 @@ class SettingsScreen(StartScreen):
    
 
     def pick_themes_screen(self):
-        def render_preview(bkg_color, fgd_color):
+
+        def render_game_preview(bkg_color, fgd_color):
             
             pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, 0, game.width, game.height))
             pygame.draw.rect(game.screen, fgd_color, new_playing_field_rect)
@@ -1199,7 +1197,7 @@ class SettingsScreen(StartScreen):
                         next_theme(1)
 
                     
-            render_preview(game.background_color, game.foreground_color)
+            render_game_preview(game.background_color, game.foreground_color)
             draw_title()
             self.draw_back_button(mouse)
             draw_arrows(mouse)
@@ -1425,6 +1423,7 @@ class Block(Game):
         self.flash_start = 0
         self.direction = 0
         self.fade_start = 0
+        self.preview_color = (255, 255, 255)
         
     
     def render(self):
@@ -1477,6 +1476,7 @@ class Block(Game):
                 for x in range(3):
                     fade_color.append((color_difference[x] / 0.5 * (0.5 - fade_time)) + self.color[x])
                 fade_color = tuple(fade_color)
+           
             else:
                 fade_color = (255, 255, 255)
 
@@ -1497,7 +1497,7 @@ class Block(Game):
 
     def render_preview(self):
 
-        pygame.draw.rect(game.screen, (255, 255, 255), ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
+        pygame.draw.rect(game.screen, self.preview_color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
         pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + 103, (self.y-1)* self.size + 103, 24, 24))
 
 

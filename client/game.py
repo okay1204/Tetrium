@@ -170,6 +170,9 @@ class Game:
         self.text_color = self.foreground_color
         self.preview_and_meter_outline_color = (0, 0, 0)
 
+        self.preview_color = self.preview_and_meter_outline_color
+
+
    
     def set_grid_color(self, color):
         self.grid_color = tuple(darken(i, 10) for i in color)
@@ -1482,7 +1485,6 @@ class Block(Game):
         self.flash_start = 0
         self.direction = 0
         self.fade_start = 0
-        self.preview_color = (255, 255, 255)
         
     
     def render(self):
@@ -1556,7 +1558,7 @@ class Block(Game):
 
     def render_preview(self):
 
-        pygame.draw.rect(game.screen, self.preview_color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
+        pygame.draw.rect(game.screen, game.preview_color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
         pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + 103, (self.y-1)* self.size + 103, 24, 24))
 
 

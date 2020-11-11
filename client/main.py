@@ -389,6 +389,8 @@ while True:
 
     opp_disconnected_after = False
     start_screen.ready = False
+    start_screen.started = False
+
     start_screen.main()
     _thread.start_new_thread(server_connection, ())
 
@@ -411,6 +413,7 @@ while True:
 
         if won != None:
             game.running = False
+            pygame.mouse.set_visible(True)
             game_over(won)
             game.screen.fill((0, 0, 0))
             reset()
@@ -654,7 +657,12 @@ while True:
             elif event.type == pygame.QUIT:
 
                 game.running = False
-                game.n.disconnect()
+
+                while True:
+                    if can_disconnect:
+                        game.n.disconnect()
+                        break
+
                 sys.exit()
 
         if backToTop:

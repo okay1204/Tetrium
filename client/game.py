@@ -819,70 +819,6 @@ class StartScreen(Game):
         game.screen.blit(self.settings_button_text, (self.settings_button_pos[0] + 10, self.settings_button_pos[1] + 3))
     
     
-    
-    def draw_controls(self, controls, pos, color, keys_bkg_color = (0, 0, 0), underline = False, clicked_index = -1):
-    
-        replace_keys = {
-            'left click': 'lmb',
-            'middle click': 'mmb',
-            'right click': 'rmb',
-            'up': '↑',
-            'down': '↓',
-            'right': '→',
-            'left': '←',
-            'left shift': 'lshft',
-            'right shift': 'rshft',
-            'caps lock': 'caps',
-            'return': 'entr',
-            'left ctrl': 'lctrl',
-            'right ctrl': 'rctrl',
-            'left meta': 'wn',
-            'right meta': 'wn',
-            'left alt': 'lalt',
-            'right alt': 'ralt',
-            'compose': 'cmp',
-            'space': 'spc',
-            'escape': 'esc',
-            'print screen': 'prnt',
-            'scroll lock': 'scrl',
-            'break': 'brk',
-            'insert': 'insrt',
-            'page up': 'pup',
-            'page down': 'pdwn',
-            'backspace': 'bksp',
-
-        }
-
-        
-        text_rects = []
-    
-       
-        #pos 0 = left side, 1 = right side
-        for index, values in enumerate(controls):
-            description, key = values
-            modified_key = replace_keys[key].upper() if key in replace_keys.keys() else key.upper()
-            text_1 = game.big_font.render(modified_key, True, (0, 0, 0))
-            text_2 = game.medium_font.render(f" = {description}", True, color)
-            text_2_rect = text_2.get_rect()
-            text_2_rect.center = ((200 if pos == 0 else game.width - 150), (index * 50) + 450)
-            text_1_rect = text_1.get_rect()
-            text_1_rect.center = (text_2_rect.x - text_1_rect.width/2, text_2_rect.y + 10)
-   
-                                            #Dw about mechanics of this, just know that This just toggles True/False every half a second
-            if underline and index == clicked_index and int(str(round(time.time(), 1))[-1:]) < 5:
-                    pygame.draw.rect(game.screen, (240, 240, 166), pygame.Rect(text_1_rect.x, text_1_rect.y + 2, text_1_rect.width, text_1_rect.height + 2))
-            
-       
-
-            pygame.draw.rect(game.screen, (123, 127, 162), text_1_rect)
-            pygame.draw.rect(game.screen, keys_bkg_color, text_2_rect)
-            game.screen.blit(text_1, (text_1_rect.x, text_1_rect.y))
-            game.screen.blit(text_2, (text_2_rect.x, text_2_rect.y))
-
-            text_rects.append(text_1_rect)
-
-
-        return text_rects
 
     def wait_for_game(self):
 
@@ -1047,7 +983,7 @@ class SettingsScreen(StartScreen):
             
         ]
 
-    def set_button_color(self, color):
+    def set_buttons_color(self, color):
         self.buttons_color = color
         for i in range(len(self.buttons)):
             self.buttons[i][2] = color
@@ -1137,7 +1073,7 @@ class SettingsScreen(StartScreen):
             game.background_color = background_color
             game.set_grid_color(foreground_color)
             game.set_text_color(foreground_color)
-            self.set_button_color(foreground_color)
+            self.set_buttons_color(foreground_color)
             self.background_color = background_color
 
         
@@ -1241,7 +1177,85 @@ class SettingsScreen(StartScreen):
 
     
     def pick_controls_screen(self):
+
+
+        def draw_controls(controls, pos, color, keys_bkg_color = (0, 0, 0), value_bkg_color = self.background_color, underline = False, clicked_index = -1):
         
+            replace_keys = {
+                'left click': 'lmb',
+                'middle click': 'mmb',
+                'right click': 'rmb',
+                'up': '↑',
+                'down': '↓',
+                'right': '→',
+                'left': '←',
+                'left shift': 'lshft',
+                'right shift': 'rshft',
+                'caps lock': 'caps',
+                'return': 'entr',
+                'left ctrl': 'lctrl',
+                'right ctrl': 'rctrl',
+                'left meta': 'wn',
+                'right meta': 'wn',
+                'left alt': 'lalt',
+                'right alt': 'ralt',
+                'compose': 'cmp',
+                'space': 'spc',
+                'escape': 'esc',
+                'print screen': 'prnt',
+                'scroll lock': 'scrl',
+                'break': 'brk',
+                'insert': 'insrt',
+                'page up': 'pup',
+                'page down': 'pdwn',
+                'backspace': 'bksp',
+
+            }
+
+            
+            text_rects = []
+        
+        
+            #pos 0 = left side, 1 = right side
+            for index, values in enumerate(controls):
+                description, key = values
+                modified_key = replace_keys[key].upper() if key in replace_keys.keys() else key.upper()
+                text_1 = game.big_font.render(modified_key, True, (0, 0, 0))
+                text_2 = game.medium_font.render(f" = {description}", True, color)
+                text_2_rect = text_2.get_rect()
+                text_2_rect.center = ((200 if pos == 0 else game.width - 150), (index * 50) + 450)
+                text_1_rect = text_1.get_rect()
+                text_1_rect.center = (text_2_rect.x - text_1_rect.width/2, text_2_rect.y + 10)
+    
+                                                #Dw about mechanics of this, just know that This just toggles True/False every half a second
+                if underline and index == clicked_index and int(str(round(time.time(), 1))[-1:]) < 5:
+                        pygame.draw.rect(game.screen, (255, 255, 255), pygame.Rect(text_1_rect.x, text_1_rect.y + 2, text_1_rect.width, text_1_rect.height + 2))
+                
+        
+
+                pygame.draw.rect(game.screen, value_bkg_color, text_1_rect)
+                pygame.draw.rect(game.screen, keys_bkg_color, text_2_rect)
+                game.screen.blit(text_1, (text_1_rect.x, text_1_rect.y))
+                game.screen.blit(text_2, (text_2_rect.x, text_2_rect.y))
+
+                text_rects.append(text_1_rect)
+
+
+            return text_rects
+
+
+        def get_keys_bkg_color(color: tuple):
+            
+            darkened = tuple(darken(i, 30) for i in color)
+            
+            r, g, b  = darkened
+
+            if r <= 10 and g <= 10 and b <= 10:
+                return tuple(lighten(i, 30) for i in color)
+            
+            return darkened
+    
+            
 
         def key_exists_err():
             text = game.big_font.render('KEY ALREADY IN USE', True, (255, 0, 0))
@@ -1256,9 +1270,9 @@ class SettingsScreen(StartScreen):
                 game.screen.blit(text, (text_rect.x, text_rect.y))
                 pygame.display.update()
 
-        def draw_reset_button(pos):
-            white = (255, 255, 255)
-            color = tuple(darken(i) for i in white) if reset_button.collidepoint(pos) else white
+        def draw_reset_button(mouse):
+            inital_color = self.buttons_color
+            color = tuple(darken(i, 15) for i in inital_color) if reset_button.collidepoint(mouse) else inital_color
             pygame.draw.rect(game.screen, color, reset_button)
             game.screen.blit(reset_text, (game.width/2 - 50 + 20,  game.height - 45 + 12))
         
@@ -1293,7 +1307,7 @@ class SettingsScreen(StartScreen):
         
         def draw_prompt():
             if clicked:
-                color = (240, 240, 166) if  int(str(round(time.time(), 1))[-1:]) < 5 else (26, 27, 37)
+                color = self.buttons_color if  int(str(round(time.time(), 1))[-1:]) < 5 else self.background_color
                 prompt_text = game.big_font.render('PRESS A KEY', True, color)
                 game.screen.blit(prompt_text, (game.width/2 - 100, 300))
 
@@ -1350,7 +1364,7 @@ class SettingsScreen(StartScreen):
         running = True
         while running:
             #bkg color
-            game.screen.fill((26, 27, 37))
+            game.screen.fill(self.background_color)
 
             mouse = pygame.mouse.get_pos()
             
@@ -1410,9 +1424,10 @@ class SettingsScreen(StartScreen):
 
             draw_title()
             draw_prompt()
-            
-            text_boxes_1 = self.draw_controls(game.left_controls.items(), 0, (89, 248, 232), keys_bkg_color = (26, 27, 37), underline = clicked, clicked_index = clicked_index_1)
-            text_boxes_2 = self.draw_controls(game.right_controls.items(), 1,  (89, 248, 232),  keys_bkg_color =(26, 27, 37), underline = clicked, clicked_index = clicked_index_2)
+
+            keys_bkg_color = get_keys_bkg_color(self.background_color)
+            text_boxes_1 = draw_controls(game.left_controls.items(), 0, (255, 255, 255), keys_bkg_color = keys_bkg_color, value_bkg_color = self.buttons_color, underline = clicked, clicked_index = clicked_index_1)
+            text_boxes_2 = draw_controls(game.right_controls.items(), 1,  (255, 255, 255),  keys_bkg_color = keys_bkg_color, value_bkg_color = self.buttons_color, underline = clicked, clicked_index = clicked_index_2)
             pygame.display.update()
     
 

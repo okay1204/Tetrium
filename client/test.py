@@ -1,5 +1,7 @@
+import requests
 
 
-x = {i for i in [1, 1, 3]}
+content = requests.get('http://www.killyourself.com/')
 
-print(x)
+
+print(dir(content))

@@ -168,6 +168,9 @@ class Game:
         self.set_grid_color(self.foreground_color)
         self.theme_text = theme[0]
 
+
+        self.text_color = (255, 255, 255)
+
    
     def set_grid_color(self, color):
 
@@ -186,7 +189,7 @@ class Game:
         for x in range(1, 4):
             pygame.draw.circle(self.screen, self.foreground_color, (450, 130*x), 40)
 
-        text = self.font.render('Next', True, (255, 255 ,255))
+        text = self.font.render('Next', True, self.text_color)
         textRect = text.get_rect()
         textRect.center = (450, 60)
         self.screen.blit(text, textRect)
@@ -203,7 +206,7 @@ class Game:
     
         # for hold area
         pygame.draw.circle(self.screen, self.foreground_color, (50, 130), 40)
-        text = self.font.render('Hold', True, (255, 255 ,255))
+        text = self.font.render('Hold', True, self.text_color)
         textRect = text.get_rect()
         textRect.center = (50, 60)
         self.screen.blit(text, textRect)
@@ -217,25 +220,25 @@ class Game:
         if self.continuous: text = "On"
         else: text = "Off"
 
-        text = self.font.render(f"Continuous Movement: {text}", True, (255, 255 ,255))
+        text = self.font.render(f"Continuous Movement: {text}", True, self.text_color)
         textRect = text.get_rect()
         textRect.center = (300, 780)
         self.screen.blit(text, textRect)
 
         self.score = int(self.score)
-        text = self.font.render(f"Score: {self.score}", True, (255, 255 ,255))
+        text = self.font.render(f"Score: {self.score}", True, self.text_color)
         textRect = text.get_rect()
         textRect.center = (250, 725)
         self.screen.blit(text, textRect)
 
         font = pygame.font.Font('assets/arial.ttf', 25)
 
-        text = font.render(f"Level: {self.level}", True, (255, 255 ,255))
+        text = font.render(f"Level: {self.level}", True, self.text_color)
         textRect = text.get_rect()
         textRect.center = (420, 725)
         self.screen.blit(text, textRect)
 
-        text = font.render(f"Lines: {self.lines}", True, (255, 255 ,255))
+        text = font.render(f"Lines: {self.lines}", True, self.text_color)
         textRect = text.get_rect()
         textRect.center = (75, 725)
         self.screen.blit(text, textRect)
@@ -249,19 +252,19 @@ class Game:
 
         time_elapsed = f"{minutes}m {remaining_seconds}s"
 
-        text = font.render(f"Time Elapsed: {time_elapsed}", True, (255, 255 ,255))
+        text = font.render(f"Time Elapsed: {time_elapsed}", True, self.text_color)
         textRect = text.get_rect()
         textRect.center = (250, 25)
         self.screen.blit(text, textRect)
 
 
-        text = font.render(self.name, True, (255, 255 ,255))
+        text = font.render(self.name, True, self.text_color)
         textRect = text.get_rect()
         textRect.center = (250, 65)
         self.screen.blit(text, textRect)
 
 
-        text = font.render(self.opp_name, True, (255, 255 ,255))
+        text = font.render(self.opp_name, True, self.text_color)
         textRect = text.get_rect()
         textRect.center = (650, 230)
         self.screen.blit(text, textRect)
@@ -1053,14 +1056,13 @@ class SettingsScreen(StartScreen):
                 if dark:
                     new_left_arrow = left_arrow
                     new_left_arrow_rect = new_left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
-                    new_left_arrow_rect_color = tuple(darken(i, 30) for i in game.foreground_color)
+                    new_left_arrow_rect_color = tuple(darken(i, 15) for i in game.foreground_color)
                
             
                 else:
                     new_left_arrow = pygame.transform.scale(left_arrow, (int(dimensions * hover_scale_factor), int(dimensions * hover_scale_factor)))
                     new_left_arrow_rect = new_left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
                     new_left_arrow_rect_color = game.foreground_color
-
 
             else:
                 new_left_arrow = left_arrow
@@ -1073,7 +1075,7 @@ class SettingsScreen(StartScreen):
                 if dark:
                     new_right_arrow = right_arrow
                     new_right_arrow_rect = new_right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
-                    new_right_arrow_rect_color = tuple(darken(i, 30) for i in game.foreground_color)
+                    new_right_arrow_rect_color = tuple(darken(i, 15) for i in game.foreground_color)
                 
                 
                 

@@ -12,7 +12,7 @@ import socket
 # in order to get classes from a different folder
 import os
 import sys
-sys.path.insert(1 , os.path.join(os.path.dirname(os.getcwd()), 'server'))
+sys.path.insert(1, os.path.join(os.path.dirname(os.getcwd()), 'server'))
 
 
 pieces = ["T", "L", "J", "S", "Z", "I", "O"]
@@ -21,6 +21,7 @@ bag = pieces.copy()
 random.shuffle(bag)
 next_bag = pieces.copy()
 random.shuffle(next_bag)
+
 
 def pick_bag():
     global bag, next_bag
@@ -34,7 +35,6 @@ def pick_bag():
     bag.append(next_bag.pop(0))
 
     return value
-
 
 
 fall_speed = 1
@@ -82,59 +82,51 @@ def reset():
 
 opp_disconnected_after = False
 
+
 def game_over(win: bool):
 
     global gameOver, opp_disconnected_after
-
-
 
     gameOver = True
 
     pygame.mixer.music.set_volume(game.lowered_volume)
     button_dimensions = (300, 40)
-    button_pos = (int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
+    button_pos = (
+        int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
-   
-    restart_button_font  = pygame.font.Font('assets/arial.ttf', 32)
+    restart_button_font = pygame.font.Font('assets/arial.ttf', 32)
     restart_button_rect = pygame.Rect(button_pos, button_dimensions)
     restart_button_color = (255, 255, 255)
-    restart_button_text = restart_button_font.render(f'FIND NEW MATCH', True, (0, 0, 0))
+    restart_button_text = restart_button_font.render(
+        f'FIND NEW MATCH', True, (0, 0, 0))
     game_over_font = pygame.font.Font('assets/arial.ttf', 60)
-    
-
 
     if not win:
         send('game over')
         game_over_text = game_over_font.render(f'You lost...', True, (0, 0, 0))
 
-
-    
     else:
         game_over_text = game_over_font.render(f'You win!', True, (0, 0, 0))
 
-    
-    textRect = game_over_text.get_rect() 
-    textRect.center = (game.width // 2, 200) 
-   
+    textRect = game_over_text.get_rect()
+    textRect.center = (game.width // 2, 200)
 
-  
     def draw_restart_button():
-    
-        pygame.draw.rect(game.screen, restart_button_color, restart_button_rect)
-        game.screen.blit(restart_button_text, (button_pos[0] + 10, button_pos[1] + 3))
-    
+
+        pygame.draw.rect(game.screen, restart_button_color,
+                         restart_button_rect)
+        game.screen.blit(restart_button_text,
+                         (button_pos[0] + 10, button_pos[1] + 3))
+
     def draw_bkg():
         game.screen.blit(game.opaque_bkg, (0, 0))
         game.opaque_bkg.set_alpha(120)
-            
 
     while gameOver:
 
         mouse = pygame.mouse.get_pos()
-        
-       
-       
-        #Game over loop
+
+        # Game over loop
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -142,7 +134,7 @@ def game_over(win: bool):
                 sys.exit()
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                
+
                 # find new match
                 if restart_button_rect.collidepoint(event.pos):
                     reset()
@@ -153,35 +145,30 @@ def game_over(win: bool):
                     gameOver = False
 
             elif event.type == pygame.KEYDOWN:
-                
+
                 # repace this with a button
                 # rematch
                 if event.key == pygame.K_t:
-                    
+
                     if not opp_disconnected_after:
                         send("rematch")
 
         if restart_button_rect.collidepoint(mouse):
             restart_button_color = tuple(map(darken, (255, 255, 255)))
-        
+
         else:
             restart_button_color = (255, 255, 255)
 
         if won == None:
-            gameOver = False
+            break
 
-       
-        game.screen.blit(game_over_text, textRect) 
-        
+        game.screen.blit(game_over_text, textRect)
+
         draw_restart_button()
         draw_bkg()
-   
-  
 
         pygame.display.update()
         game.clock.tick(60)
-
-
 
 
 moving = 0
@@ -192,7 +179,8 @@ last_rotation_fall = 0
 
 combo = -1
 score_key = [100, 300, 500, 800]
-tspin_key = [{"mini": 200, "normal": 800}, {"mini": 400, "normal": 1200}, {"normal": 1600}]
+tspin_key = [{"mini": 200, "normal": 800}, {
+    "mini": 400, "normal": 1200}, {"normal": 1600}]
 difficult_before = False
 
 
@@ -210,6 +198,7 @@ won = None
 
 specials = []
 
+
 def send(string):
     global specials
 
@@ -222,25 +211,29 @@ disconnected = None
 
 attacked = True
 
+
 def server_connection():
-    
-    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked
+
+    global disconnected, current, specials, display_until, fall_speed, attacked
 
     while game.running:
 
         # for any events
 
-        resting_coords = list(map(lambda block: (block.x, block.y, block.color), game.resting))
+        resting_coords = list(
+            map(lambda block: (block.x, block.y, block.color), game.resting))
 
         if current:
-            piece_block_coords = list(map(lambda block: (block.x, block.y, block.color), current.blocks))
+            piece_block_coords = list(
+                map(lambda block: (block.x, block.y, block.color), current.blocks))
         else:
             piece_block_coords = None
-        
+
         sent_specials = specials.copy()
 
         try:
-            data = game.n.send([resting_coords, piece_block_coords, sent_specials])
+            data = game.n.send(
+                [resting_coords, piece_block_coords, sent_specials])
         except:
             # lost connection unexpectedly
             disconnected = ("You disconnected", "Try again?")
@@ -249,10 +242,9 @@ def server_connection():
         # lost connection unexpectedly
         if not data:
             disconnected = ("You disconnected", "Try again?")
-            break
 
         if data == "disconnect":
-            
+
             # disconnected after game
             if won == None:
                 disconnected = ("Opponent disconnected", "You win!")
@@ -262,30 +254,16 @@ def server_connection():
 
             break
 
-        for special in sent_specials:
-            specials.remove(special)
-        
-        # if winner info hasn't updated yet
-        if won == False and data.winner == None and game.round == data.round:
-            continue
-
-
-        # if the player won
         if data.winner == game.n.p:
             won = True
 
-        # telling game over function that rematch has started
-        elif data.winner == None and gameOver:
-            won = None
+        for special in sent_specials:
+            specials.remove(special)
 
-
-        game.round = data.round
-        
         game.opp_resting = data.opp_resting(game.n.p)
         game.opp_piece_blocks = data.opp_piece_blocks(game.n.p)
         game.opp_meter = data.opp_meter(game.n.p)
         game.opp_meter_stage = data.opp_meter_stage(game.n.p)
-
 
         meter = data.own_meter(game.n.p)
         if len(meter) > len(game.meter):
@@ -306,7 +284,7 @@ def server_connection():
 
             if speedUp:
                 fall_speed /= 10
-        
+
 
 mouse_number_key = {
     1: 'left click',
@@ -317,21 +295,26 @@ mouse_number_key = {
 meter_animations = []
 number_animations = []
 
+
 def start_meter_animation(pos, against):
     global meter_animations
 
     meter_animations.append((pos, time.time(), 15, against))
 
     for _ in range(randint(3, 5)):
-        random_pos = pos[0] + random.randint(-60, 60), pos[1] + random.randint(-60, 60)
+        random_pos = pos[0] + \
+            random.randint(-60, 60), pos[1] + random.randint(-60, 60)
         random_size = random.randint(3, 10)
 
-        meter_animations.append((random_pos, time.time(), random_size, against))
+        meter_animations.append(
+            (random_pos, time.time(), random_size, against))
+
 
 def start_number_animation(pos, number):
     global number_animations
 
     number_animations.append((pos, time.time(), number))
+
 
 def play_number_animations():
     global number_animations
@@ -343,23 +326,21 @@ def play_number_animations():
 
     for pos, start_time, number in number_animations:
 
-
         if time.time() - start_time > duration:
             removed.append((pos, start_time, number))
             continue
 
         start_time = time.time() - start_time
 
-
-        traveled = (pos[0], (travel_distance/duration * start_time * -1) + pos[1])
+        traveled = (pos[0], (travel_distance /
+                             duration * start_time * -1) + pos[1])
 
         text = game.font.render(str(number), True, (0, 0, 0))
         game.screen.blit(text, traveled)
 
-        
-    
     for remove in removed:
         number_animations.remove(remove)
+
 
 def play_meter_animations():
     global meter_animations
@@ -384,11 +365,12 @@ def play_meter_animations():
         start_time = time.time() - start_time
 
         distance = (destination[0] - pos[0], destination[1] - pos[1])
-        traveled = ((distance[0]/duration * start_time) + pos[0], (distance[1]/duration * start_time) + pos[1])
+        traveled = ((distance[0]/duration * start_time) +
+                    pos[0], (distance[1]/duration * start_time) + pos[1])
 
         pos_size = traveled[0], traveled[1], size, size
         pygame.draw.rect(game.screen, (255, 255, 255), pos_size)
-    
+
     for remove in removed:
         meter_animations.remove(remove)
 
@@ -397,7 +379,6 @@ while True:
 
     opp_disconnected_after = False
     start_screen.ready = False
-    won = None
     start_screen.main()
     _thread.start_new_thread(server_connection, ())
 
@@ -419,17 +400,17 @@ while True:
             break
 
         if won != None:
+            game.running = False
             game_over(won)
             game.screen.fill((0, 0, 0))
             reset()
-
 
         # if there are fading blocks, pause the game for a quick moment
         if game.rows_cleared:
 
             # checking if the fading blocks can be removed yet
             if game.rows_cleared[0][0].fade_start + 0.5 < time.time():
-                
+
                 for row in game.rows_cleared:
 
                     for block in row:
@@ -438,19 +419,18 @@ while True:
                     for block in game.resting:
                         if block.y < row[0].y:
                             block.y += 1
-            
+
                 game.rows_cleared.clear()
 
             game.render(bag[:3], held)
 
             play_meter_animations()
             play_number_animations()
-            
+
             pygame.display.update()
             game.clock.tick(60)
 
             continue
-
 
         if not current:
             current = Piece(5, 1, pick_bag())
@@ -469,7 +449,7 @@ while True:
 
                     if current.overlapping_blocks():
                         current.move(1, 0)
-                        
+
                         if current.overlapping_blocks():
                             current.move(-2, 0)
 
@@ -493,7 +473,6 @@ while True:
                                 avoids += 1
                         current.move(0, -1)
 
-
             elif moving == 1:
                 if time.time() - last_moved > 0.1:
                     if not current.check_right():
@@ -511,17 +490,16 @@ while True:
         for event in pygame.event.get():
 
             if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
-                
+
                 if event.type == pygame.KEYDOWN:
                     key_name = pygame.key.name(event.key)
 
                 else:
-                    
+
                     if 1 <= event.button <= 3:
                         key_name = mouse_number_key[event.button]
                     else:
                         key_name = None
-
 
                 if key_name == controls['Move Left']:
 
@@ -540,7 +518,7 @@ while True:
 
                     else:
                         moving = -1
-                
+
                 elif key_name == controls['Move Right']:
 
                     if not game.continuous:
@@ -558,8 +536,7 @@ while True:
                         moving = 1
 
                 elif key_name == controls['Rotate Clockwise']:
-                    
-        
+
                     current.rotate(0)
 
                     current.move(0, 1)
@@ -571,8 +548,6 @@ while True:
 
                     rotation_last = True
 
-
-
                 elif key_name == controls['Rotate Counter-Clockwise']:
                     current.rotate(1)
 
@@ -581,21 +556,20 @@ while True:
                         if avoids < 15:
                             fall = time.time() + 1
                             avoids += 1
-                    
+
                     current.move(0, -1)
 
                     rotation_last = True
-            
+
                 elif key_name == controls['Hold Piece']:
-                    
-                    
+
                     if canSwitch:
                         game.holdSFX.play()
-                        
+
                         if not held:
                             held = current.piece_type
                             current = None
-                        
+
                         else:
                             past_held = held
                             held = current.piece_type
@@ -604,7 +578,7 @@ while True:
                         avoids = 0
                         canSwitch = False
                         rotation_last = False
-                        
+
                         backToTop = True
 
                 elif key_name == controls['Soft Drop']:
@@ -612,15 +586,15 @@ while True:
                         fall_speed /= 10
                         speedUp = True
                         last_fall -= 2
-                
+
                 elif key_name == controls['Hard Drop']:
-                    
+
                     downCount = 0
                     while not current.check_floor():
                         current.move(0, 1)
                         downCount += 1
 
-                    current.move(0,-1)
+                    current.move(0, -1)
                     downCount -= 1
 
                     last_fall -= 5
@@ -651,7 +625,6 @@ while True:
                         fall_speed *= 10
                         speedUp = False
 
-                
                 elif key_name == controls['Move Left']:
                     if moving == -1:
                         moving = 0
@@ -661,14 +634,12 @@ while True:
                         moving = 0
 
                 elif key_name == controls['Toggle Music']:
-                    
+
                     if game.lowered_volume and game.volume:
                         game.lowered_volume, game.volume = 0, 0
 
-                    else: 
-                        game.lowered_volume, game.volume =  0.025, 0.05
-
-
+                    else:
+                        game.lowered_volume, game.volume = 0.025, 0.05
 
             elif event.type == pygame.QUIT:
 
@@ -679,10 +650,7 @@ while True:
         if backToTop:
             continue
 
-
-
         game.render(bag[:3], held)
-
 
         current.move(0, 1)
         if current.check_floor() and not touched_floor and not rotation_last:
@@ -692,16 +660,13 @@ while True:
             touched_floor = False
         current.move(0, -1)
 
-
-
         # makes the piece fall by one
         if time.time() > last_fall:
             last_fall = time.time() + fall_speed
             current.move(0, 1)
-            
+
             if speedUp and not current.check_floor():
                 game.score += 1
-
 
             if not current.check_floor():
                 rotation_last = False
@@ -713,7 +678,7 @@ while True:
                     current.flash()
                     # turn piece into resting blocks
                     for block in current.blocks:
-                        block.y -= 1    
+                        block.y -= 1
                         game.resting.append(block)
 
                     touched_floor = False
@@ -722,7 +687,8 @@ while True:
                     lines_cleared = 0
                     lowest_y = 0
                     for y in range(1, 21):
-                        row = list(filter(lambda block: block.y == y, game.resting))
+                        row = list(
+                            filter(lambda block: block.y == y, game.resting))
 
                         # line clear
                         if len(row) == 10:
@@ -744,7 +710,7 @@ while True:
                     if current.piece_type == "T" and rotation_last:
 
                         filled_corners = {}
-                
+
                         # getting all filled corners, either by blocks or walls
                         for name, value in current.corners.items():
                             x, y = value
@@ -761,7 +727,6 @@ while True:
                             else:
                                 filled_corners[name] = False
 
-
                         # normal t-spin
                         if (filled_corners["point left"] and filled_corners["point right"]) and (filled_corners["flat right"] or filled_corners["flat left"]):
                             tspin = "normal"
@@ -770,21 +735,20 @@ while True:
                         elif (filled_corners["flat right"] and filled_corners["flat left"]) and (filled_corners["point left"] or filled_corners["point right"]):
                             tspin = "mini"
 
-
                     lines_sent = 0
 
                     if lines_cleared:
 
                         send(f"clear {lines_cleared}")
-                        
+
                         game.row_clearedSFX.play()
                         game.lines += lines_cleared
-                    
 
                         combo += 1
 
                         if combo > 0:
-                            texts.append((f"{combo+1} Combo", time.time() + 3, 20))
+                            texts.append(
+                                (f"{combo+1} Combo", time.time() + 3, 20))
 
                             for minimum, maximum in combo_line_key:
                                 if minimum <= combo <= maximum:
@@ -794,17 +758,14 @@ while True:
                         # calcualting combos
                         game.score += 50 * combo * (21 - lowest_y)
 
-                        
-
-
                         if not tspin:
 
                             lines_sent += line_key[lines_cleared-1]
 
                             # for adding normal value
-                            line_clear_value = (21 - lowest_y) * score_key[lines_cleared-1]
+                            line_clear_value = (
+                                21 - lowest_y) * score_key[lines_cleared-1]
 
-            
                             # checking for back-to-back difficult line clear
                             if lines_cleared == 4:
 
@@ -813,7 +774,8 @@ while True:
                                 if difficult_before:
                                     line_clear_value *= 1.5
                                     line_clear_value = int(line_clear_value)
-                                    texts.append((f"Back to Back", time.time() + 3, 15))
+                                    texts.append(
+                                        (f"Back to Back", time.time() + 3, 15))
                                     lines_sent += 1
                                 else:
                                     difficult_before = True
@@ -825,8 +787,9 @@ while True:
                             lines_sent += t_spin_line_key[lines_cleared-1]
 
                             # any line clears with t-spins are considered difficult
-                            
-                            score_value = (21 - lowest_y) * tspin_key[lines_cleared-1][tspin]
+
+                            score_value = (21 - lowest_y) * \
+                                tspin_key[lines_cleared-1][tspin]
 
                             if tspin == "normal":
                                 spin_text, size = "T-Spin", 30
@@ -840,21 +803,22 @@ while True:
                             elif lines_cleared == 3:
                                 lines_text = "Triple"
 
-                            texts.append(([spin_text, lines_text], time.time() + 3, size))
+                            texts.append(
+                                ([spin_text, lines_text], time.time() + 3, size))
 
                             if difficult_before:
                                 score_value *= 1.5
-                                texts.append((f"Back to Back", time.time() + 3, 15))
+                                texts.append(
+                                    (f"Back to Back", time.time() + 3, 15))
                                 lines_sent += 1
                             else:
                                 difficult_before = True
 
                             game.score += score_value
-                        
-                    
+
                     # no line t-spins
                     elif tspin:
-                    
+
                         # getting block with lowest y value
                         lowest_y = 0
                         for block in current.blocks:
@@ -870,12 +834,10 @@ while True:
                         elif tspin == "mini":
                             game.score += 100 * lowest_y
                             texts.append((f"T-Spin Mini", time.time() + 3, 17))
-            
 
                     if not list(filter(lambda block: not block.fade_start, game.resting)):
                         lines_sent = 10
                         texts.append((f"Perfect Clear", time.time() + 3, 17))
-
 
                     if lines_sent:
                         send(f"junk {lines_sent}")
@@ -888,19 +850,19 @@ while True:
                                 highest_y = block.y
                                 chosen_block = block
 
-                        pos = (block.x-1) * block.size + 100, (block.y-1) * block.size + 100
+                        pos = (block.x-1) * block.size + \
+                            100, (block.y-1) * block.size + 100
 
                         start_meter_animation(pos, 1)
                         start_number_animation(pos, lines_sent)
-                    
+
                     if not lines_cleared:
                         combo = -1
-
 
                         if game.meter:
                             # increasing the stage of the incoming junk
                             send("meter increase")
-                                
+
                             meter_stage = game.meter_stage
 
                             if meter_stage >= 3:
@@ -914,17 +876,12 @@ while True:
                                     block.y -= amount
 
                                 position = random.randint(1, 10)
-                                
+
                                 for y in range(amount):
                                     for x in range(1, 11):
                                         if x != position:
-                                            game.resting.append(Block(x, 20-y, "gray"))
-                            
-
-
-
-                    
-
+                                            game.resting.append(
+                                                Block(x, 20-y, "gray"))
 
                     game.render(bag[:3], held)
 
@@ -933,7 +890,6 @@ while True:
                     # make new falling piece
                     current = None
                     avoids = 0
-
 
                 else:
                     current.move(0, -1)
@@ -944,13 +900,12 @@ while True:
         play_meter_animations()
         play_number_animations()
 
-
         if display_until > time.time():
-            text = game.font.render(f'Speed Level {game.level}', True, (0, 0 ,0))
-            textRect = text.get_rect() 
-            textRect.center = (250, game.height // 2) 
+            text = game.font.render(
+                f'Speed Level {game.level}', True, (0, 0, 0))
+            textRect = text.get_rect()
+            textRect.center = (250, game.height // 2)
             game.screen.blit(text, textRect)
-
 
         # queing up special texts
         removed_texts = []
@@ -975,14 +930,14 @@ while True:
                 for index, element in enumerate(textElements):
                     textElement, textRect = element
 
-                    textRect.center = (450, 500 + (texts.index((original, display_time, size)) * 50) + (index * 25))
+                    textRect.center = (
+                        450, 500 + (texts.index((original, display_time, size)) * 50) + (index * 25))
 
                     game.screen.blit(textElement, textRect)
 
-
             else:
                 removed_texts.append((text, display_time, size))
-        
+
         for item in removed_texts:
             texts.remove(item)
 
@@ -990,7 +945,6 @@ while True:
 
         removed_texts.clear()
 
-        
         pygame.display.update()
 
         game.clock.tick(60)

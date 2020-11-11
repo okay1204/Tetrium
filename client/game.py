@@ -171,7 +171,7 @@ class Game:
    
     def set_grid_color(self, color):
 
-        self.grid_color = tuple(map(darken, color, (10 for _ in color)))
+        self.grid_color = tuple(darken(i, 10) for i in color)
 
     def render(self, pieces=None, held=None):
         
@@ -285,7 +285,7 @@ class Game:
             else:
                 color = color_key["gray"]
 
-            darkened = (tuple(darken(color) for color in color))
+            darkened = tuple(darken(i) for i in color) #type: ignore
 
             for block in range(amount):
 
@@ -332,7 +332,7 @@ class Game:
             else:
                 color = color_key["gray"]
 
-            darkened = tuple(map(darken, color)) #type: ignore
+            darkened = tuple(darken(i) for i in color) #type: ignore
 
             for _ in range(amount):
 
@@ -602,7 +602,7 @@ class StartScreen(Game):
 
     def draw_back_button(self, pos = (-10, -10)):
         white = (255, 255, 255)
-        color = tuple(map(darken, white)) if self.back_button.collidepoint(pos) else white
+        color = tuple(darken(i) for i in white) if self.back_button.collidepoint(pos) else white
         pygame.draw.rect(game.screen, color, self.back_button)
         game.screen.blit(self.back_icon, (-3, -7))
 
@@ -668,7 +668,7 @@ class StartScreen(Game):
             self.start_button_text = game.font.render('Waiting for opponent...', True, (self.r, self.g, self.b))
             self.start_button_rect.x = game.width/2-60 - 100
             if self.disconnect_button_rect.collidepoint(mouse):
-                color = tuple(map(darken, (255, 255, 255)))
+                color = tuple(darken(i) for i in (255, 255, 255))
             else:
                 color = (255, 255, 255)
                 
@@ -1053,7 +1053,7 @@ class SettingsScreen(StartScreen):
                 if dark:
                     new_left_arrow = left_arrow
                     new_left_arrow_rect = new_left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
-                    new_left_arrow_rect_color = tuple(map(darken, game.foreground_color, (10 for _ in game.foreground_color)))
+                    new_left_arrow_rect_color = tuple(darken(i, 30) for i in game.foreground_color)
                
             
                 else:
@@ -1073,7 +1073,7 @@ class SettingsScreen(StartScreen):
                 if dark:
                     new_right_arrow = right_arrow
                     new_right_arrow_rect = new_right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
-                    new_right_arrow_rect_color = tuple(map(darken, game.foreground_color, (10 for _ in game.foreground_color)))
+                    new_right_arrow_rect_color = tuple(darken(i, 30) for i in game.foreground_color)
                 
                 
                 
@@ -1210,7 +1210,7 @@ class SettingsScreen(StartScreen):
 
         def draw_reset_button(pos):
             white = (255, 255, 255)
-            color = tuple(map(darken, white)) if reset_button.collidepoint(pos) else white
+            color = tuple(darken(i) for i in white) if reset_button.collidepoint(pos) else white
             pygame.draw.rect(game.screen, color, reset_button)
             game.screen.blit(reset_text, (game.width/2 - 50 + 20,  game.height - 45 + 12))
         
@@ -1363,7 +1363,7 @@ class SettingsScreen(StartScreen):
               
                 if button[0].collidepoint(mouse):
                                                                     #2 is the color index
-                    self.buttons[index][2] = tuple(map(darken, self.buttons_color))
+                    self.buttons[index][2] = tuple(darken(i) for i in self.buttons_color)
                 
                 else:
                     self.buttons[index][2] = self.buttons_color
@@ -1431,7 +1431,7 @@ class Block(Game):
         # normal
         if time.time() > self.flash_start + 0.2 and not self.fade_start:
 
-            darker = tuple(map(darken, self.color))
+            darker = tuple(darken(i) for i in self.color)
             pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
             pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
 
@@ -1460,7 +1460,7 @@ class Block(Game):
 
             flash_color = tuple(flash_color)
 
-            darker = tuple(map(darken, flash_color))
+            darker = tuple(darken(i) for i in flash_color)
 
             pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
             pygame.draw.rect(game.screen, flash_color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
@@ -1481,7 +1481,7 @@ class Block(Game):
                 fade_color = (255, 255, 255)
 
             
-            darker = tuple(map(darken, fade_color))
+            darker = tuple(darken(i) for i in fade_color)
 
             pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
             pygame.draw.rect(game.screen, fade_color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
@@ -1490,7 +1490,7 @@ class Block(Game):
     # for putting blocks on second screen
     def render_second(self):
 
-        darker = tuple(map(darken, self.color))
+        darker = tuple(darken(i) for i in self.color)
         pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size/2 + 570, (self.y-1)* self.size/2 + 250, 15, 15))
         pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size/2 + 572, (self.y-1)* self.size/2 + 252, 11, 11))                    
 
@@ -1912,7 +1912,7 @@ class Piece(Game):
             for block in self.blocks:
                 block.render_preview()
             
-            for x in range(downCount): # noqa pylint: disable=unused-variable
+            for _ in range(downCount): # noqa pylint: disable=unused-variable
                 self.move(0, -1)
 
             self.move(0, 1)
@@ -1929,5 +1929,3 @@ settings_screen = SettingsScreen()
 
 if __name__ == "__main__":
     import main
-
-    

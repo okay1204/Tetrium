@@ -75,6 +75,8 @@ class Game:
 
         self.continuous = True
 
+        self.round = 1
+
 
         self.level = 1
         self.score = 0
@@ -609,17 +611,16 @@ class StartScreen(Game):
 
     def draw_start_button(self):
        
-        if not self.connected:
-            #if mouse hovering make it lighter
-            if self.start_button_rect.collidepoint(self.mouse): 
-                colooooooooor = (255,255,255)
-                self.start_button_text_color = (self.r, self.g, self.b)
-            
-            else: 
-                colooooooooor = (0, 0, 0)
-                self.start_button_text_color = (255, 255, 255)
+        #if mouse hovering make it lighter
+        if self.start_button_rect.collidepoint(self.mouse): 
+            colooooooooor = (255,255,255)
+            self.start_button_text_color = (self.r, self.g, self.b)
+        
+        else: 
+            colooooooooor = (0, 0, 0)
+            self.start_button_text_color = (255, 255, 255)
 
-            pygame.draw.rect(game.screen, colooooooooor, self.start_button_rect)
+        pygame.draw.rect(game.screen, colooooooooor, self.start_button_rect)
 
     
     def credits_screen(self, pieces, draw_tetris_pieces):
@@ -667,7 +668,7 @@ class StartScreen(Game):
             self.start_button_text = game.font.render('START', True, self.start_button_text_color)
         
         else:
-            self.start_button_text = game.font.render('Waiting for opponent...', True, self.start_button_text_color)
+            self.start_button_text = game.font.render('Waiting for opponent...', True, (self.r, self.g, self.b))
             self.start_button_rect.x = game.width/2-60 - 100
             if self.disconnect_button_rect.collidepoint(mouse):
                 color = tuple(map(darken, (255, 255, 255)))
@@ -736,6 +737,7 @@ class StartScreen(Game):
         game.n = network.Network()
         if game.n.p == "no connection":
             print("no connection") # TODO no connection screen here
+            self.connected = False
             return            
 
         self.start_button_rect.x -=  100
@@ -904,7 +906,7 @@ class StartScreen(Game):
                 if event.type == pygame.QUIT:
 
                     if self.connected:
-                        self.n.disconnect()
+                        game.n.disconnect()
 
                     pygame.quit()
                     sys.exit()
@@ -913,8 +915,8 @@ class StartScreen(Game):
                     
                     if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
 
-                        self.start()
                         self.connected = True
+                        self.start()
                         _thread.start_new_thread(self.wait_for_game, ())
                         game.screen.fill((0, 0, 0))
                         pygame.mixer.music.set_volume(game.volume)
@@ -952,6 +954,7 @@ class StartScreen(Game):
                     if self.input_active:
                         
                         if event.key == pygame.K_RETURN:
+                            self.connected = True
                             self.start()
                             pygame.mixer.music.set_volume(self.volume)
                             self.screen.fill((0, 0, 0))
@@ -982,6 +985,7 @@ class StartScreen(Game):
             # checking if game started
             if self.connected and self.ready:
                 self.connected = False
+                self.start_button_rect = pygame.Rect(game.width/2-60, game.height/2, 120, 40)
                 break
             
                 

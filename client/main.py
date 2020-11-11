@@ -168,7 +168,7 @@ def game_over(win: bool):
             restart_button_color = (255, 255, 255)
 
         if won == None:
-            break
+            gameOver = False
 
        
         game.screen.blit(game_over_text, textRect) 
@@ -224,7 +224,7 @@ attacked = True
 
 def server_connection():
     
-    global disconnected, current, specials, display_until, fall_speed, attacked
+    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked
 
     while game.running:
 
@@ -249,6 +249,7 @@ def server_connection():
         # lost connection unexpectedly
         if not data:
             disconnected = ("You disconnected", "Try again?")
+            break
 
         if data == "disconnect":
             
@@ -260,15 +261,25 @@ def server_connection():
                 opp_disconnected_after = True
 
             break
-        
-        if data.winner == game.n.p:
-            won = True
-
 
         for special in sent_specials:
             specials.remove(special)
-
         
+        # if winner info hasn't updated yet
+        if won == False and data.winner == None and game.round == data.round:
+            continue
+
+
+        # if the player won
+        if data.winner == game.n.p:
+            won = True
+
+        # telling game over function that rematch has started
+        elif data.winner == None and gameOver:
+            won = None
+
+
+        game.round = data.round
         
         game.opp_resting = data.opp_resting(game.n.p)
         game.opp_piece_blocks = data.opp_piece_blocks(game.n.p)
@@ -386,6 +397,7 @@ while True:
 
     opp_disconnected_after = False
     start_screen.ready = False
+    won = None
     start_screen.main()
     _thread.start_new_thread(server_connection, ())
 
@@ -407,7 +419,6 @@ while True:
             break
 
         if won != None:
-            game.running = False
             game_over(won)
             game.screen.fill((0, 0, 0))
             reset()
@@ -784,6 +795,8 @@ while True:
                         game.score += 50 * combo * (21 - lowest_y)
 
                         
+
+
                         if not tspin:
 
                             lines_sent += line_key[lines_cleared-1]

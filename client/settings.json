@@ -1,7 +1,7 @@
 {
   "controls": {
-    "Move Left": "left click",
-    "Move Right": "j",
+    "Move Left": "a",
+    "Move Right": "d",
     "Soft Drop": "s",
     "Toggle Movement": "g",
     "Toggle Music": "m",
@@ -10,5 +10,5 @@
     "Hold Piece": "up",
     "Hard Drop": "down"
   },
-  "theme": 0
+  "theme": 7
 }

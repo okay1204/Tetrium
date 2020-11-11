@@ -53,8 +53,6 @@ class Game:
 
         self.width = 750
         self.height = 800
-        self.background_color = (0, 20, 39)
-        self.foreground_color = (101, 142, 156)
 
 
         self.running = True
@@ -104,7 +102,6 @@ class Game:
 
         self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
         self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
-        self.grid_color =  tuple(map(lambda x: x - 10, self.foreground_color))
         self.opaque_bkg = pygame.image.load('assets/opaque_bkg.png')
 
 
@@ -122,26 +119,60 @@ class Game:
 
 
         # setting controls
-        with open('controls.json') as f:
+        with open('settings.json') as f:
             temp = json.load(f)
        
         self.left_controls = {
-            "Move Left": temp["Move Left"],
-            "Move Right": temp["Move Right"],
-            "Soft Drop": temp["Soft Drop"],
-            "Toggle Movement": temp["Toggle Movement"],
-            "Toggle Music": temp["Toggle Music"]
+            "Move Left": temp["controls"]["Move Left"],
+            "Move Right": temp["controls"]["Move Right"],
+            "Soft Drop": temp["controls"]["Soft Drop"],
+            "Toggle Movement": temp["controls"]["Toggle Movement"],
+            "Toggle Music": temp["controls"]["Toggle Music"]
         }
 
         self.right_controls = {
-            "Rotate Clockwise": temp["Rotate Clockwise"],
-            "Rotate Counter-Clockwise": temp["Rotate Counter-Clockwise"],
-            "Hold Piece": temp["Hold Piece"],
-            "Hard Drop": temp["Hard Drop"]
+            "Rotate Clockwise": temp["controls"]["Rotate Clockwise"],
+            "Rotate Counter-Clockwise": temp["controls"]["Rotate Counter-Clockwise"],
+            "Hold Piece": temp["controls"]["Hold Piece"],
+            "Hard Drop": temp["controls"]["Hard Drop"]
         }
+
+        #first tuple is rgb of background color, second is foreground
+        self.themes = [
+            ['default', (0, 0, 0), (101, 142, 156)],
+            ['blue mystique', (0, 20, 39), (101, 142, 156)],
+            ['placeholder 1', (39, 38, 53), (177, 229, 242)],
+            ['placeholder 2', (1, 38, 34), (184, 242, 230)],   
+            ['placeholder 3', (30, 47, 35), (179, 156, 77)],
+            ['placeholder 4', (61, 64, 91), (202, 156, 225)],
+            ['placeholder 5', (17, 20, 25), (92, 200, 255)],
+            ['placeholder 6', (0, 0, 0), (0, 20, 39)],
+            ['placeholder 7', (38, 70, 83), (42, 157, 143)],
+            ['placeholder 8', (38, 70, 83), (233, 196, 106)],
+        ]
+
       
+        try:
+            self.theme_index = temp['theme']
+        
+        except:
+            self.theme_index = 0
+            with open('settings.json', 'w') as f:
+                full_controls = dict(game.left_controls, **game.right_controls)
+                full_dict = {'controls': full_controls, 'theme': game.theme_index}
+                json.dump(full_dict, f, indent=2)
 
 
+        theme =  self.themes[self.theme_index]
+        self.background_color = theme[1]
+        self.foreground_color = theme[2]
+        self.set_grid_color(self.foreground_color)
+        self.theme_text = theme[0]
+
+   
+    def set_grid_color(self, color):
+
+        self.grid_color = tuple(map(darken, color, (10 for _ in color)))
 
     def render(self, pieces=None, held=None):
         
@@ -407,7 +438,7 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     check_click(event.pos)
 
 
@@ -491,7 +522,7 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     
                     check_click(event.pos)
 
@@ -987,9 +1018,6 @@ class SettingsScreen(StartScreen):
 
    
 
-    
-
-
     def pick_themes_screen(self):
         def render_preview(bkg_color, fgd_color):
             
@@ -1002,8 +1030,122 @@ class SettingsScreen(StartScreen):
             pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, 0, game.width, (game.height - new_playing_field_rect.height)/2))
             pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, new_playing_field_rect.y + new_playing_field_rect.height, game.width, (game.height - new_playing_field_rect.height)/2))
 
+        def is_dark(rgb):
+            
+            r, g, b = rgb
+            cutoff = 30
+            if r < cutoff and g < cutoff and b < cutoff:
+                return True
+
+
+        def draw_arrows(mouse):
+            dark = False
+            if is_dark(game.background_color):
+                dark = True
+
+
+
+            #hover effect
+            if left_arrow_rect.collidepoint(mouse):
+                
+                if dark:
+                    new_left_arrow = left_arrow
+                    new_left_arrow_rect = new_left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
+                    new_left_arrow_rect_color = tuple(map(darken, game.foreground_color, (10 for _ in game.foreground_color)))
+               
+            
+                else:
+                    new_left_arrow = pygame.transform.scale(left_arrow, (int(dimensions * hover_scale_factor), int(dimensions * hover_scale_factor)))
+                    new_left_arrow_rect = new_left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
+                    new_left_arrow_rect_color = game.foreground_color
+
+
+            else:
+                new_left_arrow = left_arrow
+                new_left_arrow_rect = left_arrow_rect
+                new_left_arrow_rect_color = game.foreground_color
+
+
+            if right_arrow_rect.collidepoint(mouse):
+
+                if dark:
+                    new_right_arrow = right_arrow
+                    new_right_arrow_rect = new_right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
+                    new_right_arrow_rect_color = tuple(map(darken, game.foreground_color, (10 for _ in game.foreground_color)))
+                
+                
+                
+                else:
+                    new_right_arrow = pygame.transform.scale(right_arrow, (int(dimensions * hover_scale_factor), int(dimensions * hover_scale_factor)))
+                    new_right_arrow_rect = new_right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
+                    new_right_arrow_rect_color = game.foreground_color
+
+            else:
+                new_right_arrow = right_arrow
+                new_right_arrow_rect = right_arrow_rect
+                new_right_arrow_rect_color = game.foreground_color
+                
+
+
+            if dark:
+                pygame.draw.rect(game.screen, new_left_arrow_rect_color, new_left_arrow_rect)
+                pygame.draw.rect(game.screen, new_right_arrow_rect_color, new_right_arrow_rect)
+
+
+
+
+            game.screen.blit(new_left_arrow, left_arrow_pos)
+            game.screen.blit(new_right_arrow, right_arrow_pos)
+
+        def change_theme():
+            theme = game.themes[game.theme_index]
+            game.theme_text = theme[0]
+            background_color = theme[1]
+            foreground_color = theme[2]
+            game.foreground_color = foreground_color
+            game.background_color = background_color
+            game.set_grid_color(foreground_color)
+
+        
+        def next_theme(direction):
+            #direction 0 = left, 1 = right
+            themes_len = len(game.themes)
+
+            if direction and game.theme_index >= themes_len - 1:
+                val = 0
+                game.theme_index = 0
+
+            elif direction:
+                val = 1
+            
+            elif game.theme_index <= 0:
+                val = 0
+                game.theme_index = themes_len - 1
+            
+            else:
+                val = -1
+
+            game.theme_index += val
+
+            change_theme()
+
+
+    
+
+
+        def draw_title():
+            title = game.very_big_font.render(game.theme_text, True, game.foreground_color)
+            title_rect = title.get_rect()
+            game.screen.blit(title, (game.width/2 - title_rect.width/2, 10))
+            
+        def store_theme():
+            with open('settings.json', 'w') as f:
+                full_controls = dict(game.left_controls, **game.right_controls)
+                full_dict = {'controls': full_controls, 'theme': game.theme_index}
+                json.dump(full_dict, f, indent=2)
+
         new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
-        x_pos = [8, 9, 10, 11, 13]
+        x_pos = [8, 9, 10, 11, 12]
         shuffle(x_pos)
 
         pieces = [
@@ -1012,22 +1154,28 @@ class SettingsScreen(StartScreen):
             Piece(x_pos[1], randint(-5, -2), 'J'), 
             Piece(x_pos[2], randint(0, 3), 'S'), 
             Piece(x_pos[3], randint(5, 8), 'Z'), 
-            Piece(x_pos[4], randint(10, 13), 'I'),
+            Piece(x_pos[4], randint(10, 12), 'I'),
             
         ]
-       
-       
-       
-       
+
+        
+        offset = 10
+        left_arrow = pygame.image.load('assets/left_arrow.png')
+        dimensions = left_arrow.get_height()
+        left_arrow_pos = (offset, game.height/2 - dimensions/2)
+        right_arrow_pos =  (game.width - dimensions - offset, game.height/2 - dimensions/2)
+        right_arrow = pygame.image.load('assets/right_arrow.png')
+        left_arrow_rect = left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
+        right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
+        hover_scale_factor = 1.1
+        
         running = True
         while running:
             #bkg color
-            background_color = game.background_color
-            fore_ground_color = game.foreground_color
-            game.screen.fill((26, 27, 37))
 
             mouse = pygame.mouse.get_pos()
-
+           
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
 
@@ -1035,13 +1183,22 @@ class SettingsScreen(StartScreen):
                     sys.exit()
 
 
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.back_button.collidepoint(event.pos):
+                        store_theme()
                         running = False
 
+                    elif left_arrow_rect.collidepoint(event.pos):
+                        next_theme(0)
+
+                    elif right_arrow_rect.collidepoint(event.pos):
+                        next_theme(1)
+
                     
-            render_preview(background_color, fore_ground_color)
+            render_preview(game.background_color, game.foreground_color)
+            draw_title()
             self.draw_back_button(mouse)
+            draw_arrows(mouse)
             pygame.display.update()
 
 
@@ -1058,8 +1215,9 @@ class SettingsScreen(StartScreen):
         
         
         def reset_controls():
-            with open('controls.json', 'w') as f:
-                json.dump(game.default_controls, f, indent=2)
+            with open('settings.json', 'w') as f:
+                new_dict = {'controls': game.default_controls, 'theme': game.theme_index}
+                json.dump(new_dict, f, indent=2)
 
 
             game.left_controls = {
@@ -1108,9 +1266,10 @@ class SettingsScreen(StartScreen):
             elif clicked_index_2 >= 0:
                 game.right_controls[list(game.right_controls.keys())[clicked_index_2]] = key
 
-            with open('controls.json', 'w') as f:
+            with open('settings.json', 'w') as f:
                 full_controls = dict(game.left_controls, **game.right_controls)
-                json.dump(full_controls, f, indent=2)
+                full_dict = {'controls': full_controls, 'theme': game.theme_index}
+                json.dump(full_dict, f, indent=2)
 
         
 
@@ -1138,7 +1297,7 @@ class SettingsScreen(StartScreen):
                     sys.exit()
 
 
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
                     if clicked:
                         if 1 <= event.button <= 3:
@@ -1225,7 +1384,7 @@ class SettingsScreen(StartScreen):
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     
                     for button, _, _, func in self.buttons:
                         if button.collidepoint(event.pos):

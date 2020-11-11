@@ -1,0 +1,14 @@
+{
+  "controls": {
+    "Move Left": "a",
+    "Move Right": "d",
+    "Soft Drop": "s",
+    "Toggle Movement": "g",
+    "Toggle Music": "m",
+    "Rotate Clockwise": "right",
+    "Rotate Counter-Clockwise": "left",
+    "Hold Piece": "up",
+    "Hard Drop": "down"
+  },
+  "theme": 7
+}

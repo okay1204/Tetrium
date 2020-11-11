@@ -129,7 +129,13 @@ def game_over(win: bool):
         # Game over loop
 
         for event in pygame.event.get():
+
             if event.type == pygame.QUIT:
+
+                while True:
+                    if can_disconnect:
+                        game.n.disconnect()
+                        break
                 pygame.quit()
                 sys.exit()
 
@@ -149,6 +155,7 @@ def game_over(win: bool):
                                 break
 
                     gameOver = False
+                    return False
 
             elif event.type == pygame.KEYDOWN:
 
@@ -166,7 +173,8 @@ def game_over(win: bool):
             restart_button_color = (255, 255, 255)
 
         if won == None:
-            break
+            gameOver = False
+            return True
 
         game.screen.blit(game_over_text, textRect)
 
@@ -412,11 +420,14 @@ while True:
             break
 
         if won != None:
-            game.running = False
             pygame.mouse.set_visible(True)
-            game_over(won)
-            game.screen.fill((0, 0, 0))
             reset()
+            rematch = game_over(won)
+            won = None
+
+            if not rematch:
+                game.screen.fill((0, 0, 0))
+                break
 
         # if there are fading blocks, pause the game for a quick moment
         if game.rows_cleared:

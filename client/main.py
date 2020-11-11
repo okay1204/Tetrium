@@ -147,8 +147,14 @@ def game_over(win: bool):
                 if restart_button_rect.collidepoint(event.pos):
                     reset()
                     game.running = False
+
                     if not opp_disconnected_after:
-                        game.n.disconnect()
+
+                        # while loop to wait until it can disonnect safely
+                        while True:
+                            if can_disconnect:
+                                game.n.disconnect()
+                                break
 
                     gameOver = False
 
@@ -218,15 +224,17 @@ def send(string):
 
 # for getting information about opponent
 disconnected = None
-
-
 attacked = True
+
+
+can_disconnect = False
 
 def server_connection():
     
-    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked
+    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked, can_disconnect
 
     while game.running:
+        can_disconnect = False
 
         # for any events
 
@@ -245,6 +253,8 @@ def server_connection():
             # lost connection unexpectedly
             disconnected = ("You disconnected", "Try again?")
             break
+
+        can_disconnect = True
 
         # lost connection unexpectedly
         if not data:

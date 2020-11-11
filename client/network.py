@@ -29,7 +29,7 @@ class Network:
             if response.isdigit():
                 response = int(response)
 
-            self.client.settimeout(2.0)
+            # self.client.settimeout(2.0)
             return response
         except:
             return "no connection"
@@ -70,7 +70,7 @@ class Network:
 
             return recieved
         except socket.error as e:
-            print(e)
+            raise e
 
 
 if __name__ == "__main__":

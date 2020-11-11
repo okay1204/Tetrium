@@ -1028,11 +1028,12 @@ class SettingsScreen(StartScreen):
 
     def __init__(self):
         super().__init__()
-        self.buttons_color = (255, 255, 255)
+        self.buttons_color = game.foreground_color
+        self.background_color = game.background_color
         self.buttons = [
             [
                 pygame.Rect(game.width/2 - 200/2, game.height/2 - 100, 200, 50), 
-                game.big_font.render('CONTROLS', True, (0, 0, 0)),
+                game.big_font.render('CONTROLS', True,  (0, 0, 0)),
                 self.buttons_color,
                 self.pick_controls_screen
             ], 
@@ -1046,6 +1047,11 @@ class SettingsScreen(StartScreen):
             
         ]
 
+    def set_button_color(self, color):
+        self.buttons_color = color
+        for i in range(len(self.buttons)):
+            self.buttons[i][2] = color
+            
    
 
     def pick_themes_screen(self):
@@ -1073,8 +1079,6 @@ class SettingsScreen(StartScreen):
             dark = False
             if is_dark(game.background_color):
                 dark = True
-
-
 
             #hover effect
             if left_arrow_rect.collidepoint(mouse):
@@ -1133,6 +1137,8 @@ class SettingsScreen(StartScreen):
             game.background_color = background_color
             game.set_grid_color(foreground_color)
             game.set_text_color(foreground_color)
+            self.set_button_color(foreground_color)
+            self.background_color = background_color
 
         
         def next_theme(direction):
@@ -1425,7 +1431,7 @@ class SettingsScreen(StartScreen):
               
                 if button[0].collidepoint(mouse):
                                                                     #2 is the color index
-                    self.buttons[index][2] = tuple(darken(i) for i in self.buttons_color)
+                    self.buttons[index][2] = tuple(darken(i, 15) for i in self.buttons_color)
                 
                 else:
                     self.buttons[index][2] = self.buttons_color
@@ -1438,7 +1444,7 @@ class SettingsScreen(StartScreen):
         running = True
         while running:
             #bkg color
-            game.screen.fill((0, 0, 0))
+            game.screen.fill(self.background_color)
             mouse = pygame.mouse.get_pos()
             #Makes sure that if game starts while were in this screen it goes back to game
             running = start_screen.check_started()

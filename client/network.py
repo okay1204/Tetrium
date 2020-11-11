@@ -72,7 +72,7 @@ class Network:
 
             return recieved
         except socket.error as e:
-            raise e
+            print(e)
 
 
 if __name__ == "__main__":

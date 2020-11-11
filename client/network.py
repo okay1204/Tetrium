@@ -31,6 +31,8 @@ class Network:
 
             # self.client.settimeout(2.0)
             return response
+
+            
         except:
             return "no connection"
 

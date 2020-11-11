@@ -65,8 +65,12 @@ def threaded_client(conn, player, gameId):
                 
                 else:
 
-                    if game.ready and conn.gettimeout() != timeout:
+                    if game.winner != None:
+                        conn.settimeout(None)
+
+                    elif game.ready and conn.gettimeout() != timeout:
                         conn.settimeout(timeout)
+
 
 
                     # data will be in order of
@@ -105,6 +109,8 @@ def threaded_client(conn, player, gameId):
 
                                 if player: opp = 0
                                 else: opp = 1
+
+                                conn.settimeout(None)
 
                                 print(f'Player {opp} ({game.names[opp]}) beat Player {player} ({game.names[player]}) in game {gameId}')
                             

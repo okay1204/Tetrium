@@ -6,6 +6,8 @@ class OnlineGame:
 
         self.ready = False
 
+        self.round = 1
+
         # Player names
         self.names = [None, None]
 
@@ -121,6 +123,7 @@ class OnlineGame:
         self.rematch = [False, False]
         self.winner = None
         self.time_started = time.time()
+        self.round += 1
     
     
     

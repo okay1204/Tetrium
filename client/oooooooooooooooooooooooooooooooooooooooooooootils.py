@@ -4,4 +4,3 @@ def darken(value, amt = 60):
 
 def lighten(value, amt  = 60):
     return min(value + amt, 255)
-

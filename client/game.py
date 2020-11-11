@@ -170,27 +170,23 @@ class Game:
         self.theme_text = theme[0]
        
        
-
    
     def set_grid_color(self, color):
         self.grid_color = tuple(darken(i, 10) for i in color)
 
     
-    def complimentary_color(self, color: tuple):
+    def complimentary_color(self, color: tuple): 
         
         def contrast(val):
             return abs((val + 255/2) - 255)
         
-
-
         return tuple(contrast(i) for i in color)
 
     def set_text_color(self, color):
-        self.text_color = color
         contrast = self.complimentary_color(color)
+        self.text_color = color
         self.preview_color = contrast
-        self.meter_outline_color = contrast
-
+        
     def render(self, pieces=None, held=None):
         
         self.screen.fill(self.background_color)
@@ -286,7 +282,7 @@ class Game:
 
 
         # junk line meter
-        pygame.draw.rect(self.screen, self.meter_outline_color, (32, 394, 36, 306))
+        pygame.draw.rect(self.screen, self.preview_color, (32, 394, 36, 306))
         pygame.draw.rect(self.screen, self.foreground_color, (35, 397, 30, 300))
 
         meter_block = 0
@@ -333,7 +329,7 @@ class Game:
                 Block(x, y, color, colorByName = False).render_second()
         
         # junk line meter
-        pygame.draw.rect(self.screen, (255, 255, 255), (539, 398, 17, 152))
+        pygame.draw.rect(self.screen, self.preview_color, (539, 398, 17, 152))
         pygame.draw.rect(self.screen, self.foreground_color, (540, 399, 15, 150))
 
 

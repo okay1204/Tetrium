@@ -597,11 +597,15 @@ class StartScreen(Game):
         self.credits_button_pos = (game.width - 70, game.height - self.credits_button_height)
         self.credits_button = pygame.Rect(self.credits_button_pos[0], self.credits_button_pos[1], 70, self.credits_button_height)
         self.connected = False
+        self.started = False
         self.back_icon = pygame.image.load('assets/arrow-back.png')
         self.back_button = pygame.Rect(10, 10, 75, 65)
         self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
         self.disconnect_button_text = game.font.render('Disconnect', True, (self.r, self.g, self.b))
 
+
+    def check_started(self):
+        return not self.started
 
     def draw_back_button(self, pos = (-10, -10)):
         white = (255, 255, 255)
@@ -641,6 +645,9 @@ class StartScreen(Game):
         running = True
         while running:
             mouse = pygame.mouse.get_pos()
+            #Makes sure that if game starts while were in this screen it goes back to game
+            running = start_screen.check_started()
+
             #Game over loop
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -651,8 +658,9 @@ class StartScreen(Game):
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.back_button.collidepoint(event.pos):
                         running = False
+                        break
 
-
+           
             game.screen.fill((0,0,0))
             draw_tetris_pieces(pieces)
             self.draw_back_button(mouse)
@@ -872,6 +880,7 @@ class StartScreen(Game):
 
             if self.status == 'get':
                 data = game.n.send('get')
+
             elif self.status == 'disconnect':
                 game.n.disconnect()
                 break
@@ -883,7 +892,9 @@ class StartScreen(Game):
                     data = game.n.send('get')
                     game.opp_name = data.opp_name(game.n.p)
                     self.ready = True
+                    self.started = True
                     break
+            
             except Exception as e:
                 if not isinstance(e, AttributeError):
                     raise e
@@ -894,10 +905,12 @@ class StartScreen(Game):
 
     
     def main(self):
-
-        while True:
+        running = True
+        while running:
             #NOTE make sure this is at the top
             self.s.fill((0,0,0, 2))
+            #Makes sure that if game starts while were in this screen it goes back to game
+            running = start_screen.check_started()
 
             self.mouse = pygame.mouse.get_pos() 
 
@@ -986,6 +999,8 @@ class StartScreen(Game):
             if self.connected and self.ready:
                 self.connected = False
                 self.start_button_rect = pygame.Rect(game.width/2-60, game.height/2, 120, 40)
+                self.started = True
+                running = False
                 break
             
                 
@@ -1178,8 +1193,12 @@ class SettingsScreen(StartScreen):
             #bkg color
 
             mouse = pygame.mouse.get_pos()
-           
-            
+
+    
+            #Makes sure that if game starts while were in this screen it goes back to game
+            running = start_screen.check_started()
+
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
 
@@ -1198,7 +1217,6 @@ class SettingsScreen(StartScreen):
                     elif right_arrow_rect.collidepoint(event.pos):
                         next_theme(1)
 
-                    
             render_game_preview(game.background_color, game.foreground_color)
             draw_title()
             self.draw_back_button(mouse)
@@ -1293,6 +1311,10 @@ class SettingsScreen(StartScreen):
             game.screen.fill((26, 27, 37))
 
             mouse = pygame.mouse.get_pos()
+            
+            #Makes sure that if game starts while were in this screen it goes back to game
+            running = start_screen.check_started()
+    
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1338,7 +1360,9 @@ class SettingsScreen(StartScreen):
                         get_key_input(event.key)
                     
                     clicked = False
-    
+
+
+        
             self.draw_back_button(mouse)
             draw_reset_button(mouse)
 
@@ -1379,8 +1403,10 @@ class SettingsScreen(StartScreen):
         while running:
             #bkg color
             game.screen.fill((0, 0, 0))
-
             mouse = pygame.mouse.get_pos()
+            #Makes sure that if game starts while were in this screen it goes back to game
+            running = start_screen.check_started()
+
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1397,6 +1423,8 @@ class SettingsScreen(StartScreen):
                     if self.back_button.collidepoint(event.pos):
                         running = False
 
+            
+          
 
             self.buttons_hover(mouse)
             self.draw_back_button(mouse)

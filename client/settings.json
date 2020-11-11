@@ -10,5 +10,9 @@
     "Hold Piece": "up",
     "Hard Drop": "down"
   },
+<<<<<<< HEAD
+  "theme": 7
+=======
   "theme": 1
+>>>>>>> 237413a1d88f293a6e77ada5baa9aa5d24992edd
 }

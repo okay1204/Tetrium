@@ -167,16 +167,18 @@ class Game:
         self.foreground_color = theme[2]
         self.set_grid_color(self.foreground_color)
         self.theme_text = theme[0]
+        self.text_color = self.foreground_color
+        self.preview_and_meter_outline_color = (0, 0, 0)
 
-        self.preview_color = (255, 255, 255)
+        self.preview_color = self.preview_and_meter_outline_color
 
-
-        self.text_color = (255, 255, 255)
 
    
     def set_grid_color(self, color):
-
         self.grid_color = tuple(darken(i, 10) for i in color)
+
+    def set_text_color(self, color):
+        self.text_color = color
 
     def render(self, pieces=None, held=None):
         
@@ -273,7 +275,7 @@ class Game:
 
 
         # junk line meter
-        pygame.draw.rect(self.screen, (255, 255, 255), (32, 394, 36, 306))
+        pygame.draw.rect(self.screen, self.preview_and_meter_outline_color, (32, 394, 36, 306))
         pygame.draw.rect(self.screen, self.foreground_color, (35, 397, 30, 300))
 
         meter_block = 0
@@ -1126,6 +1128,7 @@ class SettingsScreen(StartScreen):
             game.foreground_color = foreground_color
             game.background_color = background_color
             game.set_grid_color(foreground_color)
+            game.set_text_color(foreground_color)
 
         
         def next_theme(direction):
@@ -1235,6 +1238,11 @@ class SettingsScreen(StartScreen):
             text_rect = text.get_rect(center = (game.width/2, game.height/2 - 100))
             start_time = time.time()
             while time.time() - start_time <= 0.5:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                        
                 game.screen.blit(text, (text_rect.x, text_rect.y))
                 pygame.display.update()
 

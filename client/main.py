@@ -232,24 +232,22 @@ def server_connection():
     global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked, can_disconnect
 
     while game.running:
+
         can_disconnect = False
 
         # for any events
 
-        resting_coords = list(
-            map(lambda block: (block.x, block.y, block.color), game.resting))
+        resting_coords = list(map(lambda block: (block.x, block.y, block.color), game.resting))
 
         if current:
-            piece_block_coords = list(
-                map(lambda block: (block.x, block.y, block.color), current.blocks))
+            piece_block_coords = list(map(lambda block: (block.x, block.y, block.color), current.blocks))
         else:
             piece_block_coords = None
-
+        
         sent_specials = specials.copy()
 
         try:
-            data = game.n.send(
-                [resting_coords, piece_block_coords, sent_specials])
+            data = game.n.send([resting_coords, piece_block_coords, sent_specials])
         except:
             # lost connection unexpectedly
             disconnected = ("You disconnected", "Try again?")
@@ -260,9 +258,10 @@ def server_connection():
         # lost connection unexpectedly
         if not data:
             disconnected = ("You disconnected", "Try again?")
+            break
 
         if data == "disconnect":
-
+            
             # disconnected after game
             if won == None:
                 disconnected = ("Opponent disconnected", "You win!")
@@ -272,16 +271,30 @@ def server_connection():
 
             break
 
+        for special in sent_specials:
+            specials.remove(special)
+        
+        # if winner info hasn't updated yet
+        if won == False and data.winner == None and game.round == data.round:
+            continue
+
+
+        # if the player won
         if data.winner == game.n.p:
             won = True
 
-        for special in sent_specials:
-            specials.remove(special)
+        # telling game over function that rematch has started
+        elif data.winner == None and gameOver:
+            won = None
 
+
+        game.round = data.round
+        
         game.opp_resting = data.opp_resting(game.n.p)
         game.opp_piece_blocks = data.opp_piece_blocks(game.n.p)
         game.opp_meter = data.opp_meter(game.n.p)
         game.opp_meter_stage = data.opp_meter_stage(game.n.p)
+
 
         meter = data.own_meter(game.n.p)
         if len(meter) > len(game.meter):
@@ -353,7 +366,7 @@ def play_number_animations():
         traveled = (pos[0], (travel_distance /
                              duration * start_time * -1) + pos[1])
 
-        text = game.font.render(str(number), True, game.preview_color)
+        text = game.font.render(str(number), True, game.preview_color) # NOTE change this color
         game.screen.blit(text, traveled)
 
     for remove in removed:

@@ -353,7 +353,7 @@ def play_number_animations():
         traveled = (pos[0], (travel_distance /
                              duration * start_time * -1) + pos[1])
 
-        text = game.font.render(str(number), True, (0, 0, 0))
+        text = game.font.render(str(number), True, game.preview_color)
         game.screen.blit(text, traveled)
 
     for remove in removed:

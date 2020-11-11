@@ -6,7 +6,7 @@ class OnlineGame:
 
         self.ready = False
 
-        self.round = 1
+        self.round = 0
 
         # Player names
         self.names = [None, None]

@@ -22,6 +22,16 @@ random.shuffle(bag)
 next_bag = pieces.copy()
 random.shuffle(next_bag)
 
+def stop():
+
+    game.running = False
+    while True:
+        if can_disconnect:
+            game.n.disconnect()
+            break
+    pygame.quit()
+    sys.exit()
+
 
 def pick_bag():
     global bag, next_bag
@@ -81,7 +91,7 @@ def reset():
 
 
 opp_disconnected_after = False
-
+opp_rematched = False
 
 def game_over(win: bool):
 
@@ -90,7 +100,7 @@ def game_over(win: bool):
     gameOver = True
 
     pygame.mixer.music.set_volume(game.lowered_volume)
-    button_dimensions = (300, 40)
+    button_dimensions = (250, 40)
     button_pos = (
         int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
@@ -98,15 +108,34 @@ def game_over(win: bool):
     restart_button_rect = pygame.Rect(button_pos, button_dimensions)
     restart_button_color = (255, 255, 255)
     restart_button_text = restart_button_font.render(
-        f'FIND NEW MATCH', True, (0, 0, 0))
-    game_over_font = pygame.font.Font('assets/arial.ttf', 60)
+        'Find new match', True, (0, 0, 0))
+    game_over_font = pygame.font.Font('assets/arial.ttf', 50)
+
+    rematch_text_font = pygame.font.Font('assets/arial.ttf', 40)
+    self_rematch_text = opp_rematch_text = "Deciding..."
+    
+    rematch_active = True
+
+    rematch_button_font = pygame.font.Font('assets/arial.ttf', 26)
+    rematch_button_dimensions = (120, 40)
+    rematch_button_text = rematch_button_font.render('Rematch', True, (0, 0, 0))
+
+    self_rematch_button_pos = (int(game.width/4 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
+    self_rematch_button_rect = pygame.Rect(self_rematch_button_pos, rematch_button_dimensions)
+    self_rematch_button_color = (255, 255, 255)
+
+
+    text_font = pygame.font.Font('assets/arial.ttf', 25)
+    you_text = text_font.render("You", True, (0, 0, 0))
+    opponent_text = text_font.render(game.opp_name, True, (0, 0, 0))
+    opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
 
     if not win:
         send('game over')
-        game_over_text = game_over_font.render(f'You lost...', True, (0, 0, 0))
+        game_over_text = game_over_font.render('You lost...', True, (0, 0, 0))
 
     else:
-        game_over_text = game_over_font.render(f'You win!', True, (0, 0, 0))
+        game_over_text = game_over_font.render('You win!', True, (0, 0, 0))
 
     textRect = game_over_text.get_rect()
     textRect.center = (game.width // 2, 200)
@@ -122,7 +151,33 @@ def game_over(win: bool):
         game.screen.blit(game.opaque_bkg, (0, 0))
         game.opaque_bkg.set_alpha(120)
 
+    def draw_self_rematch_button():
+        pygame.draw.rect(game.screen, self_rematch_button_color, self_rematch_button_rect)
+        game.screen.blit(rematch_button_text, (self_rematch_button_pos[0]+10, self_rematch_button_pos[1]+4))
+
+    def draw_self_rematch_text():
+        
+        self_rendered_text = rematch_text_font.render(self_rematch_text, True, (0, 0, 0))
+        game.screen.blit(self_rendered_text, (self_rematch_button_pos[0]-30, self_rematch_button_pos[1]+100))
+
+
+        opp_rendered_text = rematch_text_font.render(opp_rematch_text, True, (0, 0, 0))
+        game.screen.blit(opp_rendered_text, (int(game.height/2)+80, self_rematch_button_pos[1]+100))
+
+    def draw_texts():
+        game.screen.blit(you_text, (self_rematch_button_pos[0]+30, self_rematch_button_pos[1]-50))
+
+        game.screen.blit(opponent_text, opponent_rect)
+
+
     while gameOver:
+
+
+        if opp_disconnected_after:
+            opp_rematch_text = "Disconnected"
+        elif opp_rematched:
+            opp_rematch_text = "Rematching..."
+
 
         mouse = pygame.mouse.get_pos()
 
@@ -131,13 +186,7 @@ def game_over(win: bool):
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
-
-                while True:
-                    if can_disconnect:
-                        game.n.disconnect()
-                        break
-                pygame.quit()
-                sys.exit()
+                stop()
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
@@ -157,20 +206,25 @@ def game_over(win: bool):
                     gameOver = False
                     return False
 
-            elif event.type == pygame.KEYDOWN:
+                
+                if self_rematch_button_rect.collidepoint(event.pos) and rematch_active:
+                    rematch_active = False
+                    self_rematch_text = "Rematching..."
+                    send("rematch")
 
-                # repace this with a button
-                # rematch
-                if event.key == pygame.K_t:
-
-                    if not opp_disconnected_after:
-                        send("rematch")
-
+        # for hover effects
         if restart_button_rect.collidepoint(mouse):
             restart_button_color = tuple(map(darken, (255, 255, 255)))
-
         else:
             restart_button_color = (255, 255, 255)
+
+        
+
+        if self_rematch_button_rect.collidepoint(mouse):
+            self_rematch_button_color = tuple(map(darken, (255, 255, 255)))
+        else:
+            self_rematch_button_color = (255, 255, 255)
+
 
         if won == None:
             gameOver = False
@@ -179,6 +233,9 @@ def game_over(win: bool):
         game.screen.blit(game_over_text, textRect)
 
         draw_restart_button()
+        draw_self_rematch_button()
+        draw_self_rematch_text()
+        draw_texts()
         draw_bkg()
 
         pygame.display.update()
@@ -229,7 +286,9 @@ can_disconnect = False
 
 def server_connection():
     
-    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked, can_disconnect
+    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked, can_disconnect, opp_rematched
+
+    specials.clear()
 
     while game.running:
 
@@ -287,6 +346,8 @@ def server_connection():
         elif data.winner == None and gameOver:
             won = None
 
+        
+        opp_rematched = data.opp_has_rematched(game.n.p)
 
         game.round = data.round
         
@@ -433,6 +494,7 @@ while True:
             break
 
         if won != None:
+            opp_rematched = False
             pygame.mouse.set_visible(True)
             reset()
             rematch = game_over(won)
@@ -679,15 +741,7 @@ while True:
                         game.lowered_volume, game.volume = 0.025, 0.05
 
             elif event.type == pygame.QUIT:
-
-                game.running = False
-
-                while True:
-                    if can_disconnect:
-                        game.n.disconnect()
-                        break
-
-                sys.exit()
+                stop()
 
         if backToTop:
             continue

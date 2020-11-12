@@ -917,8 +917,9 @@ class StartScreen(Game):
                         if event.key == pygame.K_RETURN:
                             self.connected = True
                             self.start()
-                            pygame.mixer.music.set_volume(self.volume)
-                            self.screen.fill((0, 0, 0))
+                            _thread.start_new_thread(self.wait_for_game, ())
+                            game.screen.fill((0, 0, 0))
+                            pygame.mixer.music.set_volume(game.volume)
                                 
 
                         elif event.key == pygame.K_BACKSPACE:

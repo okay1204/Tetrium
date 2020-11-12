@@ -161,7 +161,7 @@ def game_over(win: bool):
     rematch_button_dimensions = (120, 40)
     rematch_button_text = rematch_button_font.render('Rematch', True, (0, 0, 0))
 
-    self_rematch_button_pos = (int(game.width/4 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
+    self_rematch_button_pos = (int(game.width/2 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
     self_rematch_button_rect = pygame.Rect(self_rematch_button_pos, rematch_button_dimensions)
     self_rematch_button_color = (255, 255, 255)
 
@@ -199,14 +199,14 @@ def game_over(win: bool):
     def draw_self_rematch_text():
         
         self_rendered_text = rematch_text_font.render(self_rematch_text, True, (0, 0, 0))
-        game.screen.blit(self_rendered_text, (self_rematch_button_pos[0]-30, self_rematch_button_pos[1]+100))
+        game.screen.blit(self_rendered_text, (int(game.width/4)-100, int(game.height/2)+250))
 
 
         opp_rendered_text = rematch_text_font.render(opp_rematch_text, True, (0, 0, 0))
-        game.screen.blit(opp_rendered_text, (int(game.height/2)+80, self_rematch_button_pos[1]+100))
+        game.screen.blit(opp_rendered_text, (int(game.width/2)+80, int(game.height/2)+250))
 
     def draw_texts():
-        game.screen.blit(you_text, (self_rematch_button_pos[0]+30, self_rematch_button_pos[1]-50))
+        game.screen.blit(you_text, (int(game.width/4)-30, int(game.height/2)+100))
 
         game.screen.blit(opponent_text, opponent_rect)
 
@@ -471,7 +471,7 @@ def play_number_animations():
         traveled = (pos[0], (travel_distance /
                              duration * start_time * -1) + pos[1])
 
-        text = game.font.render(str(number), True, game.preview_color) # NOTE change this color
+        text = game.font.render(str(number), True, game.preview_color)
         game.screen.blit(text, traveled)
 
     for remove in removed:

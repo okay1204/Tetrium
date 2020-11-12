@@ -477,10 +477,10 @@ class Game:
     def disconnected_screen(self, text1, text2):
 
         def draw_text():
-            dc_text_1 = self.font.render(text1, True, (255, 255, 255))
-            dc_text_2 = self.font.render(text2,  True, (255, 255, 255))
-            self.screen.blit(dc_text_1, (self.width/2 - 175, 200))
-            self.screen.blit(dc_text_2, (self.width/2 - 75, 300))
+            dc_text_1 = self.font.render(text1, True, game.foreground_color)
+            dc_text_2 = self.font.render(text2,  True, game.foreground_color)
+            self.screen.blit(dc_text_1, (self.width/2 - dc_text_1.get_rect().width/2, 200))
+            self.screen.blit(dc_text_2, (self.width/2 - dc_text_2.get_rect().width/2, 300))
 
         rgb_stage = 0
 
@@ -515,16 +515,16 @@ class Game:
         def draw_button():
             nonlocal button_text_color
 
-            #if mouse hovering make it yellow
-            if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
-                pygame.draw.rect(self.screen, (255,255,255), button_rect)
+            pygame.draw.rect(self.screen, tuple(darken(color) for color in game.foreground_color), button_rect)
+
+            #if mouse hovering make it rgb
+            if button_rect.collidepoint(mouse): 
                 cycle_colors()
                 button_text_color = (r, g, b)
 
             
             else: 
-                pygame.draw.rect(self.screen, (255,255,255), button_rect)
-                button_text_color = (0, 0, 0)
+                button_text_color = game.foreground_color
                 
             button_text = self.font.render("FIND NEW MATCH", True, button_text_color)
             self.screen.blit(button_text, (button_pos[0] + 10, button_pos[1] + 3))
@@ -556,12 +556,13 @@ class Game:
                     check_click(event.pos)
 
 
-            self.screen.fill((0,0,0))
+            self.screen.fill(game.background_color)
 
             draw_text()
             draw_button()
 
             pygame.display.update()
+            game.clock.tick(60)
 
 
     def countdown(self, countdown):

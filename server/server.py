@@ -162,7 +162,7 @@ player = 0
 s.listen()
 print("Server Started, Waiting for connections")
 
-version = "0.2"
+version = "0.1"
 # NOTE replace with download link to newer version
 download_link = "www.google.com"
 

@@ -207,7 +207,7 @@ def game_over(win: bool):
                     return False
 
                 
-                if self_rematch_button_rect.collidepoint(event.pos) and rematch_active:
+                if self_rematch_button_rect.collidepoint(event.pos) and rematch_active and not opp_disconnected_after:
                     rematch_active = False
                     self_rematch_text = "Rematching..."
                     send("rematch")
@@ -233,7 +233,10 @@ def game_over(win: bool):
         game.screen.blit(game_over_text, textRect)
 
         draw_restart_button()
-        draw_self_rematch_button()
+
+        if not opp_disconnected_after:
+            draw_self_rematch_button()
+
         draw_self_rematch_text()
         draw_texts()
         draw_bkg()

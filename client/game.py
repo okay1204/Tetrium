@@ -178,9 +178,10 @@ class Game:
     def complimentary_color(self, color: tuple): 
         
         def contrast(val):
-            return abs((val + 255/2) - 255)
+            return int(abs((val + 255/2) - 255))
         
         return tuple(contrast(i) for i in color)
+
 
     def set_text_color(self, color):
         contrast = self.complimentary_color(color)
@@ -641,7 +642,7 @@ class StartScreen(Game):
     def credits_screen(self, pieces, draw_tetris_pieces):
 
         
-        credits_list = ['Made by', 'Zack Ghanbari', 'and Ali Rastegar']
+        credits_list = ['Made by', 'Ali Rastegar' 'Zack Ghanbari']
         text_y = 0
         text_offset = 80
         text_scroll_dist = 0.1

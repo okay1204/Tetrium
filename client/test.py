@@ -1,11 +1,7 @@
-def complimentary_color(color_0: tuple, color_1: tuple):
-    
+import textwrap
 
-    def compliment(val, num):
-        if not num:
-            return abs((val + 120) - 360)
+x = 'hi'
 
-        return abs((val + 240) - 360)
 
-    
-    
+
+print(textwrap.indent(x, 'joe'))

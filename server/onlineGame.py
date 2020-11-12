@@ -19,6 +19,8 @@ class OnlineGame:
 
         self.winner = None
 
+        self.countdown = 0
+
         # Both players junk meter
         self.meters = [[], []]
         self.meter_stages = [1, 1]
@@ -129,6 +131,7 @@ class OnlineGame:
     def _reset(self):
         self.rematch = [False, False]
         self.winner = None
+        self.countdown = time.time() + 4
         self.time_started = time.time()
         self.round += 1
         self.meters = [[], []]

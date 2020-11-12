@@ -96,6 +96,9 @@ class Game:
         self.big_font = pygame.font.Font('assets/arial.ttf', 30)
         self.very_big_medium_font = pygame.font.Font('assets/arial.ttf', 70)
         self.very_big_font = pygame.font.Font('assets/arial.ttf', 75)
+
+
+        self.enormous_font = pygame.font.Font('assets/arial.ttf', 120)
         
        
 
@@ -548,6 +551,34 @@ class Game:
 
             pygame.display.update()
 
+
+    def countdown(self, countdown):
+
+        # countdown is actually 4 seconds long, consisting of 3, 2, 1, and GO
+        while countdown > time.time():
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+
+                    return False
+
+            seconds = int(countdown - time.time())
+            if not seconds:
+                seconds = "GO"
+
+            self.screen.fill((0, 0, 0))
+
+            above_text = self.medium_font.render("Game starts in...", True, (255, 255, 255))
+            self.screen.blit(above_text, (game.width/2-above_text.get_rect().width/2, 150))
+
+            countdown_text = self.enormous_font.render(str(seconds), True, (255, 255, 255))
+            self.screen.blit(countdown_text, (game.width/2-countdown_text.get_rect().width/2, game.height/2))
+
+
+            pygame.display.update()
+            self.clock.tick(60)
+
+        return True
 
 
 game = Game()

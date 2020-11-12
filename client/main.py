@@ -326,11 +326,11 @@ attacked = True
 
 
 can_disconnect = False
-
+countdown = 0
 
 def server_connection():
     
-    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked, can_disconnect, opp_rematched
+    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked, can_disconnect, opp_rematched, countdown
 
     specials.clear()
 
@@ -420,6 +420,12 @@ def server_connection():
 
             if speedUp:
                 fall_speed /= 10
+
+        
+        if data.countdown > time.time():
+            countdown = data.countdown
+        else:
+            countdown = 0
 
 
 mouse_number_key = {
@@ -518,6 +524,7 @@ while True:
     start_screen.started = False
 
     start_screen.main()
+    countdown = time.time() + 4
     _thread.start_new_thread(server_connection, ())
 
     with open('settings.json') as f:
@@ -547,6 +554,12 @@ while True:
             if not rematch:
                 game.screen.fill((0, 0, 0))
                 break
+
+        
+        if countdown > time.time():
+            # meaning if the user quit in the countdown
+            if not game.countdown(countdown):
+                stop()
 
         # if there are fading blocks, pause the game for a quick moment
         if game.rows_cleared:

@@ -485,21 +485,34 @@ class Game:
             self.screen.blit(dc_text_1, (self.width/2 - 175, 200))
             self.screen.blit(dc_text_2, (self.width/2 - 75, 300))
 
+        rgb_stage = 0
+
         def cycle_colors():
             
-            nonlocal r, g, b
+            nonlocal r, g, b, rgb_stage
 
-            if g < 255 and r > 0:
-                g += 1
-                r -= 1
+            if rgb_stage == 0:
+                if g < 255 and r > 0:
+                    g += 1
+                    r -= 1
+                else:
+                    rgb_stage = 1
 
-            else:
+
+            elif rgb_stage == 1:
                 if b < 255 and g > 0:
                     b += 1
                     g -= 1
-                
+                    
                 else:
-                    r, g, b = 255, 0, 0
+                    rgb_stage = 2
+
+            elif rgb_stage == 2:
+                if r < 255 and b > 0:
+                    r += 1
+                    b -= 1
+                else:
+                    rgb_stage = 0
 
             
         def draw_button():
@@ -612,7 +625,7 @@ class StartScreen(Game):
             
         ]
 
-        self.rgb_dir = 0
+        self.rgb_stage = 0
 
         self.version_text = game.small_font.render(f"v {network.version}", True, (255, 255, 255))
         rect = self.version_text.get_rect()
@@ -821,30 +834,29 @@ class StartScreen(Game):
     def cycle_colors(self, rgb):
         r, g, b = rgb
     
-        if not self.rgb_dir:
+
+        if self.rgb_stage == 0:
             if g < 255 and r > 0:
                 g += 1
                 r -= 1
-
             else:
-                if b < 255 and g > 0:
-                    b += 1
-                    g -= 1
+                self.rgb_stage = 1
 
-                else:
-                    self.rgb_dir = 1
-        else:
-            if g < 255 and b > 0:
-                g += 1
-                b -= 1
 
-            else:
-                if r < 255 and g > 0:
-                    r += 1
-                    g -= 1
+        elif self.rgb_stage == 1:
+            if b < 255 and g > 0:
+                b += 1
+                g -= 1
                 
-                else:
-                    self.rgb_dir = 0
+            else:
+                self.rgb_stage = 2
+
+        elif self.rgb_stage == 2:
+            if r < 255 and b > 0:
+                r += 1
+                b -= 1
+            else:
+                self.rgb_stage = 0
         
         return (r, g, b)
         

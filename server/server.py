@@ -116,7 +116,6 @@ def threaded_client(conn, player, gameId):
                             
                             elif special == "rematch":
                                 
-                                print("rematch", player)
                                 game.rematch[player] = True
 
                                 if all(game.rematch):

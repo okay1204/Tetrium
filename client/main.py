@@ -33,6 +33,47 @@ def stop():
     sys.exit()
 
 
+def render_texts():
+
+    # queing up special texts
+    removed_texts = []
+    for text, display_time, size in texts:
+
+        if display_time > time.time():
+
+            font = pygame.font.Font('assets/arial.ttf', size)
+
+            original = text
+
+            if isinstance(text, str):
+                text = text,
+
+            textElements = []
+            for line in text:
+                textElement = font.render(line, True, game.preview_color)
+                textRect = textElement.get_rect()
+
+                textElements.append((textElement, textRect))
+
+            for index, element in enumerate(textElements):
+                textElement, textRect = element
+
+                textRect.center = (
+                    450, 500 + (texts.index((original, display_time, size)) * 50) + (index * 25))
+
+                game.screen.blit(textElement, textRect)
+
+        else:
+            removed_texts.append((text, display_time, size))
+
+    for item in removed_texts:
+        texts.remove(item)
+    
+    removed_texts.clear()
+
+
+
+
 def pick_bag():
     global bag, next_bag
 
@@ -528,6 +569,7 @@ while True:
 
             play_meter_animations()
             play_number_animations()
+            render_texts()
 
             pygame.display.update()
             game.clock.tick(60)
@@ -1006,43 +1048,9 @@ while True:
             textRect.center = (250, game.height // 2)
             game.screen.blit(text, textRect)
 
-        # queing up special texts
-        removed_texts = []
-        for text, display_time, size in texts:
-
-            if display_time > time.time():
-
-                font = pygame.font.Font('assets/arial.ttf', size)
-
-                original = text
-
-                if isinstance(text, str):
-                    text = text,
-
-                textElements = []
-                for line in text:
-                    textElement = font.render(line, True, (255, 255, 255))
-                    textRect = textElement.get_rect()
-
-                    textElements.append((textElement, textRect))
-
-                for index, element in enumerate(textElements):
-                    textElement, textRect = element
-
-                    textRect.center = (
-                        450, 500 + (texts.index((original, display_time, size)) * 50) + (index * 25))
-
-                    game.screen.blit(textElement, textRect)
-
-            else:
-                removed_texts.append((text, display_time, size))
-
-        for item in removed_texts:
-            texts.remove(item)
-
         pygame.mixer.music.set_volume(game.volume)
 
-        removed_texts.clear()
+        render_texts()
 
         pygame.display.update()
 

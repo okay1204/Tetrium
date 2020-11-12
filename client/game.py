@@ -612,6 +612,8 @@ class StartScreen(Game):
             
         ]
 
+        self.rgb_dir = 0
+
         self.version_text = game.small_font.render(f"v {network.version}", True, (255, 255, 255))
         rect = self.version_text.get_rect()
         self.version_text_rect = self.version_text.get_rect(center=(game.width-(rect.width/2)-10, rect.height+10))
@@ -819,17 +821,30 @@ class StartScreen(Game):
     def cycle_colors(self, rgb):
         r, g, b = rgb
     
-        if g < 255 and r > 0:
-            g += 1
-            r -= 1
-
-        else:
-            if b < 255 and g > 0:
-                b += 1
-                g -= 1
+        if not self.rgb_dir:
+            if g < 255 and r > 0:
+                g += 1
+                r -= 1
 
             else:
-                r, g, b = 255, 0, 0
+                if b < 255 and g > 0:
+                    b += 1
+                    g -= 1
+
+                else:
+                    self.rgb_dir = 1
+        else:
+            if g < 255 and b > 0:
+                g += 1
+                b -= 1
+
+            else:
+                if r < 255 and g > 0:
+                    r += 1
+                    g -= 1
+                
+                else:
+                    self.rgb_dir = 0
         
         return (r, g, b)
         

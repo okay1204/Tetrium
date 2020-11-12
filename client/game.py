@@ -379,24 +379,25 @@ class Game:
 
     def outdated_version_screen(self, new_version, download_link):
 
-        copy_button_text_color = (0,0,0)
-        copy_button_dimensions = (300, 40)
+        text_color = game.foreground_color
+        rect_color = tuple(darken(color) for color in game.foreground_color)
+
+        
+        copy_button_dimensions = (300, 45)
         copy_button_pos = (self.width/2 - copy_button_dimensions[0]/2, self.height/2 - copy_button_dimensions[1]/2)
         copy_button_rect = pygame.Rect(*copy_button_pos, *copy_button_dimensions)
 
-
-        quit_button_text_color = (0,0,0)
-        quit_button_dimensions = (80, 40)
+        quit_button_dimensions = (140, 40)
         quit_button_pos = (self.width/2 - quit_button_dimensions[0]/2, 700)
         quit_button_rect = pygame.Rect(*quit_button_pos, *quit_button_dimensions)
     
 
         def draw_text():
-            text1 = self.font.render("You are running an outdated", True, (255, 255, 255))
-            text2 = self.font.render("version of the game", True, (255, 255, 255))
+            text1 = self.font.render("You are running an outdated", True, rect_color)
+            text2 = self.font.render("version of the game", True, rect_color)
 
-            text3 = self.font.render(f"Your Version: {network.version}", True, (255, 255, 255))
-            text4 = self.font.render(f"New Version: {new_version}", True, (255, 255, 255))
+            text3 = self.font.render(f"Your Version: {network.version}", True, rect_color)
+            text4 = self.font.render(f"New Version: {new_version}", True, rect_color)
 
             self.screen.blit(text1, (self.width/2-200, 100))
             self.screen.blit(text2, (self.width/2-130, 150))
@@ -408,32 +409,24 @@ class Game:
         copy_animation = False
 
         def draw_buttons():
-
-            nonlocal quit_button_text_color
         
-            pygame.draw.rect(self.screen, (255,255,255), copy_button_rect)
+            pygame.draw.rect(self.screen, rect_color, copy_button_rect)
                 
-            copy_button_text = self.font.render("Copy download link", True, copy_button_text_color)
+            copy_button_text = self.font.render("Copy download link", True, text_color)
             self.screen.blit(copy_button_text, (copy_button_pos[0] + 10, copy_button_pos[1] + 3))
-                
-
-            if quit_button_pos[0] <= mouse[0] <= quit_button_pos[0] + quit_button_dimensions[0] and quit_button_pos[1] <= mouse[1] <= quit_button_pos[1] + quit_button_dimensions[1]: 
-                pygame.draw.rect(self.screen, (0,0,0), quit_button_rect)
-                quit_button_text_color = (255,255,255)
-
             
-            else: 
-                pygame.draw.rect(self.screen, (255,255,255), quit_button_rect)
-                quit_button_text_color = (0, 0, 0)
 
 
-            quit_button_text = self.font.render("Quit", True, quit_button_text_color)
+            pygame.draw.rect(self.screen, rect_color, quit_button_rect)
+
+            quit_button_text = self.font.render("Go Back", True, text_color)
             self.screen.blit(quit_button_text, (quit_button_pos[0] + 10, quit_button_pos[1] + 3))
 
+        breakOut = False
 
         def check_click(pos):
 
-            nonlocal copied_pos, copy_animation
+            nonlocal copied_pos, copy_animation, breakOut
             
 
             if copy_button_rect.collidepoint(pos):
@@ -443,17 +436,14 @@ class Game:
                 copy_animation = True
 
             elif quit_button_rect.collidepoint(pos):
-                pygame.quit()
-                sys.exit()
+                breakOut = True
 
 
 
 
         while True:
 
-            game.screen.fill((0, 0, 0))
-
-            mouse = pygame.mouse.get_pos() 
+            game.screen.fill(game.background_color)
 
             for event in pygame.event.get():
 
@@ -476,6 +466,9 @@ class Game:
 
                 if copied_pos <= 320:
                     copy_animation = False
+
+            if breakOut:
+                break
 
             pygame.display.update()
             self.clock.tick(60)
@@ -833,10 +826,8 @@ class StartScreen(Game):
         game.n = network.Network()
         if game.n.p == "no connection":
             print("no connection") # TODO no connection screen here
-            self.connected = False
             return            
 
-        self.start_button_rect.x -=  100
 
 
         self.input_text = self.input_text.strip()
@@ -847,10 +838,13 @@ class StartScreen(Game):
             outdated_info = game.n.p.split()
                                         # new version number # download link
             game.outdated_version_screen(outdated_info[2], outdated_info[3])
+            return
 
+        self.start_button_rect.x -=  100
         self.connected = True
         game.name = self.input_text
         game.n.send("name " + self.input_text)
+        _thread.start_new_thread(self.wait_for_game, ())
 
     def cycle_colors(self, rgb):
         r, g, b = rgb
@@ -959,9 +953,7 @@ class StartScreen(Game):
                     
                     if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
 
-                        self.connected = True
                         self.start()
-                        _thread.start_new_thread(self.wait_for_game, ())
                         game.screen.fill((0, 0, 0))
                         pygame.mixer.music.set_volume(game.volume)
                       
@@ -998,9 +990,7 @@ class StartScreen(Game):
                     if self.input_active:
                         
                         if event.key == pygame.K_RETURN:
-                            self.connected = True
                             self.start()
-                            _thread.start_new_thread(self.wait_for_game, ())
                             game.screen.fill((0, 0, 0))
                             pygame.mixer.music.set_volume(game.volume)
                                 

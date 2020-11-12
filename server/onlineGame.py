@@ -131,6 +131,8 @@ class OnlineGame:
         self.winner = None
         self.time_started = time.time()
         self.round += 1
+        self.meters = [[], []]
+        self.meter_stages = [1, 1]
     
     
     

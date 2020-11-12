@@ -46,8 +46,11 @@ class Game:
         self.holdSFX = pygame.mixer.Sound('assets/hold_effect.wav')
         self.row_clearedSFX = pygame.mixer.Sound('assets/row_cleared.wav')
         self.row_clearedSFX.set_volume(0.5)
-        self.meter_send = pygame.mixer.Sound('assets/meter_send.wav')
-        self.meter_recieve = pygame.mixer.Sound('assets/meter_recieve.wav')
+        self.meter_sendSFX = pygame.mixer.Sound('assets/meter_send.wav')
+        self.meter_recieveSFX = pygame.mixer.Sound('assets/meter_recieve.wav')
+        self.countdownSFX = pygame.mixer.Sound('assets/countdown.wav')
+        self.countdown_goSFX = pygame.mixer.Sound('assets/countdown_go.wav')
+
         
 
         self.width = 750
@@ -570,6 +573,8 @@ class Game:
     def countdown(self, countdown):
 
         # countdown is actually 4 seconds long, consisting of 3, 2, 1, and GO
+        pygame.mixer.music.set_volume(0)
+        last_second = 100
         while countdown > time.time():
 
             for event in pygame.event.get():
@@ -578,8 +583,20 @@ class Game:
                     return False
 
             seconds = int(countdown - time.time())
+
+            if seconds != last_second:
+
+                if seconds:
+                    self.countdownSFX.play()
+                else:
+                    self.countdown_goSFX.play()
+
+
+            last_second = seconds
+
             if not seconds:
                 seconds = "GO"
+            
 
             self.screen.fill(game.background_color)
 
@@ -592,6 +609,9 @@ class Game:
 
             pygame.display.update()
             self.clock.tick(60)
+
+        if not game.muted:
+            pygame.mixer.music.set_volume(game.volume)
 
         return True
 

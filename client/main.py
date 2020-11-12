@@ -50,7 +50,7 @@ def render_texts():
 
             textElements = []
             for line in text:
-                textElement = font.render(line, True, game.preview_color)
+                textElement = font.render(line, True, game.foreground_color)
                 textRect = textElement.get_rect()
 
                 textElements.append((textElement, textRect))

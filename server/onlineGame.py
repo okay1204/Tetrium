@@ -72,6 +72,13 @@ class OnlineGame:
             return self.names[1]
         else:
             return self.names[0]
+    
+    def opp_has_rematched(self, p):
+
+        if not p:
+            return self.rematch[1]
+        else:
+            return self.rematch[0]
 
 
     def _update(self, data, p):

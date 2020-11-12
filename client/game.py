@@ -46,6 +46,8 @@ class Game:
         self.holdSFX = pygame.mixer.Sound('assets/hold_effect.wav')
         self.row_clearedSFX = pygame.mixer.Sound('assets/row_cleared.wav')
         self.row_clearedSFX.set_volume(0.5)
+        self.meter_send = pygame.mixer.Sound('assets/meter_send.wav')
+        self.meter_recieve = pygame.mixer.Sound('assets/meter_recieve.wav')
         
 
         self.width = 750
@@ -566,12 +568,12 @@ class Game:
             if not seconds:
                 seconds = "GO"
 
-            self.screen.fill((0, 0, 0))
+            self.screen.fill(game.background_color)
 
-            above_text = self.medium_font.render("Game starts in...", True, (255, 255, 255))
+            above_text = self.medium_font.render("Game starts in...", True, game.foreground_color)
             self.screen.blit(above_text, (game.width/2-above_text.get_rect().width/2, 150))
 
-            countdown_text = self.enormous_font.render(str(seconds), True, (255, 255, 255))
+            countdown_text = self.enormous_font.render(str(seconds), True, game.foreground_color)
             self.screen.blit(countdown_text, (game.width/2-countdown_text.get_rect().width/2, game.height/2))
 
 

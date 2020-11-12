@@ -406,6 +406,7 @@ def server_connection():
 
             if attacked:
                 start_meter_animation((700, 600), 0)
+                game.meter_recieve.play()
             else:
                 attacked = True
 
@@ -995,6 +996,7 @@ while True:
 
                     if lines_sent:
                         send(f"junk {lines_sent}")
+                        game.meter_send.play()
 
                         # getting the block with the highest y
                         highest_y = 0

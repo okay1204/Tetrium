@@ -578,6 +578,10 @@ class StartScreen(Game):
             Piece(self.x_pos[8], randint(-15, -12), 'J'),
             
         ]
+
+        self.version_text = game.small_font.render(f"v {network.version}", True, (255, 255, 255))
+        rect = self.version_text.get_rect()
+        self.version_text_rect = self.version_text.get_rect(center=(game.width-(rect.width/2)-10, rect.height+10))
     
         self.r, self.g, self.b = 255, 0, 0
         self.last_falls = [time.time() for _ in self.pieces]
@@ -702,6 +706,9 @@ class StartScreen(Game):
         title_text = game.very_big_font.render('TETRIUM', True, (self.r, self.g, self.b)) 
         game.screen.blit(self.start_button_text, (self.start_button_rect.x + 7, self.start_button_rect.y + 3))
         game.screen.blit(title_text, (game.width/2 - 165, game.height/2 - 200)) 
+
+
+        game.screen.blit(self.version_text, self.version_text_rect)
         
 
 
@@ -818,8 +825,6 @@ class StartScreen(Game):
         color = tuple(map(lighten, (self.r,self.g, self.b))) if self.settings_button.collidepoint(pos) else (self.r, self.g, self.b)
         pygame.draw.rect(game.screen, color, self.settings_button)
         game.screen.blit(self.settings_button_text, (self.settings_button_pos[0] + 10, self.settings_button_pos[1] + 3))
-    
-    
 
     def wait_for_game(self):
 
@@ -847,9 +852,6 @@ class StartScreen(Game):
                 if not isinstance(e, AttributeError):
                     raise e
                 break
-
-
-
 
     
     def main(self):
@@ -1446,14 +1448,12 @@ class SettingsScreen(StartScreen):
     def buttons_hover(self, mouse):
         for index, button in enumerate(self.buttons):
               
-                if button[0].collidepoint(mouse):
-                                                                    #2 is the color index
-                    self.buttons[index][2] = tuple(darken(i, 15) for i in self.buttons_color)
-                
-                else:
-                    self.buttons[index][2] = self.buttons_color
-
-    
+            if button[0].collidepoint(mouse):
+                                                                #2 is the color index
+                self.buttons[index][2] = tuple(darken(i, 15) for i in self.buttons_color)
+            
+            else:
+                self.buttons[index][2] = self.buttons_color
 
 
     def main(self):

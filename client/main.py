@@ -1024,6 +1024,7 @@ while True:
                             if meter_stage >= 3:
                                 attacked = False
                                 send("meter reset")
+                                game.garbage_recieveSFX.play()
 
                                 amount = game.meter[0]
                                 game.meter.pop(0)

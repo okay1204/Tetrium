@@ -3,9 +3,10 @@ import _thread
 from onlineGame import OnlineGame #type: ignore
 import pickle
 import traceback
+from ip import IP
 
 
-server = "localhost"
+server = IP
 port = 6969
 
 timeout = 3.0
@@ -162,7 +163,7 @@ player = 0
 s.listen()
 print("Server Started, Waiting for connections")
 
-version = "0.1"
+version = "1.0"
 # NOTE replace with download link to newer version
 download_link = "www.google.com"
 

@@ -172,10 +172,13 @@ while True:
     conn, addr = s.accept()
 
     # make sure client is running correct version first
-    client_version = conn.recv(4096).decode()
-    if version != client_version:
-        print(f"{addr[0]} was disconnected because they were running version {client_version}")
-        conn.send(str.encode(f"outdated version {version} {download_link}"))
+    try:
+        client_version = conn.recv(4096).decode()
+        if version != client_version:
+            print(f"{addr[0]} was disconnected because they were running version {client_version}")
+            conn.send(str.encode(f"outdated version {version} {download_link}"))
+            continue
+    except:
         continue
 
     

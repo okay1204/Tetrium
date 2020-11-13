@@ -64,7 +64,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((self.width, self.height))
 
-        self.icon = pygame.image.load('./assets/tetris.jpg')
+        self.icon = pygame.image.load('./assets/tetrium.png')
         pygame.display.set_icon(self.icon)
 
         self.caption = "Tetrium"

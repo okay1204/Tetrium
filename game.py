@@ -127,7 +127,7 @@ class Game:
 
 
         # setting controls
-        with open(resource_path('settings.json')) as f:
+        with open('settings.json') as f:
             temp = json.load(f)
        
         self.left_controls = {
@@ -165,7 +165,7 @@ class Game:
         
         except:
             self.theme_index = 0
-            with open(resource_path('settings.json'), 'w') as f:
+            with open('settings.json', 'w') as f:
                 full_controls = dict(game.left_controls, **game.right_controls)
                 full_dict = {'controls': full_controls, 'theme': game.theme_index}
                 json.dump(full_dict, f, indent=2)
@@ -1205,7 +1205,7 @@ class SettingsScreen(StartScreen):
             game.screen.blit(title, (game.width/2 - title_rect.width/2, 10))
             
         def store_theme():
-            with open(resource_path('settings.json'), 'w') as f:
+            with open('settings.json', 'w') as f:
                 full_controls = dict(game.left_controls, **game.right_controls)
                 full_dict = {'controls': full_controls, 'theme': game.theme_index}
                 json.dump(full_dict, f, indent=2)
@@ -1375,7 +1375,7 @@ class SettingsScreen(StartScreen):
         
         
         def reset_controls():
-            with open(resource_path('settings.json'), 'w') as f:
+            with open('settings.json', 'w') as f:
                 new_dict = {'controls': game.default_controls, 'theme': game.theme_index}
                 json.dump(new_dict, f, indent=2)
 
@@ -1440,7 +1440,7 @@ class SettingsScreen(StartScreen):
                 else:
                     key_exists_err()
 
-            with open(resource_path('settings.json'), 'w') as f:
+            with open('settings.json', 'w') as f:
                 full_controls = dict(game.left_controls, **game.right_controls)
                 full_dict = {'controls': full_controls, 'theme': game.theme_index}
                 json.dump(full_dict, f, indent=2)

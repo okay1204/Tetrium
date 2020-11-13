@@ -1,7 +1,2 @@
-import textwrap
-
-x = 'hi'
-
-
-
-print(textwrap.indent(x, 'joe'))
+if True:
+    print('hi')

@@ -1380,7 +1380,7 @@ class SettingsScreen(StartScreen):
                     sys.exit()
 
 
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
                     if clicked:
                         if 1 <= event.button <= 3:

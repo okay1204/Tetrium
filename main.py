@@ -8,11 +8,7 @@ import json
 import _thread
 import socket
 
-
-# in order to get classes from a different folder
-import os
 import sys
-sys.path.insert(1, os.path.join(os.path.dirname(os.getcwd()), 'server'))
 
 
 pieces = ["T", "L", "J", "S", "Z", "I", "O"]

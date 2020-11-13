@@ -528,8 +528,7 @@ while True:
     with open('settings.json') as f:
         controls = json.load(f)['controls']
 
-    # NOTE uncomment this line after
-    # pygame.mouse.set_visible(False)
+    pygame.mouse.set_visible(False)
 
     while game.running:
 

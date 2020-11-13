@@ -826,7 +826,7 @@ class StartScreen(Game):
 
         game.n = network.Network()
         if game.n.p == "no connection":
-            print("no connection") # TODO no connection screen here
+            self.no_connection_screen()
             return            
 
 
@@ -1033,6 +1033,26 @@ class StartScreen(Game):
 
         game.time_started = time.time()
         game.running = True
+
+
+    def no_connection_screen(self):
+
+        display_time = time.time() + 3
+
+        game.screen.fill(game.background_color)
+
+        text = game.very_big_font.render("No connection", True, game.foreground_color)
+        game.screen.blit(text, (game.width/2-text.get_rect().width/2, 300))
+        pygame.display.update()
+
+        while display_time > time.time():
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            game.clock.tick(60)
 
 
 class SettingsScreen(StartScreen):

@@ -7,12 +7,10 @@ import sys
 import json
 import _thread
 import socket
+import onlineGame
+from oooooooooooooooooooooooooooooooooooooooooooootils import resource_path
 
-
-# in order to get classes from a different folder
-import os
 import sys
-sys.path.insert(1, os.path.join(os.path.dirname(os.getcwd()), 'server'))
 
 
 pieces = ["T", "L", "J", "S", "Z", "I", "O"]
@@ -31,6 +29,47 @@ def stop():
             break
     pygame.quit()
     sys.exit()
+
+
+def render_texts():
+
+    # queing up special texts
+    removed_texts = []
+    for text, display_time, size in texts:
+
+        if display_time > time.time():
+
+            font = pygame.font.Font(resource_path('assets/arial.ttf'), size)
+
+            original = text
+
+            if isinstance(text, str):
+                text = text,
+
+            textElements = []
+            for line in text:
+                textElement = font.render(line, True, game.foreground_color)
+                textRect = textElement.get_rect()
+
+                textElements.append((textElement, textRect))
+
+            for index, element in enumerate(textElements):
+                textElement, textRect = element
+
+                textRect.center = (
+                    450, 500 + (texts.index((original, display_time, size)) * 50) + (index * 25))
+
+                game.screen.blit(textElement, textRect)
+
+        else:
+            removed_texts.append((text, display_time, size))
+
+    for item in removed_texts:
+        texts.remove(item)
+    
+    removed_texts.clear()
+
+
 
 
 def pick_bag():
@@ -104,28 +143,28 @@ def game_over(win: bool):
     button_pos = (
         int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
-    restart_button_font = pygame.font.Font('assets/arial.ttf', 32)
+    restart_button_font = pygame.font.Font(resource_path('assets/arial.ttf'), 32)
     restart_button_rect = pygame.Rect(button_pos, button_dimensions)
     restart_button_color = (255, 255, 255)
     restart_button_text = restart_button_font.render(
         'Find new match', True, (0, 0, 0))
-    game_over_font = pygame.font.Font('assets/arial.ttf', 50)
+    game_over_font = pygame.font.Font(resource_path('assets/arial.ttf'), 50)
 
-    rematch_text_font = pygame.font.Font('assets/arial.ttf', 40)
+    rematch_text_font = pygame.font.Font(resource_path('assets/arial.ttf'), 40)
     self_rematch_text = opp_rematch_text = "Deciding..."
     
     rematch_active = True
 
-    rematch_button_font = pygame.font.Font('assets/arial.ttf', 26)
+    rematch_button_font = pygame.font.Font(resource_path('assets/arial.ttf'), 26)
     rematch_button_dimensions = (120, 40)
     rematch_button_text = rematch_button_font.render('Rematch', True, (0, 0, 0))
 
-    self_rematch_button_pos = (int(game.width/4 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
+    self_rematch_button_pos = (int(game.width/2 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
     self_rematch_button_rect = pygame.Rect(self_rematch_button_pos, rematch_button_dimensions)
     self_rematch_button_color = (255, 255, 255)
 
 
-    text_font = pygame.font.Font('assets/arial.ttf', 25)
+    text_font = pygame.font.Font(resource_path('assets/arial.ttf'), 25)
     you_text = text_font.render("You", True, (0, 0, 0))
     opponent_text = text_font.render(game.opp_name, True, (0, 0, 0))
     opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
@@ -158,14 +197,14 @@ def game_over(win: bool):
     def draw_self_rematch_text():
         
         self_rendered_text = rematch_text_font.render(self_rematch_text, True, (0, 0, 0))
-        game.screen.blit(self_rendered_text, (self_rematch_button_pos[0]-30, self_rematch_button_pos[1]+100))
+        game.screen.blit(self_rendered_text, (int(game.width/4)-100, int(game.height/2)+250))
 
 
         opp_rendered_text = rematch_text_font.render(opp_rematch_text, True, (0, 0, 0))
-        game.screen.blit(opp_rendered_text, (int(game.height/2)+80, self_rematch_button_pos[1]+100))
+        game.screen.blit(opp_rendered_text, (int(game.width/2)+80, int(game.height/2)+250))
 
     def draw_texts():
-        game.screen.blit(you_text, (self_rematch_button_pos[0]+30, self_rematch_button_pos[1]-50))
+        game.screen.blit(you_text, (int(game.width/4)-30, int(game.height/2)+100))
 
         game.screen.blit(opponent_text, opponent_rect)
 
@@ -285,11 +324,11 @@ attacked = True
 
 
 can_disconnect = False
-
+countdown = 0
 
 def server_connection():
     
-    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked, can_disconnect, opp_rematched
+    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked, can_disconnect, opp_rematched, countdown
 
     specials.clear()
 
@@ -365,6 +404,7 @@ def server_connection():
 
             if attacked:
                 start_meter_animation((700, 600), 0)
+                game.meter_recieveSFX.play()
             else:
                 attacked = True
 
@@ -379,6 +419,12 @@ def server_connection():
 
             if speedUp:
                 fall_speed /= 10
+
+        
+        if data.countdown > time.time():
+            countdown = data.countdown
+        else:
+            countdown = 0
 
 
 mouse_number_key = {
@@ -430,7 +476,7 @@ def play_number_animations():
         traveled = (pos[0], (travel_distance /
                              duration * start_time * -1) + pos[1])
 
-        text = game.font.render(str(number), True, game.preview_color) # NOTE change this color
+        text = game.font.render(str(number), True, game.preview_color)
         game.screen.blit(text, traveled)
 
     for remove in removed:
@@ -507,6 +553,12 @@ while True:
                 game.screen.fill((0, 0, 0))
                 break
 
+        
+        if countdown > time.time():
+            # meaning if the user quit in the countdown
+            if not game.countdown(countdown):
+                stop()
+
         # if there are fading blocks, pause the game for a quick moment
         if game.rows_cleared:
 
@@ -528,6 +580,7 @@ while True:
 
             play_meter_animations()
             play_number_animations()
+            render_texts()
 
             pygame.display.update()
             game.clock.tick(60)
@@ -940,6 +993,7 @@ while True:
 
                     if lines_sent:
                         send(f"junk {lines_sent}")
+                        game.meter_sendSFX.play()
 
                         # getting the block with the highest y
                         highest_y = 0
@@ -967,6 +1021,7 @@ while True:
                             if meter_stage >= 3:
                                 attacked = False
                                 send("meter reset")
+                                game.garbage_recieveSFX.play()
 
                                 amount = game.meter[0]
                                 game.meter.pop(0)
@@ -1006,43 +1061,9 @@ while True:
             textRect.center = (250, game.height // 2)
             game.screen.blit(text, textRect)
 
-        # queing up special texts
-        removed_texts = []
-        for text, display_time, size in texts:
-
-            if display_time > time.time():
-
-                font = pygame.font.Font('assets/arial.ttf', size)
-
-                original = text
-
-                if isinstance(text, str):
-                    text = text,
-
-                textElements = []
-                for line in text:
-                    textElement = font.render(line, True, (255, 255, 255))
-                    textRect = textElement.get_rect()
-
-                    textElements.append((textElement, textRect))
-
-                for index, element in enumerate(textElements):
-                    textElement, textRect = element
-
-                    textRect.center = (
-                        450, 500 + (texts.index((original, display_time, size)) * 50) + (index * 25))
-
-                    game.screen.blit(textElement, textRect)
-
-            else:
-                removed_texts.append((text, display_time, size))
-
-        for item in removed_texts:
-            texts.remove(item)
-
         pygame.mixer.music.set_volume(game.volume)
 
-        removed_texts.clear()
+        render_texts()
 
         pygame.display.update()
 

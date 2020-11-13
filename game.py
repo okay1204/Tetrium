@@ -9,7 +9,7 @@ from random import shuffle, randint
 import network
 import json
 import pyperclip
-from oooooooooooooooooooooooooooooooooooooooooooootils import darken, lighten
+from oooooooooooooooooooooooooooooooooooooooooooootils import *
 import _thread
 
 
@@ -34,18 +34,24 @@ class Game:
         self.lowered_volume = 0.015
 
         pygame.init()
-        self.font = pygame.font.Font('assets/arial.ttf', 32)
+        self.font = pygame.font.Font(resource_path('assets/arial.ttf'), 32)
 
-        pygame.mixer.music.load('assets/background_audio.wav')
-        #NOTE set volume to 0.15 in final version
+        pygame.mixer.music.load(resource_path('assets/background_audio.wav'))
+
         pygame.mixer.music.set_volume(self.lowered_volume)
         pygame.mixer.music.play(-1)
 
 
-        self.correct_rotateSFX = pygame.mixer.Sound('assets/move_effect_success.wav')
-        self.holdSFX = pygame.mixer.Sound('assets/hold_effect.wav')
-        self.row_clearedSFX = pygame.mixer.Sound('assets/row_cleared.wav')
+        self.correct_rotateSFX = pygame.mixer.Sound(resource_path('assets/move_effect_success.wav'))
+        self.holdSFX = pygame.mixer.Sound(resource_path('assets/hold_effect.wav'))
+        self.row_clearedSFX = pygame.mixer.Sound(resource_path('assets/row_cleared.wav'))
         self.row_clearedSFX.set_volume(0.5)
+        self.meter_sendSFX = pygame.mixer.Sound(resource_path('assets/meter_send.wav'))
+        self.meter_recieveSFX = pygame.mixer.Sound(resource_path('assets/meter_recieve.wav'))
+        self.countdownSFX = pygame.mixer.Sound(resource_path('assets/countdown.wav'))
+        self.countdown_goSFX = pygame.mixer.Sound(resource_path('assets/countdown_go.wav'))
+        self.garbage_recieveSFX = pygame.mixer.Sound(resource_path('assets/garbage_recieve.wav'))
+
         
 
         self.width = 750
@@ -58,7 +64,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((self.width, self.height))
 
-        self.icon = pygame.image.load('./assets/tetris.jpg')
+        self.icon = pygame.image.load(resource_path('assets/tetrium.png'))
         pygame.display.set_icon(self.icon)
 
         self.caption = "Tetrium"
@@ -91,17 +97,20 @@ class Game:
 
         self.rows_cleared = []
 
-        self.small_font = pygame.font.Font('assets/arial.ttf', 15)
-        self.medium_font = pygame.font.Font('assets/arial.ttf', 20)
-        self.big_font = pygame.font.Font('assets/arial.ttf', 30)
-        self.very_big_medium_font = pygame.font.Font('assets/arial.ttf', 70)
-        self.very_big_font = pygame.font.Font('assets/arial.ttf', 75)
+        self.small_font = pygame.font.Font(resource_path('assets/arial.ttf'), 15)
+        self.medium_font = pygame.font.Font(resource_path('assets/arial.ttf'), 20)
+        self.big_font = pygame.font.Font(resource_path('assets/arial.ttf'), 30)
+        self.very_big_medium_font = pygame.font.Font(resource_path('assets/arial.ttf'), 70)
+        self.very_big_font = pygame.font.Font(resource_path('assets/arial.ttf'), 75)
+
+
+        self.enormous_font = pygame.font.Font(resource_path('assets/arial.ttf'), 120)
         
        
 
         self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
         self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
-        self.opaque_bkg = pygame.image.load('assets/opaque_bkg.png')
+        self.opaque_bkg = pygame.image.load(resource_path('assets/opaque_bkg.png'))
 
 
         self.default_controls = {
@@ -243,7 +252,7 @@ class Game:
         textRect.center = (250, 725)
         self.screen.blit(text, textRect)
 
-        font = pygame.font.Font('assets/arial.ttf', 25)
+        font = pygame.font.Font(resource_path('assets/arial.ttf'), 25)
 
         text = font.render(f"Level: {self.level}", True, self.text_color)
         textRect = text.get_rect()
@@ -255,7 +264,7 @@ class Game:
         textRect.center = (75, 725)
         self.screen.blit(text, textRect)
 
-        font = pygame.font.Font('assets/arial.ttf', 20)
+        font = pygame.font.Font(resource_path('assets/arial.ttf'), 20)
 
         time_elapsed = math.floor(time.time() - self.time_started)
 
@@ -370,24 +379,25 @@ class Game:
 
     def outdated_version_screen(self, new_version, download_link):
 
-        copy_button_text_color = (0,0,0)
-        copy_button_dimensions = (300, 40)
+        text_color = game.foreground_color
+        rect_color = tuple(darken(color) for color in game.foreground_color)
+
+        
+        copy_button_dimensions = (300, 45)
         copy_button_pos = (self.width/2 - copy_button_dimensions[0]/2, self.height/2 - copy_button_dimensions[1]/2)
         copy_button_rect = pygame.Rect(*copy_button_pos, *copy_button_dimensions)
 
-
-        quit_button_text_color = (0,0,0)
-        quit_button_dimensions = (80, 40)
+        quit_button_dimensions = (140, 40)
         quit_button_pos = (self.width/2 - quit_button_dimensions[0]/2, 700)
         quit_button_rect = pygame.Rect(*quit_button_pos, *quit_button_dimensions)
     
 
         def draw_text():
-            text1 = self.font.render("You are running an outdated", True, (255, 255, 255))
-            text2 = self.font.render("version of the game", True, (255, 255, 255))
+            text1 = self.font.render("You are running an outdated", True, rect_color)
+            text2 = self.font.render("version of the game", True, rect_color)
 
-            text3 = self.font.render(f"Your Version: {network.version}", True, (255, 255, 255))
-            text4 = self.font.render(f"New Version: {new_version}", True, (255, 255, 255))
+            text3 = self.font.render(f"Your Version: {network.version}", True, rect_color)
+            text4 = self.font.render(f"New Version: {new_version}", True, rect_color)
 
             self.screen.blit(text1, (self.width/2-200, 100))
             self.screen.blit(text2, (self.width/2-130, 150))
@@ -399,32 +409,24 @@ class Game:
         copy_animation = False
 
         def draw_buttons():
-
-            nonlocal quit_button_text_color
         
-            pygame.draw.rect(self.screen, (255,255,255), copy_button_rect)
+            pygame.draw.rect(self.screen, rect_color, copy_button_rect)
                 
-            copy_button_text = self.font.render("Copy download link", True, copy_button_text_color)
+            copy_button_text = self.font.render("Copy download link", True, text_color)
             self.screen.blit(copy_button_text, (copy_button_pos[0] + 10, copy_button_pos[1] + 3))
-                
-
-            if quit_button_pos[0] <= mouse[0] <= quit_button_pos[0] + quit_button_dimensions[0] and quit_button_pos[1] <= mouse[1] <= quit_button_pos[1] + quit_button_dimensions[1]: 
-                pygame.draw.rect(self.screen, (0,0,0), quit_button_rect)
-                quit_button_text_color = (255,255,255)
-
             
-            else: 
-                pygame.draw.rect(self.screen, (255,255,255), quit_button_rect)
-                quit_button_text_color = (0, 0, 0)
 
 
-            quit_button_text = self.font.render("Quit", True, quit_button_text_color)
+            pygame.draw.rect(self.screen, rect_color, quit_button_rect)
+
+            quit_button_text = self.font.render("Go Back", True, text_color)
             self.screen.blit(quit_button_text, (quit_button_pos[0] + 10, quit_button_pos[1] + 3))
 
+        breakOut = False
 
         def check_click(pos):
 
-            nonlocal copied_pos, copy_animation
+            nonlocal copied_pos, copy_animation, breakOut
             
 
             if copy_button_rect.collidepoint(pos):
@@ -434,17 +436,14 @@ class Game:
                 copy_animation = True
 
             elif quit_button_rect.collidepoint(pos):
-                pygame.quit()
-                sys.exit()
+                breakOut = True
 
 
 
 
         while True:
 
-            game.screen.fill((0, 0, 0))
-
-            mouse = pygame.mouse.get_pos() 
+            game.screen.fill(game.background_color)
 
             for event in pygame.event.get():
 
@@ -468,6 +467,9 @@ class Game:
                 if copied_pos <= 320:
                     copy_animation = False
 
+            if breakOut:
+                break
+
             pygame.display.update()
             self.clock.tick(60)
 
@@ -475,41 +477,54 @@ class Game:
     def disconnected_screen(self, text1, text2):
 
         def draw_text():
-            dc_text_1 = self.font.render(text1, True, (255, 255, 255))
-            dc_text_2 = self.font.render(text2,  True, (255, 255, 255))
-            self.screen.blit(dc_text_1, (self.width/2 - 175, 200))
-            self.screen.blit(dc_text_2, (self.width/2 - 75, 300))
+            dc_text_1 = self.font.render(text1, True, game.foreground_color)
+            dc_text_2 = self.font.render(text2,  True, game.foreground_color)
+            self.screen.blit(dc_text_1, (self.width/2 - dc_text_1.get_rect().width/2, 200))
+            self.screen.blit(dc_text_2, (self.width/2 - dc_text_2.get_rect().width/2, 300))
+
+        rgb_stage = 0
 
         def cycle_colors():
             
-            nonlocal r, g, b
+            nonlocal r, g, b, rgb_stage
 
-            if g < 255 and r > 0:
-                g += 1
-                r -= 1
+            if rgb_stage == 0:
+                if g < 255 and r > 0:
+                    g += 1
+                    r -= 1
+                else:
+                    rgb_stage = 1
 
-            else:
+
+            elif rgb_stage == 1:
                 if b < 255 and g > 0:
                     b += 1
                     g -= 1
-                
+                    
                 else:
-                    r, g, b = 255, 0, 0
+                    rgb_stage = 2
+
+            elif rgb_stage == 2:
+                if r < 255 and b > 0:
+                    r += 1
+                    b -= 1
+                else:
+                    rgb_stage = 0
 
             
         def draw_button():
             nonlocal button_text_color
 
-            #if mouse hovering make it yellow
-            if button_pos[0] <= mouse[0] <= button_pos[0] + button_dimensions[0] and button_pos[1] <= mouse[1] <= button_pos[1] + button_dimensions[1]: 
-                pygame.draw.rect(self.screen, (255,255,255), button_rect)
+            pygame.draw.rect(self.screen, tuple(darken(color) for color in game.foreground_color), button_rect)
+
+            #if mouse hovering make it rgb
+            if button_rect.collidepoint(mouse): 
                 cycle_colors()
                 button_text_color = (r, g, b)
 
             
             else: 
-                pygame.draw.rect(self.screen, (255,255,255), button_rect)
-                button_text_color = (0, 0, 0)
+                button_text_color = game.foreground_color
                 
             button_text = self.font.render("FIND NEW MATCH", True, button_text_color)
             self.screen.blit(button_text, (button_pos[0] + 10, button_pos[1] + 3))
@@ -541,13 +556,59 @@ class Game:
                     check_click(event.pos)
 
 
-            self.screen.fill((0,0,0))
+            self.screen.fill(game.background_color)
 
             draw_text()
             draw_button()
 
             pygame.display.update()
+            game.clock.tick(60)
 
+
+    def countdown(self, countdown):
+
+        # countdown is actually 4 seconds long, consisting of 3, 2, 1, and GO
+        pygame.mixer.music.set_volume(0)
+        last_second = 100
+        while countdown > time.time():
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+
+                    return False
+
+            seconds = int(countdown - time.time())
+
+            if seconds != last_second:
+
+                if seconds:
+                    self.countdownSFX.play()
+                else:
+                    self.countdown_goSFX.play()
+
+
+            last_second = seconds
+
+            if not seconds:
+                seconds = "GO"
+            
+
+            self.screen.fill(game.background_color)
+
+            above_text = self.medium_font.render("Game starts in...", True, game.foreground_color)
+            self.screen.blit(above_text, (game.width/2-above_text.get_rect().width/2, 150))
+
+            countdown_text = self.enormous_font.render(str(seconds), True, game.foreground_color)
+            self.screen.blit(countdown_text, (game.width/2-countdown_text.get_rect().width/2, game.height/2))
+
+
+            pygame.display.update()
+            self.clock.tick(60)
+
+        if not game.muted:
+            pygame.mixer.music.set_volume(game.volume)
+
+        return True
 
 
 game = Game()
@@ -578,6 +639,12 @@ class StartScreen(Game):
             Piece(self.x_pos[8], randint(-15, -12), 'J'),
             
         ]
+
+        self.rgb_stage = 0
+
+        self.version_text = game.small_font.render(f"v {network.version}", True, (255, 255, 255))
+        rect = self.version_text.get_rect()
+        self.version_text_rect = self.version_text.get_rect(center=(game.width-(rect.width/2)-10, rect.height+10))
     
         self.r, self.g, self.b = 255, 0, 0
         self.last_falls = [time.time() for _ in self.pieces]
@@ -587,8 +654,8 @@ class StartScreen(Game):
         self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
 
         self.mute_button_radius = 35
-        self.volume_on_icon = pygame.image.load('assets/volume-high.png')
-        self.volume_off_icon = pygame.image.load('assets/volume-off.png')
+        self.volume_on_icon = pygame.image.load(resource_path('assets/volume-high.png'))
+        self.volume_off_icon = pygame.image.load(resource_path('assets/volume-off.png'))
         self.volume_icon_pos = (self.mute_button_pos[0] - 25, self.mute_button_pos[1] - 25)
         self.s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         self.input_box_placeholder = game.medium_font.render("Enter a name...", True, (96, 93, 93))
@@ -610,7 +677,7 @@ class StartScreen(Game):
         self.credits_button = pygame.Rect(self.credits_button_pos[0], self.credits_button_pos[1], 70, self.credits_button_height)
         self.connected = False
         self.started = False
-        self.back_icon = pygame.image.load('assets/arrow-back.png')
+        self.back_icon = pygame.image.load(resource_path('assets/arrow-back.png'))
         self.back_button = pygame.Rect(10, 10, 75, 65)
         self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
         self.disconnect_button_text = game.font.render('Disconnect', True, (self.r, self.g, self.b))
@@ -642,7 +709,7 @@ class StartScreen(Game):
     def credits_screen(self, pieces, draw_tetris_pieces):
 
         
-        credits_list = ['Made by', 'Ali Rastegar' 'Zack Ghanbari']
+        credits_list = ['Made by', 'okay#2996', 'and', 'AliMan21#6527']
         text_y = 0
         text_offset = 80
         text_scroll_dist = 0.1
@@ -702,6 +769,9 @@ class StartScreen(Game):
         title_text = game.very_big_font.render('TETRIUM', True, (self.r, self.g, self.b)) 
         game.screen.blit(self.start_button_text, (self.start_button_rect.x + 7, self.start_button_rect.y + 3))
         game.screen.blit(title_text, (game.width/2 - 165, game.height/2 - 200)) 
+
+
+        game.screen.blit(self.version_text, self.version_text_rect)
         
 
 
@@ -756,11 +826,9 @@ class StartScreen(Game):
 
         game.n = network.Network()
         if game.n.p == "no connection":
-            print("no connection") # TODO no connection screen here
-            self.connected = False
+            self.no_connection_screen()
             return            
 
-        self.start_button_rect.x -=  100
 
 
         self.input_text = self.input_text.strip()
@@ -771,25 +839,40 @@ class StartScreen(Game):
             outdated_info = game.n.p.split()
                                         # new version number # download link
             game.outdated_version_screen(outdated_info[2], outdated_info[3])
+            return
 
+        self.start_button_rect.x -=  100
         self.connected = True
         game.name = self.input_text
         game.n.send("name " + self.input_text)
+        _thread.start_new_thread(self.wait_for_game, ())
 
     def cycle_colors(self, rgb):
         r, g, b = rgb
     
-        if g < 255 and r > 0:
-            g += 1
-            r -= 1
 
-        else:
+        if self.rgb_stage == 0:
+            if g < 255 and r > 0:
+                g += 1
+                r -= 1
+            else:
+                self.rgb_stage = 1
+
+
+        elif self.rgb_stage == 1:
             if b < 255 and g > 0:
                 b += 1
                 g -= 1
-
+                
             else:
-                r, g, b = 255, 0, 0
+                self.rgb_stage = 2
+
+        elif self.rgb_stage == 2:
+            if r < 255 and b > 0:
+                r += 1
+                b -= 1
+            else:
+                self.rgb_stage = 0
         
         return (r, g, b)
         
@@ -818,8 +901,6 @@ class StartScreen(Game):
         color = tuple(map(lighten, (self.r,self.g, self.b))) if self.settings_button.collidepoint(pos) else (self.r, self.g, self.b)
         pygame.draw.rect(game.screen, color, self.settings_button)
         game.screen.blit(self.settings_button_text, (self.settings_button_pos[0] + 10, self.settings_button_pos[1] + 3))
-    
-    
 
     def wait_for_game(self):
 
@@ -848,9 +929,6 @@ class StartScreen(Game):
                     raise e
                 break
 
-
-
-
     
     def main(self):
         running = True
@@ -876,9 +954,7 @@ class StartScreen(Game):
                     
                     if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
 
-                        self.connected = True
                         self.start()
-                        _thread.start_new_thread(self.wait_for_game, ())
                         game.screen.fill((0, 0, 0))
                         pygame.mixer.music.set_volume(game.volume)
                       
@@ -915,10 +991,9 @@ class StartScreen(Game):
                     if self.input_active:
                         
                         if event.key == pygame.K_RETURN:
-                            self.connected = True
                             self.start()
-                            pygame.mixer.music.set_volume(self.volume)
-                            self.screen.fill((0, 0, 0))
+                            game.screen.fill((0, 0, 0))
+                            pygame.mixer.music.set_volume(game.volume)
                                 
 
                         elif event.key == pygame.K_BACKSPACE:
@@ -958,6 +1033,26 @@ class StartScreen(Game):
 
         game.time_started = time.time()
         game.running = True
+
+
+    def no_connection_screen(self):
+
+        display_time = time.time() + 3
+
+        game.screen.fill(game.background_color)
+
+        text = game.very_big_font.render("No connection", True, game.foreground_color)
+        game.screen.blit(text, (game.width/2-text.get_rect().width/2, 300))
+        pygame.display.update()
+
+        while display_time > time.time():
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            game.clock.tick(60)
 
 
 class SettingsScreen(StartScreen):
@@ -1131,11 +1226,11 @@ class SettingsScreen(StartScreen):
 
         
         offset = 10
-        left_arrow = pygame.image.load('assets/left_arrow.png')
+        left_arrow = pygame.image.load(resource_path('assets/left_arrow.png'))
         dimensions = left_arrow.get_height()
         left_arrow_pos = (offset, game.height/2 - dimensions/2)
         right_arrow_pos =  (game.width - dimensions - offset, game.height/2 - dimensions/2)
-        right_arrow = pygame.image.load('assets/right_arrow.png')
+        right_arrow = pygame.image.load(resource_path('assets/right_arrow.png'))
         left_arrow_rect = left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
         right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
         hover_scale_factor = 1.1
@@ -1445,14 +1540,12 @@ class SettingsScreen(StartScreen):
     def buttons_hover(self, mouse):
         for index, button in enumerate(self.buttons):
               
-                if button[0].collidepoint(mouse):
-                                                                    #2 is the color index
-                    self.buttons[index][2] = tuple(darken(i, 15) for i in self.buttons_color)
-                
-                else:
-                    self.buttons[index][2] = self.buttons_color
-
-    
+            if button[0].collidepoint(mouse):
+                                                                #2 is the color index
+                self.buttons[index][2] = tuple(darken(i, 15) for i in self.buttons_color)
+            
+            else:
+                self.buttons[index][2] = self.buttons_color
 
 
     def main(self):

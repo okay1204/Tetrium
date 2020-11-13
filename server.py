@@ -3,9 +3,10 @@ import _thread
 from onlineGame import OnlineGame #type: ignore
 import pickle
 import traceback
+from ip import IP
 
 
-server = "localhost"
+server = IP
 port = 6969
 
 timeout = 3.0
@@ -116,7 +117,6 @@ def threaded_client(conn, player, gameId):
                             
                             elif special == "rematch":
                                 
-                                print("rematch", player)
                                 game.rematch[player] = True
 
                                 if all(game.rematch):
@@ -163,7 +163,7 @@ player = 0
 s.listen()
 print("Server Started, Waiting for connections")
 
-version = "0.1"
+version = "1.0"
 # NOTE replace with download link to newer version
 download_link = "www.google.com"
 
@@ -172,10 +172,13 @@ while True:
     conn, addr = s.accept()
 
     # make sure client is running correct version first
-    client_version = conn.recv(4096).decode()
-    if version != client_version:
-        print(f"{addr[0]} was disconnected because they were running version {client_version}")
-        conn.send(str.encode(f"outdated version {version} {download_link}"))
+    try:
+        client_version = conn.recv(4096).decode()
+        if version != client_version:
+            print(f"{addr[0]} was disconnected because they were running version {client_version}")
+            conn.send(str.encode(f"outdated version {version} {download_link}"))
+            continue
+    except:
         continue
 
     

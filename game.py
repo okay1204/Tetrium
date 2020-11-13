@@ -9,7 +9,7 @@ from random import shuffle, randint
 import network
 import json
 import pyperclip
-from oooooooooooooooooooooooooooooooooooooooooooootils import darken, lighten
+from oooooooooooooooooooooooooooooooooooooooooooootils import *
 import _thread
 
 
@@ -34,23 +34,23 @@ class Game:
         self.lowered_volume = 0.015
 
         pygame.init()
-        self.font = pygame.font.Font('assets/arial.ttf', 32)
+        self.font = pygame.font.Font(resource_path('assets/arial.ttf'), 32)
 
-        pygame.mixer.music.load('assets/background_audio.wav')
-        #NOTE set volume to 0.15 in final version
+        pygame.mixer.music.load(resource_path('assets/background_audio.wav'))
+
         pygame.mixer.music.set_volume(self.lowered_volume)
         pygame.mixer.music.play(-1)
 
 
-        self.correct_rotateSFX = pygame.mixer.Sound('assets/move_effect_success.wav')
-        self.holdSFX = pygame.mixer.Sound('assets/hold_effect.wav')
-        self.row_clearedSFX = pygame.mixer.Sound('assets/row_cleared.wav')
+        self.correct_rotateSFX = pygame.mixer.Sound(resource_path('assets/move_effect_success.wav'))
+        self.holdSFX = pygame.mixer.Sound(resource_path('assets/hold_effect.wav'))
+        self.row_clearedSFX = pygame.mixer.Sound(resource_path('assets/row_cleared.wav'))
         self.row_clearedSFX.set_volume(0.5)
-        self.meter_sendSFX = pygame.mixer.Sound('assets/meter_send.wav')
-        self.meter_recieveSFX = pygame.mixer.Sound('assets/meter_recieve.wav')
-        self.countdownSFX = pygame.mixer.Sound('assets/countdown.wav')
-        self.countdown_goSFX = pygame.mixer.Sound('assets/countdown_go.wav')
-        self.garbage_recieveSFX = pygame.mixer.Sound('assets/garbage_recieve.wav')
+        self.meter_sendSFX = pygame.mixer.Sound(resource_path('assets/meter_send.wav'))
+        self.meter_recieveSFX = pygame.mixer.Sound(resource_path('assets/meter_recieve.wav'))
+        self.countdownSFX = pygame.mixer.Sound(resource_path('assets/countdown.wav'))
+        self.countdown_goSFX = pygame.mixer.Sound(resource_path('assets/countdown_go.wav'))
+        self.garbage_recieveSFX = pygame.mixer.Sound(resource_path('assets/garbage_recieve.wav'))
 
         
 
@@ -64,7 +64,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((self.width, self.height))
 
-        self.icon = pygame.image.load('./assets/tetrium.png')
+        self.icon = pygame.image.load(resource_path('assets/tetrium.png'))
         pygame.display.set_icon(self.icon)
 
         self.caption = "Tetrium"
@@ -97,20 +97,20 @@ class Game:
 
         self.rows_cleared = []
 
-        self.small_font = pygame.font.Font('assets/arial.ttf', 15)
-        self.medium_font = pygame.font.Font('assets/arial.ttf', 20)
-        self.big_font = pygame.font.Font('assets/arial.ttf', 30)
-        self.very_big_medium_font = pygame.font.Font('assets/arial.ttf', 70)
-        self.very_big_font = pygame.font.Font('assets/arial.ttf', 75)
+        self.small_font = pygame.font.Font(resource_path('assets/arial.ttf'), 15)
+        self.medium_font = pygame.font.Font(resource_path('assets/arial.ttf'), 20)
+        self.big_font = pygame.font.Font(resource_path('assets/arial.ttf'), 30)
+        self.very_big_medium_font = pygame.font.Font(resource_path('assets/arial.ttf'), 70)
+        self.very_big_font = pygame.font.Font(resource_path('assets/arial.ttf'), 75)
 
 
-        self.enormous_font = pygame.font.Font('assets/arial.ttf', 120)
+        self.enormous_font = pygame.font.Font(resource_path('assets/arial.ttf'), 120)
         
        
 
         self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
         self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
-        self.opaque_bkg = pygame.image.load('assets/opaque_bkg.png')
+        self.opaque_bkg = pygame.image.load(resource_path('assets/opaque_bkg.png'))
 
 
         self.default_controls = {
@@ -127,7 +127,7 @@ class Game:
 
 
         # setting controls
-        with open('settings.json') as f:
+        with open(resource_path('settings.json')) as f:
             temp = json.load(f)
        
         self.left_controls = {
@@ -165,7 +165,7 @@ class Game:
         
         except:
             self.theme_index = 0
-            with open('settings.json', 'w') as f:
+            with open(resource_path('settings.json'), 'w') as f:
                 full_controls = dict(game.left_controls, **game.right_controls)
                 full_dict = {'controls': full_controls, 'theme': game.theme_index}
                 json.dump(full_dict, f, indent=2)
@@ -252,7 +252,7 @@ class Game:
         textRect.center = (250, 725)
         self.screen.blit(text, textRect)
 
-        font = pygame.font.Font('assets/arial.ttf', 25)
+        font = pygame.font.Font(resource_path('assets/arial.ttf'), 25)
 
         text = font.render(f"Level: {self.level}", True, self.text_color)
         textRect = text.get_rect()
@@ -264,7 +264,7 @@ class Game:
         textRect.center = (75, 725)
         self.screen.blit(text, textRect)
 
-        font = pygame.font.Font('assets/arial.ttf', 20)
+        font = pygame.font.Font(resource_path('assets/arial.ttf'), 20)
 
         time_elapsed = math.floor(time.time() - self.time_started)
 
@@ -654,8 +654,8 @@ class StartScreen(Game):
         self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
 
         self.mute_button_radius = 35
-        self.volume_on_icon = pygame.image.load('assets/volume-high.png')
-        self.volume_off_icon = pygame.image.load('assets/volume-off.png')
+        self.volume_on_icon = pygame.image.load(resource_path('assets/volume-high.png'))
+        self.volume_off_icon = pygame.image.load(resource_path('assets/volume-off.png'))
         self.volume_icon_pos = (self.mute_button_pos[0] - 25, self.mute_button_pos[1] - 25)
         self.s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         self.input_box_placeholder = game.medium_font.render("Enter a name...", True, (96, 93, 93))
@@ -677,7 +677,7 @@ class StartScreen(Game):
         self.credits_button = pygame.Rect(self.credits_button_pos[0], self.credits_button_pos[1], 70, self.credits_button_height)
         self.connected = False
         self.started = False
-        self.back_icon = pygame.image.load('assets/arrow-back.png')
+        self.back_icon = pygame.image.load(resource_path('assets/arrow-back.png'))
         self.back_button = pygame.Rect(10, 10, 75, 65)
         self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
         self.disconnect_button_text = game.font.render('Disconnect', True, (self.r, self.g, self.b))
@@ -1205,7 +1205,7 @@ class SettingsScreen(StartScreen):
             game.screen.blit(title, (game.width/2 - title_rect.width/2, 10))
             
         def store_theme():
-            with open('settings.json', 'w') as f:
+            with open(resource_path('settings.json'), 'w') as f:
                 full_controls = dict(game.left_controls, **game.right_controls)
                 full_dict = {'controls': full_controls, 'theme': game.theme_index}
                 json.dump(full_dict, f, indent=2)
@@ -1226,11 +1226,11 @@ class SettingsScreen(StartScreen):
 
         
         offset = 10
-        left_arrow = pygame.image.load('assets/left_arrow.png')
+        left_arrow = pygame.image.load(resource_path('assets/left_arrow.png'))
         dimensions = left_arrow.get_height()
         left_arrow_pos = (offset, game.height/2 - dimensions/2)
         right_arrow_pos =  (game.width - dimensions - offset, game.height/2 - dimensions/2)
-        right_arrow = pygame.image.load('assets/right_arrow.png')
+        right_arrow = pygame.image.load(resource_path('assets/right_arrow.png'))
         left_arrow_rect = left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
         right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
         hover_scale_factor = 1.1
@@ -1375,7 +1375,7 @@ class SettingsScreen(StartScreen):
         
         
         def reset_controls():
-            with open('settings.json', 'w') as f:
+            with open(resource_path('settings.json'), 'w') as f:
                 new_dict = {'controls': game.default_controls, 'theme': game.theme_index}
                 json.dump(new_dict, f, indent=2)
 
@@ -1440,7 +1440,7 @@ class SettingsScreen(StartScreen):
                 else:
                     key_exists_err()
 
-            with open('settings.json', 'w') as f:
+            with open(resource_path('settings.json'), 'w') as f:
                 full_controls = dict(game.left_controls, **game.right_controls)
                 full_dict = {'controls': full_controls, 'theme': game.theme_index}
                 json.dump(full_dict, f, indent=2)

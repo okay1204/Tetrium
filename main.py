@@ -8,6 +8,7 @@ import json
 import _thread
 import socket
 import onlineGame
+from oooooooooooooooooooooooooooooooooooooooooooootils import resource_path
 
 import sys
 
@@ -38,7 +39,7 @@ def render_texts():
 
         if display_time > time.time():
 
-            font = pygame.font.Font('assets/arial.ttf', size)
+            font = pygame.font.Font(resource_path('assets/arial.ttf'), size)
 
             original = text
 
@@ -142,19 +143,19 @@ def game_over(win: bool):
     button_pos = (
         int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
-    restart_button_font = pygame.font.Font('assets/arial.ttf', 32)
+    restart_button_font = pygame.font.Font(resource_path('assets/arial.ttf'), 32)
     restart_button_rect = pygame.Rect(button_pos, button_dimensions)
     restart_button_color = (255, 255, 255)
     restart_button_text = restart_button_font.render(
         'Find new match', True, (0, 0, 0))
-    game_over_font = pygame.font.Font('assets/arial.ttf', 50)
+    game_over_font = pygame.font.Font(resource_path('assets/arial.ttf'), 50)
 
-    rematch_text_font = pygame.font.Font('assets/arial.ttf', 40)
+    rematch_text_font = pygame.font.Font(resource_path('assets/arial.ttf'), 40)
     self_rematch_text = opp_rematch_text = "Deciding..."
     
     rematch_active = True
 
-    rematch_button_font = pygame.font.Font('assets/arial.ttf', 26)
+    rematch_button_font = pygame.font.Font(resource_path('assets/arial.ttf'), 26)
     rematch_button_dimensions = (120, 40)
     rematch_button_text = rematch_button_font.render('Rematch', True, (0, 0, 0))
 
@@ -163,7 +164,7 @@ def game_over(win: bool):
     self_rematch_button_color = (255, 255, 255)
 
 
-    text_font = pygame.font.Font('assets/arial.ttf', 25)
+    text_font = pygame.font.Font(resource_path('assets/arial.ttf'), 25)
     you_text = text_font.render("You", True, (0, 0, 0))
     opponent_text = text_font.render(game.opp_name, True, (0, 0, 0))
     opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
@@ -522,13 +523,13 @@ while True:
     start_screen.started = False
 
     start_screen.main()
-    countdown = time.time() + 4
     _thread.start_new_thread(server_connection, ())
 
     with open('settings.json') as f:
         controls = json.load(f)['controls']
 
-    pygame.mouse.set_visible(False)
+    # NOTE uncomment this line after
+    # pygame.mouse.set_visible(False)
 
     while game.running:
 

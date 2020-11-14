@@ -181,17 +181,20 @@ while True:
     except:
         continue
 
-    
-    idCount += 1
-    gameId = (idCount - 1)//2
+    try:
+        idCount += 1
+        gameId = (idCount - 1)//2
 
-    if idCount % 2 == 1:
-        games[gameId] = OnlineGame(gameId)
-        player = 0
-    else:
-        games[gameId].ready = True
-        games[gameId]._reset()
-        player = 1
+        if idCount % 2 == 1:
+            games[gameId] = OnlineGame(gameId)
+            player = 0
+        else:
+            games[gameId].ready = True
+            games[gameId]._reset()
+            player = 1
+    except:
+        idCount -= 1
+        continue
     
     print(addr[0], "connected to game", gameId, "as player", player)
 

@@ -63,7 +63,7 @@ class Game:
         self.muted = False
 
         self.clock = pygame.time.Clock()
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        self.screen = pygame.display.set_mode((self.width, self.height),flags = pygame.SCALED)
 
         self.icon = pygame.image.load(get_path('assets/tetrium.png'))
         pygame.display.set_icon(self.icon)
@@ -415,9 +415,6 @@ class Game:
                 
             copy_button_text = self.font.render("Copy download link", True, text_color)
             self.screen.blit(copy_button_text, (copy_button_pos[0] + 10, copy_button_pos[1] + 3))
-            
-
-
             pygame.draw.rect(self.screen, rect_color, quit_button_rect)
 
             quit_button_text = self.font.render("Go Back", True, text_color)

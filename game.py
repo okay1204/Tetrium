@@ -51,7 +51,7 @@ class Game:
         self.meter_recieveSFX = pygame.mixer.Sound(get_path('assets/meter_recieve.wav'))
         self.countdownSFX = pygame.mixer.Sound(get_path('assets/countdown.wav'))
         self.countdown_goSFX = pygame.mixer.Sound(get_path('assets/countdown_go.wav'))
-        self.garbage_recieveSFX = pygame.mixer.Sound('assets/garbage_recieve.wav')
+        self.garbage_recieveSFX = pygame.mixer.Sound(get_path('assets/garbage_recieve.wav'))
 
         
 

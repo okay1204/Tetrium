@@ -525,11 +525,10 @@ while True:
     start_screen.main()
     _thread.start_new_thread(server_connection, ())
 
-    with open('settings.json') as f:
+    with open(get_path('settings.json')) as f:
         controls = json.load(f)['controls']
 
-    # NOTE uncomment this line after
-    # pygame.mouse.set_visible(False)
+    pygame.mouse.set_visible(False)
 
     while game.running:
 

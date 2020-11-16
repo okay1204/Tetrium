@@ -2,9 +2,12 @@ import time
 
 class OnlineGame:
 
-    def __init__(self, game_id):
+    def __init__(self, gameId):
 
+        self.id = gameId
+        self.player = 0
         self.ready = False
+        self.started = False
 
         self.round = 0
 
@@ -25,7 +28,6 @@ class OnlineGame:
         self.meters = [[], []]
         self.meter_stages = [1, 1]
 
-        self._id = game_id
 
         self.rematch = [False, False]
 

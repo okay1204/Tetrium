@@ -11,8 +11,7 @@ port = 6969
 
 timeout = 3.0
 
-idCount = 0
-games = {}
+games = []
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -21,9 +20,7 @@ s.bind((server, port))
 blocksize = 16
 sentinel = b'\x00\x00END_MESSAGE!\x00\x00'
 
-def threaded_client(conn, player, gameId):
-
-    global idCount
+def threaded_client(conn, player, game):
 
     # send player number to client right after connecting
     conn.send(str.encode(str(player)))
@@ -31,6 +28,9 @@ def threaded_client(conn, player, gameId):
     name = None
 
     while True:
+
+        gameId = game.id
+
         try:
 
             # procedure of recieving multiplepackets to combine into a singular data            
@@ -57,9 +57,7 @@ def threaded_client(conn, player, gameId):
                 break
 
 
-            if gameId in games.keys():
-
-                game = games[gameId]
+            if game.ready or not game.started:
 
                 if not data:
                     break
@@ -151,15 +149,17 @@ def threaded_client(conn, player, gameId):
             traceback.print_exc()
             break
     
-    try:
-        del games[gameId]
-    except:
-        pass
+    if game.ready:
+        game.ready = False
+    else:
+        games.remove(game)
 
-    idCount -= 1
+        for index in range(len(games)):
+            game.id = index
+
     conn.close()
 
-player = 0
+
 s.listen()
 print("Server Started, Waiting for connections")
 
@@ -181,21 +181,23 @@ while True:
     except:
         continue
 
-    try:
-        idCount += 1
-        gameId = (idCount - 1)//2
+    print(games)
 
-        if idCount % 2 == 1:
-            games[gameId] = OnlineGame(gameId)
-            player = 0
-        else:
-            games[gameId].ready = True
-            games[gameId]._reset()
-            player = 1
-    except:
-        idCount -= 1
-        continue
+    # if there is not a game with one player waiting
+    if not games or games[-1].player:
+        games.append(OnlineGame( len(games) ))
+        player = 0
+
+    else:
+        games[-1].player = player = 1
+        games[-1]._reset()
+        games[-1].ready = True
+        games[-1].started = True
+
+
+    gameId = len(games) -1
+    print(games)
     
     print(addr[0], "connected to game", gameId, "as player", player)
 
-    _thread.start_new_thread(threaded_client, (conn, player, gameId))
+    _thread.start_new_thread(threaded_client, (conn, player, games[-1]))

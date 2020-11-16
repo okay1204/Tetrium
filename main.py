@@ -12,7 +12,6 @@ import onlineGame
 import sys
 
 from oooooooooooooooooooooooooooooooooooooooooooootils import get_path
-
 pieces = ["T", "L", "J", "S", "Z", "I", "O"]
 
 bag = pieces.copy()

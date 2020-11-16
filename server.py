@@ -181,8 +181,6 @@ while True:
     except:
         continue
 
-    print(games)
-
     # if there is not a game with one player waiting
     if not games or games[-1].player:
         games.append(OnlineGame( len(games) ))
@@ -196,7 +194,6 @@ while True:
 
 
     gameId = len(games) -1
-    print(games)
     
     print(addr[0], "connected to game", gameId, "as player", player)
 

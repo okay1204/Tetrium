@@ -98,8 +98,8 @@ def get_piece(x, y, piece):
 
         return [
             (x, y, color),
-            (x, y+1, color),
-            (x-1, y+1, color),
+            (x, y-1, color),
+            (x-1, y-1, color),
             (x+1, y, color)
         ]
 
@@ -107,8 +107,8 @@ def get_piece(x, y, piece):
 
         return [
             (x, y, color),
-            (x, y+1, color),
-            (x+1, y+1, color),
+            (x, y-1, color),
+            (x+1, y-1, color),
             (x-1, y, color)
         ]
 

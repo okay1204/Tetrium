@@ -99,8 +99,11 @@ def threaded_client(conn, player, game):
 
                             # resets meter
                             elif special == "meter reset":
-
-                                game._reset_meter(player)
+                                
+                                try:
+                                    game._reset_meter(player)
+                                except:
+                                    pass
 
                             elif special == "game over":
 

@@ -1210,14 +1210,14 @@ class SettingsScreen(StartScreen):
 
                         if can_move(-1):
                             moving = -1
-                            das_start = time.time() + (gameplay_settings['das'] * 0.5)
+                            das_start = max(time.time() + (gameplay_settings['das'] * 0.5), time.time() + 0.205 - ((gameplay_settings['arr'] * 0.195) + 0.005))
                             piece.move(-1, 0)
                     
                     elif key_name == controls['Move Right']:
 
                         if can_move(1):
                             moving = 1
-                            das_start = time.time() + (gameplay_settings['das'] * 0.5)
+                            das_start = max(time.time() + (gameplay_settings['das'] * 0.5), time.time() + 0.205 - ((gameplay_settings['arr'] * 0.195) + 0.005))
                             piece.move(1, 0)
 
                 elif event.type == pygame.KEYUP:

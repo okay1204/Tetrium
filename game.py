@@ -737,8 +737,9 @@ class StartScreen(Game):
         credits_list = ['Made by', 'okay#2996', 'and', 'AliMan21#6527']
         text_y = 0
         text_offset = 80    
-        #8000 is just random number that i found worked well by expirementing. It cant be a set distance cause then it wont be responsive and too slow on big scree.
-        text_scroll_dist_multiplier = 1/8000
+        #smaller this number is, the faster the text will move
+        text_scroll_dist_multiplier = 2000
+
         def draw_text(tup):
             index, text = tup
             rendered_text = game.font.render(text, True, (255,255,255))
@@ -759,7 +760,6 @@ class StartScreen(Game):
                     pygame.quit()
                     sys.exit()
 
-
                 elif event.type == pygame.VIDEORESIZE:
                     game.width, game.height = event.w, event.h
                     game.resize_all_screens()
@@ -769,11 +769,11 @@ class StartScreen(Game):
                         running = False
                         break
 
-            text_scroll_dist = game.width * text_scroll_dist_multiplier
-            game.screen.fill((0,0,0))
+            text_scroll_dist = game.width / text_scroll_dist_multiplier
+            game.screen.fill((0, 0, 0))
             self.draw_tetris_pieces(self.pieces)
             self.draw_back_button(mouse)
-            text_y = text_y + text_scroll_dist if text_y <= game.width + 100 else -1 * (len(credits_list) * text_offset)
+            text_y = text_y + text_scroll_dist if text_y <= (game.height + 100) else -1 * (len(credits_list) * text_offset)
             list(map(draw_text, enumerate(credits_list)))
             pygame.display.update()
     
@@ -1149,7 +1149,7 @@ class SettingsScreen(StartScreen):
         
             #It was a lot of work to change the start and end position of the blocks, so i just cover them with a rect so look like theyre not going off screen
             pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, 0, game.width, (game.height - new_playing_field_rect.height)/2))
-            pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, new_playing_field_rect.y + new_playing_field_rect.height, game.width, (game.height - new_playing_field_rect.height)/2))
+            pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, new_playing_field_rect.y + new_playing_field_rect.height, game.width, (game.height - new_playing_field_rect.height)))
 
 
 
@@ -1261,21 +1261,6 @@ class SettingsScreen(StartScreen):
                 full_dict = {'controls': full_controls, 'theme': game.theme_index}
                 json.dump(full_dict, f, indent=2)
 
-    
-        # x_pos = [8, 9, 10, 11, 12]
-        # shuffle(x_pos)
-
-        # self.pieces = [
-
-        #     Piece(x_pos[0], randint(-9, -7), 'T'), 
-        #     Piece(x_pos[1], randint(-5, -2), 'J'), 
-        #     Piece(x_pos[2], randint(0, 3), 'S'), 
-        #     Piece(x_pos[3], randint(5, 8), 'Z'), 
-        #     Piece(x_pos[4], randint(10, 12), 'I'),
-            
-        # ]
-
-
         
         offset = 10
         left_arrow = pygame.image.load(resource_path('assets/left_arrow.png'))
@@ -1288,7 +1273,6 @@ class SettingsScreen(StartScreen):
         hover_scale_factor = 1.1
         
         
-        
         new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
         min_x = int(new_playing_field_rect.x/30)
         max_x = min_x + int(new_playing_field_rect.width/30) - 4 
@@ -1296,10 +1280,10 @@ class SettingsScreen(StartScreen):
         
 
         step_y = int(max_y/5) or 1
-        step_x = int(max_x/6) or 1
+        step_x = 1
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
-        x_pos = list(range(min_x, max_x, step_x)) + list(range(min_x, int(max_x/2), step_x))
-        y_pos = list(range(0, max_y, step_y)) + list(range(0, int(max_y/2), step_y))
+        x_pos = list(range(min_x, max_x, step_x))
+        y_pos = list(range(0, max_y, step_y)) 
 
         shuffle(x_pos)
 
@@ -1310,9 +1294,7 @@ class SettingsScreen(StartScreen):
            
         ]
 
-
         self.last_falls = [time.time() for _ in self.pieces]
-
 
 
         running = True
@@ -1323,12 +1305,6 @@ class SettingsScreen(StartScreen):
     
             #Makes sure that if game starts while were in this screen it goes back to game
             running = start_screen.check_started()
-
-            print(f'{min_x = }, {max_x = }, {x_pos = }')
-            # print(f'{min_x = }, {max_x = }, {new_playing_field_rect}, {[piece.x for piece in self.pieces]}')
-            # print(f'{self.pieces = }, {min_x = }, {max_x = }, {new_playing_field_rect.width = }, {[piece.x for piece in start_screen.pieces]}')
-        
- 
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1347,9 +1323,11 @@ class SettingsScreen(StartScreen):
                     max_x = min_x + int(new_playing_field_rect.width/30) - 4
                     max_y = int(new_playing_field_rect.height/30)
                     step_y = int(max_y/5) or 1
-                    step_x = int(max_x/6) or 1
-                    x_pos = list(range(min_x, max_x + 1, step_x)) + list(range(min_x, int(max_x/2), step_x))
-                    y_pos = list(range(0, max_y, step_y)) + list(range(0, int(max_y/2), step_y))
+                    step_x = 1
+
+                    x_pos = list(range(min_x, max_x, step_x))
+
+                    y_pos = list(range(0, max_y, step_y))
                     shuffle(x_pos)
 
 
@@ -1359,7 +1337,7 @@ class SettingsScreen(StartScreen):
                     
                     ]
 
-                                
+                    self.last_falls = [time.time() for _ in self.pieces]
                     game.resize_all_screens()
 
    

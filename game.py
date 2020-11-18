@@ -1104,12 +1104,12 @@ class SettingsScreen(StartScreen):
             {
                 "json name": "das",
                 "name": "Delayed Auto Shift",
-                "pos": (game.width/2, 200),
+                "pos": (game.width/2, game.height/4),
             },
             {
                 "json name": "arr",
                 "name": "Auto Repeat Rate",
-                "pos": (game.width/2, 350),
+                "pos": (game.width/2, game.height/2 - 50),
             }
         ]
 

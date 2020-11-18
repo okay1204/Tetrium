@@ -12,6 +12,7 @@ import onlineGame
 import sys
 
 from oooooooooooooooooooooooooooooooooooooooooooootils import get_path
+
 pieces = ["T", "L", "J", "S", "Z", "I", "O"]
 
 bag = pieces.copy()
@@ -124,7 +125,6 @@ def reset():
     canSwitch = True
     moving = 0
     game.meter.clear()
-    game.time_started = time.time()
     fall_speed = 1
     speedUp = False
 
@@ -918,8 +918,6 @@ while True:
 
                     if lines_cleared:
 
-                        send(f"clear {lines_cleared}")
-
                         game.row_clearedSFX.play()
                         game.lines += lines_cleared
 
@@ -1018,6 +1016,9 @@ while True:
                         lines_sent = 10
                         texts.append((f"Perfect Clear", time.time() + 3, 17))
 
+                    if lines_cleared:
+                        send(f"clear {max(lines_cleared, lines_sent)}")
+                    
                     if lines_sent:
                         send(f"junk {lines_sent}")
                         game.meter_sendSFX.play()

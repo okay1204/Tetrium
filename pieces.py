@@ -99,8 +99,8 @@ def get_piece(x, y, piece):
         return [
             (x, y, color),
             (x, y-1, color),
-            (x-1, y-1, color),
-            (x+1, y, color)
+            (x+1, y-1, color),
+            (x-1, y, color)
         ]
 
     elif piece == 'Z':
@@ -108,8 +108,8 @@ def get_piece(x, y, piece):
         return [
             (x, y, color),
             (x, y-1, color),
-            (x+1, y-1, color),
-            (x-1, y, color)
+            (x-1, y-1, color),
+            (x+1, y, color)
         ]
 
     elif piece == 'I':

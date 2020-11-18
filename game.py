@@ -1095,7 +1095,10 @@ class SettingsScreen(StartScreen):
     def gameplay_screen(self):
 
         with open(get_path('settings.json')) as f:
-            gameplay_settings = json.load(f)['gameplay']
+            settings = json.load(f)
+
+        gameplay_settings = settings["gameplay"]
+        controls = settings["controls"]
 
         slider_width = 500
         slider_radius = 10
@@ -1104,12 +1107,12 @@ class SettingsScreen(StartScreen):
             {
                 "json name": "das",
                 "name": "Delayed Auto Shift",
-                "pos": (game.width/2, game.height/4),
+                "pos": (game.width/2, game.height/8),
             },
             {
                 "json name": "arr",
                 "name": "Auto Repeat Rate",
-                "pos": (game.width/2, game.height/2),
+                "pos": (game.width/2, game.height/4+50),
             }
         ]
 
@@ -1133,7 +1136,7 @@ class SettingsScreen(StartScreen):
                     measurement = f"{measurement}ms"
 
                 elif name == "Auto Repeat Rate":
-                    measurement = 310 - (int(value * 290) + 10)
+                    measurement = 205 - (int(value * 195) + 5)
                     measurement = f"{measurement}ms"
                 
                 
@@ -1141,44 +1144,113 @@ class SettingsScreen(StartScreen):
                 game.screen.blit(value_element, (pos[0] - value_element.get_rect().width/2, pos[1]+90))
 
         
+        piece = Piece(9, 15, "O")
         def draw_preview():
             text_element = game.big_font.render("Preview", True, game.foreground_color)
-            game.screen.blit(text_element, (game.width/2 - text_element.get_rect().width/2, game.height/4*3))
+            game.screen.blit(text_element, (game.width/2 - text_element.get_rect().width/2, game.height/2))
+
+            text_element2 = game.medium_font.render("Move left and right to try it out", True, game.foreground_color)
+            game.screen.blit(text_element2, (game.width/2 - text_element2.get_rect().width/2, game.height/2+50))
+
+            piece.render(preview=False)
             
 
+        def can_move(moving):
+
+            if moving == 1 and piece.x < 20: return True
+            elif moving == -1 and piece.x > -2: return True
+            return False
+
+
+        reset_button_rect = pygame.Rect(game.width/2-40, game.height-100, 80, 25)
+        def draw_reset_button():
+
+            if reset_button_rect.collidepoint(mouse):
+                reset_button_color = tuple(darken(color) for color in game.foreground_color)
+            else:
+                reset_button_color = game.foreground_color
+           
+            pygame.draw.rect(game.screen, reset_button_color, reset_button_rect)
+
+            reset_button_text = game.medium_font.render("RESET", True, game.background_color)
+            game.screen.blit(reset_button_text, (game.width/2-reset_button_text.get_rect().width/2, game.height-100))
 
         running = True
         dragging = None
+        moving = 0
+        last_move = 0
+        das_start = 0
         while running:
 
+            for slider in sliders:
+                gameplay_settings[slider["json name"]] = slider["value"]
+
+            if moving:
+                if can_move(moving) and time.time() > das_start:
+                    if time.time() > last_move:
+                        piece.move(moving, 0)
+                        last_move = time.time() + (0.205 - ((gameplay_settings['arr'] * 0.195) + 0.005))
 
             mouse = pygame.mouse.get_pos()
             for event in pygame.event.get():
 
                 if event.type == pygame.QUIT:
+
+                    with open(get_path('settings.json'), 'w') as f:
+                        json.dump(settings, f, indent=2)
+
                     pygame.quit()
                     sys.exit()
 
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                elif event.type == pygame.KEYDOWN:
+
+                    key_name = pygame.key.name(event.key)
+
+                    if key_name == controls['Move Left']:
+
+                        if can_move(-1):
+                            moving = -1
+                            das_start = time.time() + (gameplay_settings['das'] * 0.5)
+                            piece.move(-1, 0)
+                    
+                    elif key_name == controls['Move Right']:
+
+                        if can_move(1):
+                            moving = 1
+                            das_start = time.time() + (gameplay_settings['das'] * 0.5)
+                            piece.move(1, 0)
+
+                elif event.type == pygame.KEYUP:
+
+                    key_name = pygame.key.name(event.key)
+
+                    if key_name == controls['Move Left']:
+                        if moving == -1:
+                            moving = 0
+
+                    elif key_name == controls['Move Right']:
+                        if moving == 1:
+                            moving = 0
+
+
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
                     # back button
                     if self.back_button.collidepoint(event.pos):
                         running = False
 
-                        gameplay_settings = {}
-                        for slider in sliders:
-                            gameplay_settings[slider["json name"]] = slider["value"]
-
-
-                        with open(get_path('settings.json')) as f:
-                            full_dict = json.load(f)
-
-                        full_dict["gameplay"] = gameplay_settings
-
                         with open(get_path('settings.json'), 'w') as f:
-                            json.dump(full_dict, f, indent=2)
+                            json.dump(settings, f, indent=2)
                         
-                        
+                    elif reset_button_rect.collidepoint(mouse):
+
+                        for slider in sliders:
+
+                            name = slider['json name']
+                            if name == 'das':
+                                slider['value'] = 0.8
+                            elif name == 'arr':
+                                slider['value'] = 0.85
 
                     elif not dragging:
                         for slider in sliders:
@@ -1189,7 +1261,7 @@ class SettingsScreen(StartScreen):
                                 dragging = slider["name"]
                                 break
 
-                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
 
                     if dragging: dragging = None
 
@@ -1210,6 +1282,7 @@ class SettingsScreen(StartScreen):
 
             draw_sliders()
             draw_preview()
+            draw_reset_button()
             self.draw_back_button(mouse)
 
 

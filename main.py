@@ -285,7 +285,6 @@ def game_over(win: bool):
 
 
 moving = 0
-last_moved = 0
 
 
 last_rotation_fall = 0
@@ -530,7 +529,16 @@ while True:
         pass
 
     with open(get_path('settings.json')) as f:
-        controls = json.load(f)['controls']
+        settings = json.load(f)
+
+    controls = settings['controls']
+    gameplay_settings = settings['gameplay']
+
+    das = gameplay_settings['das'] * 0.5
+    arr = 0.205 - ((gameplay_settings['arr'] * 0.195) + 0.005)
+
+    das_start = 0
+    arr_start = 0
 
     pygame.mouse.set_visible(False)
 
@@ -619,10 +627,11 @@ while True:
             rotation_last = False
 
             if moving == -1:
-                if time.time() - last_moved > 0.1:
+                if time.time() > arr_start and time.time() > das_start:
                     if not current.check_left():
                         current.move(-1, 0)
-                        last_moved = time.time()
+                        arr_start = time.time() + arr
+                        rotation_last = False
 
                         current.move(0, 1)
                         if current.check_floor():
@@ -632,10 +641,11 @@ while True:
                         current.move(0, -1)
 
             elif moving == 1:
-                if time.time() - last_moved > 0.1:
+                if time.time() > arr_start and time.time() > das_start:
                     if not current.check_right():
                         current.move(1, 0)
-                        last_moved = time.time()
+                        arr_start = time.time() + arr
+                        rotation_last = False
 
                         current.move(0, 1)
                         if current.check_floor():
@@ -661,36 +671,50 @@ while True:
 
                 if key_name == controls['Move Left']:
 
-                    if not game.continuous:
-                        if not current.check_left():
+                    if not current.check_left():
+
+                        if not game.continuous:
                             current.move(-1, 0)
 
-                            current.move(0, 1)
-                            if current.check_floor():
-                                if avoids < 15:
-                                    fall = time.time() + 0.3
-                                    avoids += 1
-                            current.move(0, -1)
+                        else:
+                            current.move(-1, 0)
+                            das_start = max(time.time() + das, time.time() + arr)
 
-                            rotation_last = False
+                        rotation_last = False
 
-                    else:
+
+                        current.move(0, 1)
+                        if current.check_floor():
+                            if avoids < 15:
+                                fall = time.time() + 0.3
+                                avoids += 1
+                        current.move(0, -1)
+
+                    if game.continuous:
                         moving = -1
 
                 elif key_name == controls['Move Right']:
 
-                    if not game.continuous:
-                        if not current.check_right():
+                    if not current.check_right():
+
+                        if not game.continuous:
                             current.move(1, 0)
 
-                            current.move(0, 1)
-                            if current.check_floor():
-                                if avoids < 15:
-                                    fall = time.time() + 0.3
-                                    avoids += 1
-                            current.move(0, -1)
+                        else:
+                            current.move(1, 0)
+                            das_start = max(time.time() + das, time.time() + arr)
 
-                    else:
+                        rotation_last = False
+
+
+                        current.move(0, 1)
+                        if current.check_floor():
+                            if avoids < 15:
+                                fall = time.time() + 0.3
+                                avoids += 1
+                        current.move(0, -1)
+
+                    if game.continuous:
                         moving = 1
 
                 elif key_name == controls['Rotate Clockwise']:

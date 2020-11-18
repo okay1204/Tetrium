@@ -1109,7 +1109,7 @@ class SettingsScreen(StartScreen):
             {
                 "json name": "arr",
                 "name": "Auto Repeat Rate",
-                "pos": (game.width/2, 350),
+                "pos": (game.width/2, 400),
             }
         ]
 
@@ -1121,11 +1121,25 @@ class SettingsScreen(StartScreen):
             for slider in sliders:
                 name, pos, value = slider["name"], slider["pos"], slider["value"]
 
-                text_element = game.big_font.render(name, True, (game.foreground_color))
+                text_element = game.big_font.render(name, True, game.foreground_color)
                 game.screen.blit(text_element, (pos[0] - text_element.get_rect().width/2, pos[1]))
 
                 pygame.draw.rect(game.screen, game.foreground_color, (pos[0] - slider_width/2, pos[1] + 70, slider_width, 4))
                 pygame.draw.circle(game.screen, game.foreground_color, center= ((pos[0]-slider_width/2) + int(value * slider_width), pos[1]+72), radius=slider_radius)
+
+                
+                if name == "Delayed Auto Shift":
+                    measurement = int(value * 500)
+                    measurement = f"{measurement}ms"
+
+                elif name == "Auto Repeat Rate":
+                    measurement = 310 - (int(value * 290) + 10)
+                    measurement = f"{measurement}ms"
+                
+                
+                value_element = game.medium_font.render(measurement, True, game.foreground_color)
+                game.screen.blit(value_element, (pos[0] - value_element.get_rect().width/2, pos[1]+90))
+
 
         running = True
         dragging = None

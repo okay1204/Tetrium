@@ -1,11 +1,12 @@
 # pylint: disable=no-member
 
 import pygame
+from pygame.constants import NOFRAME
 import pieces as pieces_lib
 import math
 import time
 import sys
-from random import shuffle, randint
+from random import shuffle, randint, choice
 import network
 import json
 import pyperclip
@@ -53,7 +54,6 @@ class Game:
         self.garbage_recieveSFX = pygame.mixer.Sound(resource_path('assets/garbage_recieve.wav'))
 
         
-
         self.width = 750
         self.height = 800
 
@@ -62,7 +62,7 @@ class Game:
         self.muted = False
 
         self.clock = pygame.time.Clock()
-        self.screen = pygame.display.set_mode((self.width, self.height),flags = pygame.SCALED)
+        self.screen = pygame.display.set_mode((self.width, self.height), flags = pygame.RESIZABLE)
 
         self.icon = pygame.image.load(resource_path('assets/tetrium.png'))
         pygame.display.set_icon(self.icon)
@@ -414,6 +414,9 @@ class Game:
                 
             copy_button_text = self.font.render("Copy download link", True, text_color)
             self.screen.blit(copy_button_text, (copy_button_pos[0] + 10, copy_button_pos[1] + 3))
+            
+
+
             pygame.draw.rect(self.screen, rect_color, quit_button_rect)
 
             quit_button_text = self.font.render("Go Back", True, text_color)
@@ -447,8 +450,12 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
 
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     check_click(event.pos)
 
 
@@ -548,6 +555,10 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     
                     check_click(event.pos)
@@ -573,6 +584,11 @@ class Game:
                 if event.type == pygame.QUIT:
 
                     return False
+
+
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
 
             seconds = int(countdown - time.time())
 
@@ -608,6 +624,12 @@ class Game:
         return True
 
 
+    def resize_all_screens(self):
+        start_screen.resize_screen()
+        settings_screen.resize_screen()
+            
+
+
 game = Game()
 
 
@@ -617,67 +639,73 @@ class StartScreen(Game):
 
     def __init__(self):
 
+
+
         self.ready = False
-
-        #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
-        self.x_pos = [0, 4, 8, 12, 16, 20, 0, 4, 8]
-        shuffle(self.x_pos)
-
-        self.pieces = [
-
-            Piece(self.x_pos[0], randint(-9, -6), 'T'), 
-            Piece(self.x_pos[1], randint(-6, -3), 'L'), 
-            Piece(self.x_pos[2], randint(-3, 0), 'J'), 
-            Piece(self.x_pos[3], randint(0, 3), 'S'), 
-            Piece(self.x_pos[4], randint(3, 6), 'Z'), 
-            Piece(self.x_pos[5], randint(6, 9), 'I'),
-            Piece(self.x_pos[6], randint(9, 12), 'T'),
-            Piece(self.x_pos[7], randint(12, 15), 'L'),
-            Piece(self.x_pos[8], randint(-15, -12), 'J'),
-            
-        ]
 
         self.rgb_stage = 0
 
         self.version_text = game.small_font.render(f"v {network.version}", True, (255, 255, 255))
-        rect = self.version_text.get_rect()
-        self.version_text_rect = self.version_text.get_rect(center=(game.width-(rect.width/2)-10, rect.height+10))
+        self.input_box_width = 300
+        self.input_box_height = 50
+        self.mute_button_radius = 35
+        self.start_button_text_color = (255, 255, 255)
+        self.credits_button_height = 30
+        self.input_text_width = 0
+        self.back_button = pygame.Rect(10, 10, 75, 65)
+        self.piece_types = ['I', 'O', 'T', 'L', 'J', 'Z', 'S']
+        self.resize_screen()
     
         self.r, self.g, self.b = 255, 0, 0
         self.last_falls = [time.time() for _ in self.pieces]
-        self.start_button_text_color = (255, 255, 255)
-        self.mute_button_pos = (int(game.width/2), int(game.height/2 + 100))
-        self.start_button_rect = pygame.Rect(game.width/2-60, game.height/2, 120, 40)
-        self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
 
-        self.mute_button_radius = 35
         self.volume_on_icon = pygame.image.load(resource_path('assets/volume-high.png'))
         self.volume_off_icon = pygame.image.load(resource_path('assets/volume-off.png'))
-        self.volume_icon_pos = (self.mute_button_pos[0] - 25, self.mute_button_pos[1] - 25)
-        self.s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         self.input_box_placeholder = game.medium_font.render("Enter a name...", True, (96, 93, 93))
-        self.input_box_y =  game.height/2 - 85
-        self.input_box_width = 300
-        self.input_box_x = (game.width - self.input_box_width)/2
-        self.input_box_height = 50
-        self.input_box = pygame.Rect(self.input_box_x, self.input_box_y, self.input_box_width, self.input_box_height)
-        self.input_box_bkg = pygame.Rect((game.width - self.input_box_width)/2 , game.height/2 - 85, self.input_box_width, self.input_box_height)
         self.input_active = False
         self.input_text = ''
-        self.input_text_width = 0
-        self.settings_button_pos = (0 , game.height - 30)
-        self.settings_button = pygame.Rect(0, game.height - 30, 125, 30)
         self.settings_button_text = game.medium_font.render('SETTINGS', True, (0, 0, 0))
         self.credits_button_text = game.small_font.render('CREDITS', True, (0, 0, 0))
-        self.credits_button_height = 30
-        self.credits_button_pos = (game.width - 70, game.height - self.credits_button_height)
-        self.credits_button = pygame.Rect(self.credits_button_pos[0], self.credits_button_pos[1], 70, self.credits_button_height)
         self.connected = False
         self.started = False
         self.back_icon = pygame.image.load(resource_path('assets/arrow-back.png'))
-        self.back_button = pygame.Rect(10, 10, 75, 65)
-        self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
         self.disconnect_button_text = game.font.render('Disconnect', True, (self.r, self.g, self.b))
+
+    def resize_screen(self):
+        self.max_x = int((game.width/30)-3) 
+        self.max_y = int((game.height/30))
+        step_y = int(self.max_y/5) or 1
+        step_x = int(self.max_x/5) or 1
+        #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
+        self.x_pos = list(range(0, self.max_x, step_x)) + list(range(0, int(self.max_x/2), step_x))
+        self.y_pos = list(range(0, self.max_y, step_y)) + list(range(0, int(self.max_y/2), step_y))
+
+        shuffle(self.x_pos)
+
+
+        self.pieces = [
+            Piece(x_pos, y_pos, choice(self.piece_types)) for x_pos, y_pos in zip(self.x_pos, self.y_pos)
+        ]
+
+        rect = self.version_text.get_rect()
+        self.version_text_rect = self.version_text.get_rect(center=(game.width-(rect.width/2)-10, rect.height+10))
+        self.mute_button_pos = (int(game.width/2), int(game.height/2 + 100))
+        self.start_button_rect = pygame.Rect(game.width/2-60, game.height/2, 120, 40)
+        self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
+        self.volume_icon_pos = (self.mute_button_pos[0] - 25, self.mute_button_pos[1] - 25)
+        self.s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
+        self.input_box_y =  game.height/2 - 85
+        
+        self.input_box_x = (game.width - self.input_box_width)/2
+        
+        self.input_box = pygame.Rect(self.input_box_x, self.input_box_y, self.input_box_width, self.input_box_height)
+        self.input_box_bkg = pygame.Rect((game.width - self.input_box_width)/2 , game.height/2 - 85, self.input_box_width, self.input_box_height)
+        self.settings_button_pos = (0 , game.height - 30)
+        self.settings_button = pygame.Rect(0, game.height - self.credits_button_height, 125, self.credits_button_height)
+        self.credits_button_pos = (game.width - 70, game.height - self.credits_button_height)
+        self.credits_button = pygame.Rect(self.credits_button_pos[0], self.credits_button_pos[1], 70, self.credits_button_height)
+        self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
+
 
 
     def check_started(self):
@@ -685,9 +713,9 @@ class StartScreen(Game):
 
     def draw_back_button(self, pos = (-10, -10)):
         white = (255, 255, 255)
-        color = tuple(darken(i) for i in white) if self.back_button.collidepoint(pos) else white
-        pygame.draw.rect(game.screen, color, self.back_button)
-        game.screen.blit(self.back_icon, (-3, -7))
+        color = tuple(darken(i) for i in white) if start_screen.back_button.collidepoint(pos) else white
+        pygame.draw.rect(game.screen, color, start_screen.back_button)
+        game.screen.blit(start_screen.back_icon, (-3, -7))
 
     def draw_start_button(self):
        
@@ -703,14 +731,14 @@ class StartScreen(Game):
         pygame.draw.rect(game.screen, colooooooooor, self.start_button_rect)
 
     
-    def credits_screen(self, pieces, draw_tetris_pieces):
+    def credits_screen(self):
 
         
         credits_list = ['Made by', 'okay#2996', 'and', 'AliMan21#6527']
         text_y = 0
-        text_offset = 80
-        text_scroll_dist = 0.1
-        
+        text_offset = 80    
+        #8000 is just random number that i found worked well by expirementing. It cant be a set distance cause then it wont be responsive and too slow on big scree.
+        text_scroll_dist_multiplier = 1/8000
         def draw_text(tup):
             index, text = tup
             rendered_text = game.font.render(text, True, (255,255,255))
@@ -731,14 +759,19 @@ class StartScreen(Game):
                     pygame.quit()
                     sys.exit()
 
+
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.back_button.collidepoint(event.pos):
                         running = False
                         break
 
-           
+            text_scroll_dist = game.width * text_scroll_dist_multiplier
             game.screen.fill((0,0,0))
-            draw_tetris_pieces(pieces)
+            self.draw_tetris_pieces(self.pieces)
             self.draw_back_button(mouse)
             text_y = text_y + text_scroll_dist if text_y <= game.width + 100 else -1 * (len(credits_list) * text_offset)
             list(map(draw_text, enumerate(credits_list)))
@@ -882,9 +915,12 @@ class StartScreen(Game):
 
 
             piece.render(False)
-            if time.time() > self.last_falls[i]:
-                piece.move(0, 1)
-                self.last_falls[i] = time.time() + 0.75
+            try:
+                if time.time() > self.last_falls[i]:
+                    piece.move(0, 1)
+                    self.last_falls[i] = time.time() + 0.75
+            except:
+                break
 
 
 
@@ -926,6 +962,32 @@ class StartScreen(Game):
                     raise e
                 break
 
+
+        
+    def no_connection_screen(self):
+
+        display_time = time.time() + 3
+
+        game.screen.fill(game.background_color)
+
+        text = game.very_big_font.render("No connection", True, game.foreground_color)
+        game.screen.blit(text, (game.width/2-text.get_rect().width/2, 300))
+        pygame.display.update()
+
+        while display_time > time.time():
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+
+            game.clock.tick(60)
+
+
     
     def main(self):
         running = True
@@ -946,8 +1008,12 @@ class StartScreen(Game):
 
                     pygame.quit()
                     sys.exit()
+                
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
                     
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     
                     if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
 
@@ -967,7 +1033,7 @@ class StartScreen(Game):
                         game.muted = not game.muted
                     
                     elif self.credits_button.collidepoint(event.pos):
-                        self.credits_screen(self.pieces, self.draw_tetris_pieces)
+                        self.credits_screen()
                         #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
                         self.s.fill((0, 0, 0))
 
@@ -1000,7 +1066,7 @@ class StartScreen(Game):
                             self.get_input(event.unicode)
 
                         
-            
+        
             pygame.mixer.music.set_volume(game.lowered_volume)
             game.screen.blit(self.s, (0, 0))  
             self.r, self.g, self.b = self.cycle_colors((self.r, self.g, self.b))
@@ -1032,33 +1098,24 @@ class StartScreen(Game):
         game.running = True
 
 
-    def no_connection_screen(self):
-
-        display_time = time.time() + 3
-
-        game.screen.fill(game.background_color)
-
-        text = game.very_big_font.render("No connection", True, game.foreground_color)
-        game.screen.blit(text, (game.width/2-text.get_rect().width/2, 300))
-        pygame.display.update()
-
-        while display_time > time.time():
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-            game.clock.tick(60)
-
 
 class SettingsScreen(StartScreen):
 
 
     def __init__(self):
-        super().__init__()
         self.buttons_color = game.foreground_color
         self.background_color = game.background_color
+        self.resize_screen()
+    
+        
+
+    def set_buttons_color(self, color):
+        self.buttons_color = color
+        for i in range(len(self.buttons)):
+            self.buttons[i][2] = color
+
+
+    def resize_screen(self):
         self.buttons = [
             [
                 pygame.Rect(game.width/2 - 200/2, game.height/2 - 100, 200, 50), 
@@ -1076,25 +1133,25 @@ class SettingsScreen(StartScreen):
             
         ]
 
-    def set_buttons_color(self, color):
-        self.buttons_color = color
-        for i in range(len(self.buttons)):
-            self.buttons[i][2] = color
-            
    
 
     def pick_themes_screen(self):
+
+        #issue: we need to call setup function for this outside of this function but we cant cause its not a class
+
 
         def render_game_preview(bkg_color, fgd_color):
             
             pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, 0, game.width, game.height))
             pygame.draw.rect(game.screen, fgd_color, new_playing_field_rect)
-            self.draw_tetris_pieces(pieces)
+            self.draw_tetris_pieces(self.pieces)
            
         
             #It was a lot of work to change the start and end position of the blocks, so i just cover them with a rect so look like theyre not going off screen
             pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, 0, game.width, (game.height - new_playing_field_rect.height)/2))
             pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, new_playing_field_rect.y + new_playing_field_rect.height, game.width, (game.height - new_playing_field_rect.height)/2))
+
+
 
         def is_dark(rgb):
             
@@ -1147,8 +1204,7 @@ class SettingsScreen(StartScreen):
                 new_right_arrow = right_arrow
                 new_right_arrow_rect = right_arrow_rect
                 new_right_arrow_rect_color = game.foreground_color
-                
-
+            
 
             if dark:
                 pygame.draw.rect(game.screen, new_left_arrow_rect_color, new_left_arrow_rect)
@@ -1194,8 +1250,6 @@ class SettingsScreen(StartScreen):
 
 
     
-
-
         def draw_title():
             title = game.very_big_medium_font.render(game.theme_text, True, game.foreground_color)
             title_rect = title.get_rect()
@@ -1207,19 +1261,20 @@ class SettingsScreen(StartScreen):
                 full_dict = {'controls': full_controls, 'theme': game.theme_index}
                 json.dump(full_dict, f, indent=2)
 
-        new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
-        x_pos = [8, 9, 10, 11, 12]
-        shuffle(x_pos)
+    
+        # x_pos = [8, 9, 10, 11, 12]
+        # shuffle(x_pos)
 
-        pieces = [
+        # self.pieces = [
 
-            Piece(x_pos[0], randint(-9, -7), 'T'), 
-            Piece(x_pos[1], randint(-5, -2), 'J'), 
-            Piece(x_pos[2], randint(0, 3), 'S'), 
-            Piece(x_pos[3], randint(5, 8), 'Z'), 
-            Piece(x_pos[4], randint(10, 12), 'I'),
+        #     Piece(x_pos[0], randint(-9, -7), 'T'), 
+        #     Piece(x_pos[1], randint(-5, -2), 'J'), 
+        #     Piece(x_pos[2], randint(0, 3), 'S'), 
+        #     Piece(x_pos[3], randint(5, 8), 'Z'), 
+        #     Piece(x_pos[4], randint(10, 12), 'I'),
             
-        ]
+        # ]
+
 
         
         offset = 10
@@ -1232,26 +1287,84 @@ class SettingsScreen(StartScreen):
         right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
         hover_scale_factor = 1.1
         
+        
+        
+        new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
+        min_x = int(new_playing_field_rect.x/30)
+        max_x = min_x + int(new_playing_field_rect.width/30) - 4 
+        max_y = int(new_playing_field_rect.height/30)
+        
+
+        step_y = int(max_y/5) or 1
+        step_x = int(max_x/6) or 1
+        #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
+        x_pos = list(range(min_x, max_x, step_x)) + list(range(min_x, int(max_x/2), step_x))
+        y_pos = list(range(0, max_y, step_y)) + list(range(0, int(max_y/2), step_y))
+
+        shuffle(x_pos)
+
+
+        self.pieces = [
+
+            Piece(x_pos, y_pos, choice(start_screen.piece_types)) for x_pos, y_pos in zip(x_pos, y_pos)
+           
+        ]
+
+
+        self.last_falls = [time.time() for _ in self.pieces]
+
+
+
         running = True
         while running:
             #bkg color
 
             mouse = pygame.mouse.get_pos()
-
     
             #Makes sure that if game starts while were in this screen it goes back to game
             running = start_screen.check_started()
 
+            print(f'{min_x = }, {max_x = }, {x_pos = }')
+            # print(f'{min_x = }, {max_x = }, {new_playing_field_rect}, {[piece.x for piece in self.pieces]}')
+            # print(f'{self.pieces = }, {min_x = }, {max_x = }, {new_playing_field_rect.width = }, {[piece.x for piece in start_screen.pieces]}')
+        
+ 
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
 
                     pygame.quit()
                     sys.exit()
+                
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    left_arrow_pos = (offset, game.height/2 - dimensions/2)
+                    right_arrow_pos =  (game.width - dimensions - offset, game.height/2 - dimensions/2)
+                    left_arrow_rect = left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
+                    right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
+                    new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
+                    min_x = int(new_playing_field_rect.x/30)
+                    max_x = min_x + int(new_playing_field_rect.width/30) - 4
+                    max_y = int(new_playing_field_rect.height/30)
+                    step_y = int(max_y/5) or 1
+                    step_x = int(max_x/6) or 1
+                    x_pos = list(range(min_x, max_x + 1, step_x)) + list(range(min_x, int(max_x/2), step_x))
+                    y_pos = list(range(0, max_y, step_y)) + list(range(0, int(max_y/2), step_y))
+                    shuffle(x_pos)
 
 
+                    self.pieces = [
+
+                        Piece(x_pos, y_pos, choice(start_screen.piece_types)) for x_pos, y_pos in zip(x_pos, y_pos)
+                    
+                    ]
+
+                                
+                    game.resize_all_screens()
+
+   
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if self.back_button.collidepoint(event.pos):
+                    if start_screen.back_button.collidepoint(event.pos):
                         store_theme()
                         running = False
 
@@ -1260,6 +1373,7 @@ class SettingsScreen(StartScreen):
 
                     elif right_arrow_rect.collidepoint(event.pos):
                         next_theme(1)
+
 
             render_game_preview(game.background_color, game.foreground_color)
             draw_title()
@@ -1471,6 +1585,11 @@ class SettingsScreen(StartScreen):
                     pygame.quit()
                     sys.exit()
 
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+                    
+
 
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
@@ -1481,7 +1600,7 @@ class SettingsScreen(StartScreen):
                             
                     elif event.button == 1:
  
-                        if self.back_button.collidepoint(event.pos):
+                        if start_screen.back_button.collidepoint(event.pos):
                             running = False
 
                         elif reset_button.collidepoint(event.pos):
@@ -1562,13 +1681,18 @@ class SettingsScreen(StartScreen):
                     pygame.quit()
                     sys.exit()
 
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+
+
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     
                     for button, _, _, func in self.buttons:
                         if button.collidepoint(event.pos):
                             func()
 
-                    if self.back_button.collidepoint(event.pos):
+                    if start_screen.back_button.collidepoint(event.pos):
                         running = False
 
             

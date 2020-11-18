@@ -1109,7 +1109,7 @@ class SettingsScreen(StartScreen):
             {
                 "json name": "arr",
                 "name": "Auto Repeat Rate",
-                "pos": (game.width/2, game.height/2 - 50),
+                "pos": (game.width/2, game.height/2),
             }
         ]
 

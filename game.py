@@ -1140,6 +1140,12 @@ class SettingsScreen(StartScreen):
                 value_element = game.medium_font.render(measurement, True, game.foreground_color)
                 game.screen.blit(value_element, (pos[0] - value_element.get_rect().width/2, pos[1]+90))
 
+        
+        def draw_preview():
+            text_element = game.big_font.render("Preview", True, game.foreground_color)
+            game.screen.blit(text_element, (game.width/2 - text_element.get_rect().width/2, game.height/4*3))
+            
+
 
         running = True
         dragging = None
@@ -1203,6 +1209,7 @@ class SettingsScreen(StartScreen):
             game.screen.fill(game.background_color)
 
             draw_sliders()
+            draw_preview()
             self.draw_back_button(mouse)
 
 

@@ -166,9 +166,13 @@ class Game:
         
         except:
             self.theme_index = 0
+
+            with open(get_path('settings.json')) as f:
+                full_dict = json.load(f)
+
+            full_dict['theme'] = self.theme_index
+
             with open(get_path('settings.json'), 'w') as f:
-                full_controls = dict(game.left_controls, **game.right_controls)
-                full_dict = {'controls': full_controls, 'theme': game.theme_index}
                 json.dump(full_dict, f, indent=2)
 
 
@@ -1062,17 +1066,22 @@ class SettingsScreen(StartScreen):
         self.background_color = game.background_color
         self.buttons = [
             [
-                pygame.Rect(game.width/2 - 200/2, game.height/2 - 100, 200, 50), 
+                pygame.Rect(game.width/2 - 200/2, game.height/2 - 150, 200, 50), 
                 game.big_font.render('CONTROLS', True,  (0, 0, 0)),
                 self.buttons_color,
                 self.pick_controls_screen
             ], 
-
             [
-                pygame.Rect(game.width/2 - 200/2, game.height/2, 200, 50), 
+                pygame.Rect(game.width/2 - 200/2, game.height/2 - 50, 200, 50), 
                 game.big_font.render('THEMES', True, (0, 0, 0)), 
                 self.buttons_color,
                 self.pick_themes_screen
+            ],
+            [
+                pygame.Rect(game.width/2 - 200/2, game.height/2 + 50, 200, 50), 
+                game.big_font.render('GAMEPLAY', True, (0, 0, 0)), 
+                self.buttons_color,
+                self.gameplay_screen
             ]
             
         ]
@@ -1081,9 +1090,110 @@ class SettingsScreen(StartScreen):
         self.buttons_color = color
         for i in range(len(self.buttons)):
             self.buttons[i][2] = color
-            
-   
 
+
+    def gameplay_screen(self):
+
+        with open(get_path('settings.json')) as f:
+            gameplay_settings = json.load(f)['gameplay']
+
+        slider_width = 500
+        slider_radius = 10
+
+        sliders = [
+            {
+                "json name": "das",
+                "name": "Delayed Auto Shift",
+                "pos": (game.width/2, 200),
+            },
+            {
+                "json name": "arr",
+                "name": "Auto Repeat Rate",
+                "pos": (game.width/2, 350),
+            }
+        ]
+
+        for x in range(len(sliders)):
+            sliders[x]["value"] = gameplay_settings[sliders[x]["json name"]]
+
+        def draw_sliders():
+
+            for slider in sliders:
+                name, pos, value = slider["name"], slider["pos"], slider["value"]
+
+                text_element = game.big_font.render(name, True, (game.foreground_color))
+                game.screen.blit(text_element, (pos[0] - text_element.get_rect().width/2, pos[1]))
+
+                pygame.draw.rect(game.screen, game.foreground_color, (pos[0] - slider_width/2, pos[1] + 70, slider_width, 4))
+                pygame.draw.circle(game.screen, game.foreground_color, center= ((pos[0]-slider_width/2) + int(value * slider_width), pos[1]+72), radius=slider_radius)
+
+        running = True
+        dragging = None
+        while running:
+
+
+            mouse = pygame.mouse.get_pos()
+            for event in pygame.event.get():
+
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+
+                    # back button
+                    if self.back_button.collidepoint(event.pos):
+                        running = False
+
+                        gameplay_settings = {}
+                        for slider in sliders:
+                            gameplay_settings[slider["json name"]] = slider["value"]
+
+
+                        with open(get_path('settings.json')) as f:
+                            full_dict = json.load(f)
+
+                        full_dict["gameplay"] = gameplay_settings
+
+                        with open(get_path('settings.json'), 'w') as f:
+                            json.dump(full_dict, f, indent=2)
+                        
+                        
+
+                    elif not dragging:
+                        for slider in sliders:
+                            x, y = slider["pos"]
+                            value = slider["value"]
+
+                            if x - slider_width/2 + int(value * slider_width) - slider_radius < mouse[0] < x - slider_width/2 + int(value * slider_width) + slider_radius and y + 72 - slider_radius < mouse[1] < y + 72 + slider_radius:
+                                dragging = slider["name"]
+                                break
+
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+
+                    if dragging: dragging = None
+
+            if dragging:
+                for slider in sliders:
+                    if slider["name"] == dragging:
+
+                        value = mouse[0] - (slider["pos"][0] - slider_width / 2)
+
+                        if value < 0: value = 0
+                        elif value > slider_width: value = slider_width
+
+                        value /= slider_width
+                        slider["value"] = value
+
+
+            game.screen.fill(game.background_color)
+
+            draw_sliders()
+            self.draw_back_button(mouse)
+
+
+            pygame.display.update()
+    
     def pick_themes_screen(self):
 
         def render_game_preview(bkg_color, fgd_color):
@@ -1203,9 +1313,12 @@ class SettingsScreen(StartScreen):
             game.screen.blit(title, (game.width/2 - title_rect.width/2, 10))
             
         def store_theme():
+            with open(get_path('settings.json')) as f:
+                full_dict = json.load(f)
+
+            full_dict['theme'] = game.theme_index
+
             with open(get_path('settings.json'), 'w') as f:
-                full_controls = dict(game.left_controls, **game.right_controls)
-                full_dict = {'controls': full_controls, 'theme': game.theme_index}
                 json.dump(full_dict, f, indent=2)
 
         new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
@@ -1373,9 +1486,13 @@ class SettingsScreen(StartScreen):
         
         
         def reset_controls():
+            with open(get_path('settings.json')) as f:
+                full_dict = json.load(f)
+
+            full_dict['controls'] = game.default_controls
+
             with open(get_path('settings.json'), 'w') as f:
-                new_dict = {'controls': game.default_controls, 'theme': game.theme_index}
-                json.dump(new_dict, f, indent=2)
+                json.dump(full_dict, f, indent=2)
 
 
             game.left_controls = {
@@ -1438,11 +1555,14 @@ class SettingsScreen(StartScreen):
                 else:
                     key_exists_err()
 
-            with open(get_path('settings.json'), 'w') as f:
-                full_controls = dict(game.left_controls, **game.right_controls)
-                full_dict = {'controls': full_controls, 'theme': game.theme_index}
-                json.dump(full_dict, f, indent=2)
+            with open(get_path('settings.json')) as f:
+                full_dict = json.load(f)
 
+            full_controls = dict(game.left_controls, **game.right_controls)
+            full_dict['controls'] = full_controls
+            
+            with open(get_path('settings.json'), 'w') as f:
+                json.dump(full_dict, f, indent=2)
         
 
         title_text_1 = game.big_font.render('CLICK ON A BOX TO', True, (255, 255, 255))

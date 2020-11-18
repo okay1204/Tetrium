@@ -107,7 +107,7 @@ gameOver = False
 
 
 def reset():
-    global bag, next_bag, avoids, current, held, canSwitch, moving, fall_speed
+    global bag, next_bag, avoids, current, held, canSwitch, moving, fall_speed, speedUp
 
     game.resting.clear()
     game.level = 1
@@ -126,6 +126,7 @@ def reset():
     game.meter.clear()
     game.time_started = time.time()
     fall_speed = 1
+    speedUp = False
 
 
 opp_disconnected_after = False
@@ -523,6 +524,10 @@ while True:
 
     start_screen.main()
     _thread.start_new_thread(server_connection, ())
+
+    # waiting for countdown so it doesn't flash
+    while countdown < time.time():
+        pass
 
     with open(get_path('settings.json')) as f:
         controls = json.load(f)['controls']

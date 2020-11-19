@@ -8,7 +8,7 @@ def error_handler(e_type, value, tb):
 
     print(text)
 
-    with open('logs.txt', 'a') as f:
+    with open(get_path('logs.txt'), 'a') as f:
         f.write(f"{text}\n\n\n")
 
 
@@ -166,9 +166,9 @@ def game_over(win: bool):
 
     restart_button_font = pygame.font.Font(get_path('assets/arial.ttf'), 32)
     restart_button_rect = pygame.Rect(button_pos, button_dimensions)
-    restart_button_color = (255, 255, 255)
+    restart_button_color = game.foreground_color
     restart_button_text = restart_button_font.render(
-        'Find new match', True, (0, 0, 0))
+        'Find new match', True, game.background_color)
     game_over_font = pygame.font.Font(get_path('assets/arial.ttf'), 50)
 
     rematch_text_font = pygame.font.Font(get_path('assets/arial.ttf'), 40)
@@ -178,21 +178,21 @@ def game_over(win: bool):
 
     rematch_button_font = pygame.font.Font(get_path('assets/arial.ttf'), 26)
     rematch_button_dimensions = (120, 40)
-    rematch_button_text = rematch_button_font.render('Rematch', True, (0, 0, 0))
+    rematch_button_text = rematch_button_font.render('Rematch', True, game.background_color)
 
     self_rematch_button_pos = (int(game.width/2 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
     self_rematch_button_rect = pygame.Rect(self_rematch_button_pos, rematch_button_dimensions)
-    self_rematch_button_color = (255, 255, 255)
+    self_rematch_button_color = game.foreground_color
 
 
     text_font = pygame.font.Font(get_path('assets/arial.ttf'), 25)
-    you_text = text_font.render("You", True, (0, 0, 0))
-    opponent_text = text_font.render(game.opp_name, True, (0, 0, 0))
+    you_text = text_font.render("You", True, game.foreground_color)
+    opponent_text = text_font.render(game.opp_name, True, game.foreground_color)
     opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
 
     if not win:
         send('game over')
-        game_over_text = game_over_font.render('You lost...', True, (0, 0, 0))
+        game_over_text = game_over_font.render('You lost...', True, game.foreground_color)
 
         game.update_presence(
             details=f"In End Screen",
@@ -202,7 +202,7 @@ def game_over(win: bool):
         )
 
     else:
-        game_over_text = game_over_font.render('You win!', True, (0, 0, 0))
+        game_over_text = game_over_font.render('You win!', True, game.foreground_color)
 
         game.update_presence(
             details=f"In End Screen",
@@ -231,11 +231,11 @@ def game_over(win: bool):
 
     def draw_self_rematch_text():
         
-        self_rendered_text = rematch_text_font.render(self_rematch_text, True, (0, 0, 0))
+        self_rendered_text = rematch_text_font.render(self_rematch_text, True, game.foreground_color)
         game.screen.blit(self_rendered_text, (int(game.width/4)-100, int(game.height/2)+250))
 
 
-        opp_rendered_text = rematch_text_font.render(opp_rematch_text, True, (0, 0, 0))
+        opp_rendered_text = rematch_text_font.render(opp_rematch_text, True, game.foreground_color)
         game.screen.blit(opp_rendered_text, (int(game.width/2)+80, int(game.height/2)+250))
 
     def draw_texts():
@@ -245,6 +245,8 @@ def game_over(win: bool):
 
 
     while gameOver:
+
+        game.screen.fill(game.background_color)
 
 
         if opp_disconnected_after:
@@ -288,16 +290,16 @@ def game_over(win: bool):
 
         # for hover effects
         if restart_button_rect.collidepoint(mouse):
-            restart_button_color = tuple(map(darken, (255, 255, 255)))
+            restart_button_color = tuple(map(darken, game.foreground_color))
         else:
-            restart_button_color = (255, 255, 255)
+            restart_button_color = game.foreground_color
 
         
 
         if self_rematch_button_rect.collidepoint(mouse):
-            self_rematch_button_color = tuple(map(darken, (255, 255, 255)))
+            self_rematch_button_color = tuple(map(darken, game.foreground_color))
         else:
-            self_rematch_button_color = (255, 255, 255)
+            self_rematch_button_color = game.foreground_color
 
 
         if won == None:

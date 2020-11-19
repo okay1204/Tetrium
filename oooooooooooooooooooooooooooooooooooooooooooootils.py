@@ -1,6 +1,7 @@
 import os
 import sys
 import pathlib
+import pypresence
 
 def darken(value, amt = 60):
     return max(value - amt, 0)
@@ -8,6 +9,8 @@ def darken(value, amt = 60):
 
 def lighten(value, amt  = 60):
     return min(value + amt, 255)
+
+
 
 
 # whether this is a mac pyinstaller build or not

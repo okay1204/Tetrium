@@ -1,16 +1,30 @@
+import sys
+import traceback
+
+def error_handler(e_type, value, tb):
+
+    error = traceback.format_exception(e_type, value, tb)
+    text = "".join(error)
+
+    with open('logs.txt', 'a') as f:
+        f.write(f"{text}\n\n\n")
+    
+    print(text)
+
+
+sys.excepthook = error_handler
+
+
+
 # pylint: disable=no-member, unused-wildcard-import
 import pygame
 from game import *
 import time
 import random
-import sys
 import json
 import _thread
 import socket
 import onlineGame
-
-import sys
-
 from oooooooooooooooooooooooooooooooooooooooooooootils import get_path
 
 pieces = ["T", "L", "J", "S", "Z", "I", "O"]
@@ -108,7 +122,7 @@ gameOver = False
 
 
 def reset():
-    global bag, next_bag, avoids, current, held, canSwitch, moving, fall_speed, speedUp
+    global bag, next_bag, avoids, current, held, canSwitch, moving, fall_speed, speedUp, difficult_before
 
     game.resting.clear()
     game.level = 1
@@ -127,6 +141,7 @@ def reset():
     game.meter.clear()
     fall_speed = 1
     speedUp = False
+    difficult_before = False
 
 
 opp_disconnected_after = False
@@ -579,7 +594,10 @@ while True:
                 for row in game.rows_cleared:
 
                     for block in row:
-                        game.resting.remove(block)
+                        try:
+                            game.resting.remove(block)
+                        except:
+                            pass
 
                     for block in game.resting:
                         if block.y < row[0].y:
@@ -895,7 +913,7 @@ while True:
                             x, y = value
                             y -= 1
 
-                            if not 0 < x < 10 or y > 20:
+                            if not 0 <= x <= 10 or y > 20:
                                 filled_corners[name] = True
                                 continue
 
@@ -905,6 +923,7 @@ while True:
                                     break
                             else:
                                 filled_corners[name] = False
+
 
                         # normal t-spin
                         if (filled_corners["point left"] and filled_corners["point right"]) and (filled_corners["flat right"] or filled_corners["flat left"]):

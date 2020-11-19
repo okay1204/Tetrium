@@ -12,7 +12,7 @@ import json
 import pyperclip
 from oooooooooooooooooooooooooooooooooooooooooooootils import *
 import _thread
-
+import asyncio
 
 
 color_key = {
@@ -29,7 +29,43 @@ color_key = {
 
 class Game:
 
+    def connect_presence(self):
+        try:
+            print(1)
+            self.RPC.connect()
+            print(2)
+            self.presence_connected = True
+        except Exception as e:
+            print(e)
+            self.presence_connected = False
+
+    def threaded_updated_presence(self, state, details, start, large_image):
+        try:
+            self.RPC.update(
+                state=state,
+                details=details,
+                start=time.time(),
+                large_image=large_image,
+                large_text=large_image
+            )
+        except:
+            pass
+
+    def update_presence(self, state, details, start, large_image):
+        if self.presence_connected:
+            _thread.start_new_thread(self.threaded_updated_presence, (state, details, start, large_image))
+
     def __init__(self):
+
+        self.presence_connected = None
+
+        # self.RPC = pypresence.Presence(
+        #     client_id="778689610263560212"
+        # )
+
+        # _thread.start_new_thread(self.connect_presence, ())
+
+
 
         self.volume = 0.05
         self.lowered_volume = 0.015
@@ -79,6 +115,7 @@ class Game:
 
         self.round = 1
 
+        self.presence_connected = None
 
         self.level = 1
         self.score = 0
@@ -610,6 +647,8 @@ class Game:
         if not game.muted:
             pygame.mixer.music.set_volume(game.volume)
 
+        game.time_started = time.time()
+
         return True
 
 
@@ -934,14 +973,28 @@ class StartScreen(Game):
     
     def main(self):
         running = True
+        initial_presence = False
         while running:
+
+
             #NOTE make sure this is at the top
             self.s.fill((0,0,0, 2))
             #Makes sure that if game starts while were in this screen it goes back to game
             running = start_screen.check_started()
 
-            self.mouse = pygame.mouse.get_pos() 
+            if not initial_presence and game.presence_connected:
+                print("update")
+                game.update_presence(
+                    state="https://tetrium.me",
+                    details="In Start Menu",
+                    start=time.time(),
+                    large_image="tetrium_logo_512x512",
+                )
+                initial_presence = True
 
+
+            self.mouse = pygame.mouse.get_pos() 
+            
             #Game over loop
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1108,11 +1161,19 @@ class SettingsScreen(StartScreen):
                 "json name": "das",
                 "name": "Delayed Auto Shift",
                 "pos": (game.width/2, game.height/8),
+                "default": 0.8
             },
             {
                 "json name": "arr",
                 "name": "Auto Repeat Rate",
                 "pos": (game.width/2, game.height/4+50),
+                "default": 0.85
+            },
+            {
+                "json name": "sds",
+                "name": "Soft Drop Speed",
+                "pos": (game.width/2, game.height/2),
+                "default": 0.5
             }
         ]
 
@@ -1138,19 +1199,23 @@ class SettingsScreen(StartScreen):
                 elif name == "Auto Repeat Rate":
                     measurement = 205 - (int(value * 195) + 5)
                     measurement = f"{measurement}ms"
+
+                elif name == "Soft Drop Speed":
+                    measurement = int(value*19) + 1
+                    measurement = f"x{measurement}"
                 
                 
                 value_element = game.medium_font.render(measurement, True, game.foreground_color)
                 game.screen.blit(value_element, (pos[0] - value_element.get_rect().width/2, pos[1]+90))
 
         
-        piece = Piece(9, 15, "O")
+        piece = Piece(9, 20, "O")
         def draw_preview():
             text_element = game.big_font.render("Preview", True, game.foreground_color)
-            game.screen.blit(text_element, (game.width/2 - text_element.get_rect().width/2, game.height/2))
+            game.screen.blit(text_element, (game.width/2 - text_element.get_rect().width/2, game.height/2+140))
 
             text_element2 = game.medium_font.render("Move left and right to try it out", True, game.foreground_color)
-            game.screen.blit(text_element2, (game.width/2 - text_element2.get_rect().width/2, game.height/2+50))
+            game.screen.blit(text_element2, (game.width/2 - text_element2.get_rect().width/2, game.height/2+190))
 
             piece.render(preview=False)
             
@@ -1162,7 +1227,8 @@ class SettingsScreen(StartScreen):
             return False
 
 
-        reset_button_rect = pygame.Rect(game.width/2-40, game.height-100, 80, 25)
+        reset_button_y = game.height - 35
+        reset_button_rect = pygame.Rect(game.width/2-40, reset_button_y, 80, 25)
         def draw_reset_button():
 
             if reset_button_rect.collidepoint(mouse):
@@ -1173,7 +1239,7 @@ class SettingsScreen(StartScreen):
             pygame.draw.rect(game.screen, reset_button_color, reset_button_rect)
 
             reset_button_text = game.medium_font.render("RESET", True, game.background_color)
-            game.screen.blit(reset_button_text, (game.width/2-reset_button_text.get_rect().width/2, game.height-100))
+            game.screen.blit(reset_button_text, (game.width/2-reset_button_text.get_rect().width/2, reset_button_y))
 
         running = True
         dragging = None
@@ -1181,6 +1247,8 @@ class SettingsScreen(StartScreen):
         last_move = 0
         das_start = 0
         while running:
+
+            running = start_screen.check_started()
 
             for slider in sliders:
                 gameplay_settings[slider["json name"]] = slider["value"]
@@ -1195,9 +1263,6 @@ class SettingsScreen(StartScreen):
             for event in pygame.event.get():
 
                 if event.type == pygame.QUIT:
-
-                    with open(get_path('settings.json'), 'w') as f:
-                        json.dump(settings, f, indent=2)
 
                     pygame.quit()
                     sys.exit()
@@ -1246,11 +1311,7 @@ class SettingsScreen(StartScreen):
 
                         for slider in sliders:
 
-                            name = slider['json name']
-                            if name == 'das':
-                                slider['value'] = 0.8
-                            elif name == 'arr':
-                                slider['value'] = 0.85
+                            slider['value'] = slider['default']
 
                     elif not dragging:
                         for slider in sliders:
@@ -1287,6 +1348,11 @@ class SettingsScreen(StartScreen):
 
 
             pygame.display.update()
+
+
+            if not running:
+                with open(get_path('settings.json'), 'w') as f:
+                    json.dump(settings, f, indent=2)
     
     def pick_themes_screen(self):
 
@@ -1761,7 +1827,6 @@ class SettingsScreen(StartScreen):
 
 
     def main(self):
-
         running = True
         while running:
             #bkg color
@@ -1769,7 +1834,6 @@ class SettingsScreen(StartScreen):
             mouse = pygame.mouse.get_pos()
             #Makes sure that if game starts while were in this screen it goes back to game
             running = start_screen.check_started()
-
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

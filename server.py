@@ -128,13 +128,17 @@ def threaded_client(conn, player, game):
                         name = data[5:]
                         print(f"Player {player} in game {gameId} is called {name}")
 
-                    # dumps data
-                    sending = pickle.dumps(game)
-                    for n in range(len(sending)//blocksize+1):
-                        # sends portion of bytes
-                        conn.send(sending[n*blocksize:(n+1)*blocksize])
-                    # means end packets
-                    conn.send(sentinel)
+                    try:
+                        # dumps data
+                        sending = pickle.dumps(game)
+                        for n in range(len(sending)//blocksize+1):
+                            # sends portion of bytes
+                            conn.send(sending[n*blocksize:(n+1)*blocksize])
+                        # means end packets
+                        conn.send(sentinel)
+                    except:
+                        print(f"Player {player} ({name}) in game {gameId} forcefully disconnected")
+                        break
 
 
             else: # game doesn't exist

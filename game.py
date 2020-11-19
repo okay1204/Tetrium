@@ -1228,7 +1228,7 @@ class SettingsScreen(StartScreen):
                 "json name": "sds",
                 "name": "Soft Drop Speed",
                 "pos": (game.width/2, game.height/2),
-                "default": 0.115
+                "default": 0.17
             }
         ]
 
@@ -1256,7 +1256,7 @@ class SettingsScreen(StartScreen):
                     measurement = f"{measurement}ms"
 
                 elif name == "Soft Drop Speed":
-                    measurement = int(value*118) + 2
+                    measurement = int(value*78) + 2
                     measurement = f"x{measurement}"
                 
                 

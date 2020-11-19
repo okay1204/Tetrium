@@ -576,7 +576,7 @@ while True:
 
     das = gameplay_settings['das'] * 0.5
     arr = 0.205 - ((gameplay_settings['arr'] * 0.195) + 0.005)
-    sds = int(gameplay_settings['sds']*118) + 2
+    sds = int(gameplay_settings['sds']*78) + 2
 
     pygame.mouse.set_visible(False)
 

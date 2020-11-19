@@ -27,6 +27,10 @@ import _thread
 import socket
 import onlineGame
 from oooooooooooooooooooooooooooooooooooooooooooootils import get_path
+from multiprocessing import Process
+
+
+
 
 pieces = ["T", "L", "J", "S", "Z", "I", "O"]
 
@@ -190,8 +194,22 @@ def game_over(win: bool):
         send('game over')
         game_over_text = game_over_font.render('You lost...', True, (0, 0, 0))
 
+        game.update_presence(
+            details=f"In End Screen",
+            state=f"Lost to {game.opp_name}",
+            start=game.time_started,
+            large_image="tetrium_logo_512x512"
+        )
+
     else:
         game_over_text = game_over_font.render('You win!', True, (0, 0, 0))
+
+        game.update_presence(
+            details=f"In End Screen",
+            state=f"Won against {game.opp_name}",
+            start=game.time_started,
+            large_image="tetrium_logo_512x512"
+        )
 
     textRect = game_over_text.get_rect()
     textRect.center = (game.width // 2, 200)
@@ -531,6 +549,9 @@ def play_meter_animations():
     for remove in removed:
         meter_animations.remove(remove)
 
+das_start = 0
+arr_start = 0
+presence_update = 0
 
 while True:
 
@@ -555,14 +576,21 @@ while True:
     arr = 0.205 - ((gameplay_settings['arr'] * 0.195) + 0.005)
     sds = int(gameplay_settings['sds']*118) + 2
 
-    das_start = 0
-    arr_start = 0
-
     pygame.mouse.set_visible(False)
 
+
     while game.running:
+        
 
         if disconnected:
+
+            game.update_presence(
+                details=f"In Disconnected Screen",
+                state=f"Idle",
+                start=game.time_opened,
+                large_image="tetrium_logo_512x512"
+            )
+
             game.running = False
             pygame.mouse.set_visible(True)
             game.disconnected_screen(*disconnected)
@@ -587,6 +615,28 @@ while True:
             # meaning if the user quit in the countdown
             if not game.countdown(countdown):
                 stop()
+
+        # updating discord presence
+        if time.time() > presence_update and game.opp_name:
+            presence_update = time.time() + 5
+
+            # getting y value of highest block
+            highest_y = 20
+            for block in game.resting:
+                if block.y < highest_y:
+                    highest_y = block.y
+
+            highest_y = int(20 - highest_y)
+
+
+            game.update_presence(
+                details=f"Dueling {game.opp_name}",
+                state=f"{highest_y} Lines High",
+                start=game.time_started,
+                large_image="tetrium_logo_512x512"
+            )
+
+
 
         # if there are fading blocks, pause the game for a quick moment
         if game.rows_cleared:

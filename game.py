@@ -15,6 +15,17 @@ import _thread
 import asyncio
 
 
+# these two lines saved my life
+import nest_asyncio
+nest_asyncio.apply()
+
+
+
+if __name__ == "__main__":
+    import main
+
+
+
 color_key = {
     'green': (13, 252, 65),
     'blue': (13, 29, 252),
@@ -29,44 +40,35 @@ color_key = {
 
 class Game:
 
-    def connect_presence(self):
-        try:
-            print(1)
-            self.RPC.connect()
-            print(2)
-            self.presence_connected = True
-        except Exception as e:
-            print(e)
-            self.presence_connected = False
-
-    def threaded_updated_presence(self, state, details, start, large_image):
-        try:
-            self.RPC.update(
-                state=state,
-                details=details,
-                start=time.time(),
-                large_image=large_image,
-                large_text=large_image
-            )
-        except:
-            pass
-
-    def update_presence(self, state, details, start, large_image):
-        if self.presence_connected:
-            _thread.start_new_thread(self.threaded_updated_presence, (state, details, start, large_image))
-
     def __init__(self):
+
+        #############################
+        #############################
+        self.dev = False #############
+        #############################
+        #############################
+
+        if self.dev:
+            print("IN DEVELOPMENT MODE: DISABLES DISCORD RPC")
+
 
         self.presence_connected = None
 
-        # self.RPC = pypresence.Presence(
-        #     client_id="778689610263560212"
-        # )
+        if not self.dev:
+            # creates a new asyncio loop
+            self.discord_rpc_loop = asyncio.new_event_loop()
 
-        # _thread.start_new_thread(self.connect_presence, ())
+            # initializes the discord RPC with this new loop
+            self.RPC = pypresence.Presence(
+                client_id="778689610263560212",
+                loop=self.discord_rpc_loop
+            )
 
+            # use a thread to start this loop and run forever
+            _thread.start_new_thread(self.start_background_loop, ())
 
-
+            # then run the task on this loop
+            asyncio.run_coroutine_threadsafe(self.start_connect_presence(), self.discord_rpc_loop)
         self.volume = 0.05
         self.lowered_volume = 0.015
 
@@ -88,6 +90,9 @@ class Game:
         self.countdownSFX = pygame.mixer.Sound(get_path('assets/countdown.wav'))
         self.countdown_goSFX = pygame.mixer.Sound(get_path('assets/countdown_go.wav'))
         self.garbage_recieveSFX = pygame.mixer.Sound(get_path('assets/garbage_recieve.wav'))
+
+        self.time_opened = time.time()
+
 
         
 
@@ -114,8 +119,6 @@ class Game:
         self.continuous = True
 
         self.round = 1
-
-        self.presence_connected = None
 
         self.level = 1
         self.score = 0
@@ -652,6 +655,44 @@ class Game:
         return True
 
 
+    async def connect_presence(self):
+        try:
+            print("Connecting to Discord RPC...")
+            self.RPC.connect()
+            print("Discord RPC connected")
+            self.presence_connected = True
+        except Exception as e:
+            print(e)
+            self.presence_connected = False
+
+    async def start_connect_presence(self):
+
+        self.discord_rpc_loop.create_task(self.connect_presence())
+
+
+    def start_background_loop(self):
+        asyncio.set_event_loop(self.discord_rpc_loop)
+        self.discord_rpc_loop.run_forever()
+        
+
+    async def async_update_presence(self, details, state, start, large_image):
+        try:
+            self.RPC.update(
+                state=state,
+                details=details,
+                start=start,
+                large_image=large_image,
+                large_text=large_image
+            )
+        except Exception as e:
+            print(e)
+
+    def update_presence(self, state, details, start, large_image):
+        if not self.dev and self.presence_connected:
+            self.discord_rpc_loop.create_task(self.async_update_presence(details, state, start, large_image))
+
+
+
 game = Game()
 
 
@@ -882,6 +923,13 @@ class StartScreen(Game):
             game.outdated_version_screen(outdated_info[2], outdated_info[3])
             return
 
+        game.update_presence(
+            details="In Start Menu",
+            state="Waiting for match",
+            start=game.time_opened,
+            large_image="tetrium_logo_512x512"
+        )
+
         self.start_button_rect.x -=  100
         self.connected = True
         game.name = self.input_text
@@ -976,20 +1024,21 @@ class StartScreen(Game):
         initial_presence = False
         while running:
 
-
             #NOTE make sure this is at the top
             self.s.fill((0,0,0, 2))
             #Makes sure that if game starts while were in this screen it goes back to game
             running = start_screen.check_started()
 
+            # print(initial_presence, game.presence_connected)
             if not initial_presence and game.presence_connected:
-                print("update")
+
                 game.update_presence(
-                    state="https://tetrium.me",
                     details="In Start Menu",
-                    start=time.time(),
-                    large_image="tetrium_logo_512x512",
+                    state="Idling",
+                    start=game.time_opened,
+                    large_image="tetrium_logo_512x512"
                 )
+
                 initial_presence = True
 
 
@@ -1019,6 +1068,12 @@ class StartScreen(Game):
                         self.start_button_rect.x = game.width/2-60
                         game.screen.fill((0, 0, 0))
                         self.connected = False
+                        game.update_presence(
+                            details="In Start Menu",
+                            state="Idling",
+                            start=game.time_opened,
+                            large_image="tetrium_logo_512x512"
+                        )
 
 
                     elif self.mute_button_pos[0] - self.mute_button_radius <= self.mouse[0] <= self.mute_button_pos[0] + self.mute_button_radius and self.mute_button_pos[1] - self.mute_button_radius <= self.mouse[1] <=  self.mute_button_pos[1] + self.mute_button_radius: 
@@ -2380,8 +2435,3 @@ class Piece(Game):
 
 start_screen = StartScreen()
 settings_screen = SettingsScreen()
-
-
-
-if __name__ == "__main__":
-    import main

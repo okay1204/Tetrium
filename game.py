@@ -53,10 +53,8 @@ class Game:
         self.countdown_goSFX = pygame.mixer.Sound(resource_path('assets/countdown_go.wav'))
         self.garbage_recieveSFX = pygame.mixer.Sound(resource_path('assets/garbage_recieve.wav'))
 
-        
         self.width = 750
         self.height = 800
-
 
         self.running = True
         self.muted = False
@@ -108,8 +106,6 @@ class Game:
         
        
 
-        self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
-        self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
         self.opaque_bkg = pygame.image.load(resource_path('assets/opaque_bkg.png'))
 
 
@@ -178,6 +174,8 @@ class Game:
         self.set_text_color(self.foreground_color)
         self.theme_text = theme[0]
        
+
+        self.resize_screen_setup()
        
    
     def set_grid_color(self, color):
@@ -207,12 +205,12 @@ class Game:
             block.render()
 
         # for piece order
-        for x in range(1, 4):
-            pygame.draw.circle(self.screen, self.foreground_color, (450, 130*x), 40)
+        for i in range(1, 4):
+            pygame.draw.circle(self.screen, self.foreground_color, (self.playing_field_rect.x + self.playing_field_rect.width + 100/2,  (self.playing_field_rect.y - 100) +  130*i), 40)
 
         text = self.font.render('Next', True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (450, 60)
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width + 100/2, self.playing_field_rect.y - 40)
         self.screen.blit(text, textRect)
 
         # putting pieces in the circles
@@ -220,16 +218,16 @@ class Game:
             position = 1
             
             for piece in pieces:
-                for color, x, y, width, height in pieces_lib.preview_piece(450, position*130, piece):
+                for color, x, y, width, height in pieces_lib.preview_piece(self.playing_field_rect.x + self.playing_field_rect.width + 100/2, (self.playing_field_rect.y - 100) + position*130, piece):
                     pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
                 
                 position += 1
     
         # for hold area
-        pygame.draw.circle(self.screen, self.foreground_color, (50, 130), 40)
+        pygame.draw.circle(self.screen, self.foreground_color, (self.playing_field_rect.x - 100/2, self.playing_field_rect.y + 30), 40)
         text = self.font.render('Hold', True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (50, 60)
+        textRect.center = (self.playing_field_rect.x - 100/2, self.playing_field_rect.y - 40)
         self.screen.blit(text, textRect)
 
         if held:
@@ -237,31 +235,27 @@ class Game:
                 pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
 
 
-        # for continuous movement indication
-        if self.continuous: text = "On"
-        else: text = "Off"
-
-        text = self.font.render(f"Continuous Movement: {text}", True, self.text_color)
+        text = self.font.render(f"Continuous Movement: {'On' if self.continuous else 'Off'}", True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (300, 780)
-        self.screen.blit(text, textRect)
-
-        self.score = int(self.score)
-        text = self.font.render(f"Score: {self.score}", True, self.text_color)
-        textRect = text.get_rect()
-        textRect.center = (250, 725)
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width/2, self.playing_field_rect.y + self.playing_field_rect.height + 80)
         self.screen.blit(text, textRect)
 
         font = pygame.font.Font(resource_path('assets/arial.ttf'), 25)
 
         text = font.render(f"Level: {self.level}", True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (420, 725)
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width + 20, self.playing_field_rect.y + self.playing_field_rect.height + 25)
+        self.screen.blit(text, textRect)
+
+        self.score = int(self.score)
+        text = self.font.render(f"Score: {self.score}", True, self.text_color)
+        textRect = text.get_rect()
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width/2, self.playing_field_rect.y + self.playing_field_rect.height + 25)
         self.screen.blit(text, textRect)
 
         text = font.render(f"Lines: {self.lines}", True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (75, 725)
+        textRect.center = (self.playing_field_junk_meter_rect.x + textRect.width/3, self.playing_field_rect.y + self.playing_field_rect.height + 25)
         self.screen.blit(text, textRect)
 
         font = pygame.font.Font(resource_path('assets/arial.ttf'), 20)
@@ -275,25 +269,27 @@ class Game:
 
         text = font.render(f"Time Elapsed: {time_elapsed}", True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (250, 25)
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width/2,  self.playing_field_rect.y - 75)
         self.screen.blit(text, textRect)
 
 
         text = font.render(self.name, True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (250, 65)
+
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width/2, self.playing_field_rect.y - 20)
         self.screen.blit(text, textRect)
 
 
         text = font.render(self.opp_name, True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (650, 230)
+        textRect.center = (self.second_screen_rect.x + self.second_screen_rect.width/2, self.second_screen_rect.y - 20)
         self.screen.blit(text, textRect)
 
 
         # junk line meter
-        pygame.draw.rect(self.screen, self.preview_color, (32, 394, 36, 306))
-        pygame.draw.rect(self.screen, self.foreground_color, (35, 397, 30, 300))
+        pygame.draw.rect(self.screen, self.preview_color, self.playing_field_junk_meter_rect_outline)
+        pygame.draw.rect(self.screen, self.foreground_color, self.playing_field_junk_meter_rect)
+        
 
         meter_block = 0
 
@@ -315,8 +311,9 @@ class Game:
 
                 if meter_block >= 10:
                     break
-                pygame.draw.rect(self.screen, darkened, (35, 667 - (30 * meter_block), 30, 30))
-                pygame.draw.rect(self.screen, color, (40, 672 - (30 * meter_block), 20, 20)) #type: ignore
+
+                pygame.draw.rect(self.screen, darkened, (self.playing_field_junk_meter_rect.x, (self.playing_field_junk_meter_rect.y + self.playing_field_junk_meter_rect.height - 30) - (30 * meter_block), 30, 30))
+                pygame.draw.rect(self.screen, color, (self.playing_field_junk_meter_rect.x + 5, (self.playing_field_junk_meter_rect.y + self.playing_field_junk_meter_rect.height - 30 + 5) - (30 * meter_block), 20, 20)) #type: ignore
                 meter_block += 1
 
         
@@ -339,8 +336,8 @@ class Game:
                 Block(x, y, color, colorByName = False).render_second()
         
         # junk line meter
-        pygame.draw.rect(self.screen, self.preview_color, (539, 398, 17, 152))
-        pygame.draw.rect(self.screen, self.foreground_color, (540, 399, 15, 150))
+        pygame.draw.rect(self.screen, self.preview_color, self.opp_screen_junk_meter_rect_outline)
+        pygame.draw.rect(self.screen, self.foreground_color, self.opp_screen_junk_meter_rect)
 
 
         meter_block = 0
@@ -363,8 +360,8 @@ class Game:
                 if meter_block >= 10:
                     break
 
-                pygame.draw.rect(self.screen, darkened, (540, 534 - (15 * meter_block), 15, 15))
-                pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11)) #type: ignore
+                pygame.draw.rect(self.screen, darkened, (self.opp_screen_junk_meter_rect.x, (self.opp_screen_junk_meter_rect.y + self.opp_screen_junk_meter_rect.height) - (15 * meter_block), 15, 15))
+                pygame.draw.rect(self.screen, color, (self.opp_screen_junk_meter_rect.x + 2, (self.opp_screen_junk_meter_rect.y + self.opp_screen_junk_meter_rect.height + 2) - (15 * meter_block), 11, 11)) #type: ignore
                 meter_block += 1
 
     def draw_grid(self, rect, block_size, color):
@@ -624,7 +621,75 @@ class Game:
         return True
 
 
+    def resize_screen_setup(self):
+        #BEFORE:
+            # self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
+            # self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
+            # self.playing_field_junk_meter_rect_outline = pygame.Rect(32, 394, 36, 306)
+            # self.playing_field_junk_meter_rect = pygame.Rect(35, 397, 30, 300)
+            # self.opp_screen_junk_meter = pygame.Rect(540, 399, 15, 150)
+            # self.opp_screen_junk_meter_outline = pygame.Rect(539, 398, 17, 152)
+
+
+
+        #NOTE x and y for this rect have to be >= 100
+        playing_field_rect_height = 600
+        playing_field_rect_y = self.height/2 - playing_field_rect_height/2
+        self.playing_field_rect = pygame.Rect(100, self.height/2 - playing_field_rect_height/2, 300, 600)
+        self.block_y_offset = playing_field_rect_y
+        
+        playing_field_junk_meter_width = 36
+        playing_field_junk_meter_height = self.playing_field_rect.width
+        self.playing_field_junk_meter_rect = pygame.Rect(
+            self.playing_field_rect.x - 100/2 - playing_field_junk_meter_width/2, 
+            self.playing_field_rect.y + self.playing_field_rect.height - playing_field_junk_meter_height,
+            playing_field_junk_meter_width,
+            playing_field_junk_meter_height
+            )
+
+        offset = 6
+        self.playing_field_junk_meter_rect_outline = pygame.Rect(
+            self.playing_field_junk_meter_rect.x - offset/2,
+            self.playing_field_junk_meter_rect.y - offset/2,
+            self.playing_field_junk_meter_rect.width + offset,
+            self.playing_field_junk_meter_rect.height + offset,
+            
+            )
+
+
+        second_screen_rect_height = 150
+        self.second_screen_rect = pygame.Rect(
+            
+            self.playing_field_rect.x + self.playing_field_rect.width + 170, 
+            self.playing_field_rect.y + self.playing_field_rect.height/2 - second_screen_rect_height, 
+            second_screen_rect_height, 
+            300,
+            )
+
+
+        opp_screen_junk_meter_height = self.second_screen_rect.width
+        self.opp_screen_junk_meter_rect = pygame.Rect(
+            self.second_screen_rect.x - 30,
+            self.second_screen_rect.y + self.second_screen_rect.height - opp_screen_junk_meter_height,
+            15, 
+            opp_screen_junk_meter_height
+
+            )
+
+        offset = 3
+        self.opp_screen_junk_meter_rect_outline = pygame.Rect(
+            self.opp_screen_junk_meter_rect.x - offset/2,
+            self.opp_screen_junk_meter_rect.y - offset/2,
+            self.opp_screen_junk_meter_rect.width + offset,
+            self.opp_screen_junk_meter_rect.height + offset,
+            
+            )
+
+
+
+
     def resize_all_screens(self):
+        self.resize_screen_setup()
         start_screen.resize_screen()
         settings_screen.resize_screen()
             
@@ -672,15 +737,16 @@ class StartScreen(Game):
         self.disconnect_button_text = game.font.render('Disconnect', True, (self.r, self.g, self.b))
 
     def resize_screen(self):
-        self.max_x = int((game.width/30)-3) 
+        self.max_x = int((game.width/30)-4) 
         self.max_y = int((game.height/30))
-        step_y = int(self.max_y/5) or 1
-        step_x = int(self.max_x/5) or 1
+        step_y = 5
+        step_x = 1
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
-        self.x_pos = list(range(0, self.max_x, step_x)) + list(range(0, int(self.max_x/2), step_x))
-        self.y_pos = list(range(0, self.max_y, step_y)) + list(range(0, int(self.max_y/2), step_y))
+        self.x_pos = list(range(-3, self.max_x, step_x)) + [randint(0, self.max_x) for i in range(3)]
+        self.y_pos = list(range(-3, self.max_y, step_y)) + [randint(0, self.max_y) for i in range(3)]
 
         shuffle(self.x_pos)
+        shuffle(self.y_pos)
 
 
         self.pieces = [
@@ -737,8 +803,7 @@ class StartScreen(Game):
         credits_list = ['Made by', 'okay#2996', 'and', 'AliMan21#6527']
         text_y = 0
         text_offset = 80    
-        #smaller this number is, the faster the text will move
-        text_scroll_dist_multiplier = 2000
+        text_scroll_dist_multiplier = 4000
 
         def draw_text(tup):
             index, text = tup
@@ -906,7 +971,7 @@ class StartScreen(Game):
         
         return (r, g, b)
         
-    def draw_tetris_pieces(self, pieces):
+    def draw_tetris_pieces(self, pieces, rotate = True):
         for i, piece in enumerate(pieces):
             #means piece is off the screen
             if piece.y >= 28:
@@ -915,10 +980,16 @@ class StartScreen(Game):
 
 
             piece.render(False)
+
             try:
                 if time.time() > self.last_falls[i]:
                     piece.move(0, 1)
                     self.last_falls[i] = time.time() + 0.75
+                    #this is just an algorithm for occasionally turning the pieces
+                    if rotate and randint(0, 7) == 3:
+                        piece.rotate(randint(0, 1), False)
+
+
             except:
                 break
 
@@ -1070,7 +1141,7 @@ class StartScreen(Game):
             pygame.mixer.music.set_volume(game.lowered_volume)
             game.screen.blit(self.s, (0, 0))  
             self.r, self.g, self.b = self.cycle_colors((self.r, self.g, self.b))
-            self.draw_tetris_pieces(self.pieces)
+            self.draw_tetris_pieces(self.pieces, False)
             self.check_mute_and_draw_icons()
             self.draw_credits_button(self.mouse)
             self.draw_settings_button(self.mouse)
@@ -1682,9 +1753,6 @@ class SettingsScreen(StartScreen):
             pygame.display.update()
             game.clock.tick(60)
 
-        
-
-
 
 class Block(Game):
 
@@ -1706,13 +1774,14 @@ class Block(Game):
         
     
     def render(self):
-
+        
+        
         # normal
         if time.time() > self.flash_start + 0.2 and not self.fade_start:
 
             darker = tuple(darken(i) for i in self.color)
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-            pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
 
         # flashing
         elif time.time() <= self.flash_start + 0.2:
@@ -1741,8 +1810,9 @@ class Block(Game):
 
             darker = tuple(darken(i) for i in flash_color)
 
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-            pygame.draw.rect(game.screen, flash_color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            pygame.draw.rect(game.screen, flash_color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
+
 
         # fading
         else:
@@ -1762,8 +1832,10 @@ class Block(Game):
             
             darker = tuple(darken(i) for i in fade_color)
 
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-            pygame.draw.rect(game.screen, fade_color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            pygame.draw.rect(game.screen, fade_color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
+
+
 
 
     # for putting blocks on second screen
@@ -1776,11 +1848,11 @@ class Block(Game):
 
     def render_preview(self):
 
-        pygame.draw.rect(game.screen, game.preview_color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-        pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + 103, (self.y-1)* self.size + 103, 24, 24))
+        pygame.draw.rect(game.screen, game.preview_color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+        pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + 103, (self.y-1)* self.size + game.block_y_offset + 3, 24, 24))
 
 
-
+        
 class Piece(Game):
 
     def __init__(self, x, y, piece):
@@ -1858,7 +1930,7 @@ class Piece(Game):
                 self.rotation = '0'
 
 
-    def _path_check(self, direct, x, y):
+    def _path_check(self, direct, x, y, play_sound = True):
 
         # invert y direction
         y *= -1
@@ -1866,7 +1938,8 @@ class Piece(Game):
         self.move(x, y)
 
         if not self.check_overlap():
-            game.correct_rotateSFX.play()
+            if play_sound:
+                game.correct_rotateSFX.play()
             return True
 
         # reset
@@ -1874,13 +1947,15 @@ class Piece(Game):
         
         return False
 
+        
+
 
 
     #0 means clockwise, 1 means counterclockwise
-    def rotate(self, direct: int):
+    def rotate(self, direct: int, play_sound = True):
        
 
-        if self.piece_type == "O": return game.correct_rotateSFX.play()
+        if self.piece_type == "O": return game.correct_rotateSFX.play() if play_sound else None
 
         org_block_coords = []
 
@@ -1944,32 +2019,32 @@ class Piece(Game):
                     
                     # 0 -> R
                     if old_rotation == "0":
-                        if self._path_check(direct, -2, 0): return
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, -2, -1): return
-                        if self._path_check(direct, 1, 2): return
+                        if self._path_check(direct, -2, 0, play_sound): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, -2, -1, play_sound): return
+                        if self._path_check(direct, 1, 2, play_sound): return
 
 
                     # R -> 2
                     elif old_rotation == 'R':
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, 2, 0): return
-                        if self._path_check(direct, -1, 2): return
-                        if self._path_check(direct, 2, -1): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, 2, 0, play_sound): return
+                        if self._path_check(direct, -1, 2, play_sound): return
+                        if self._path_check(direct, 2, -1, play_sound): return
                     
                     # 2 -> L
                     elif old_rotation == '2':
-                        if self._path_check(direct, 2, 0): return
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, 2, 1): return
-                        if self._path_check(direct, -1, -2): return
+                        if self._path_check(direct, 2, 0, play_sound): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, 2, 1, play_sound): return
+                        if self._path_check(direct, -1, -2, play_sound): return
 
                     # L -> 0
                     elif old_rotation == "L":
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, -2, 0): return
-                        if self._path_check(direct, 1, -2): return
-                        if self._path_check(direct, -2, 1): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, -2, 0, play_sound): return
+                        if self._path_check(direct, 1, -2, play_sound): return
+                        if self._path_check(direct, -2, 1, play_sound): return
 
 
                 # counterclockwise
@@ -1977,31 +2052,31 @@ class Piece(Game):
 
                     # R -> 0
                     if old_rotation == "R":
-                        if self._path_check(direct, 2, 0): return
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, 2, 1): return
-                        if self._path_check(direct, -1, -2): return
+                        if self._path_check(direct, 2, 0, play_sound): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, 2, 1, play_sound): return
+                        if self._path_check(direct, -1, -2, play_sound): return
 
                     # 2 -> R
                     elif old_rotation == "2":
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, -2, 0): return
-                        if self._path_check(direct, 1, -2): return
-                        if self._path_check(direct, -2, 1): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, -2, 0, play_sound): return
+                        if self._path_check(direct, 1, -2, play_sound): return
+                        if self._path_check(direct, -2, 1, play_sound): return
 
                     # L -> 2
                     elif old_rotation == "L":
-                        if self._path_check(direct, -2, 0): return
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, -2, -1): return
-                        if self._path_check(direct, 1, 2): return
+                        if self._path_check(direct, -2, 0, play_sound): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, -2, -1, play_sound): return
+                        if self._path_check(direct, 1, 2, play_sound): return
                     
                     # 0 -> L
                     elif old_rotation == "0":
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, 2, 0): return
-                        if self._path_check(direct, -1, 2): return
-                        if self._path_check(direct, 2, -1): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, 2, 0, play_sound): return
+                        if self._path_check(direct, -1, 2, play_sound): return
+                        if self._path_check(direct, 2, -1, play_sound): return
 
 
 
@@ -2013,32 +2088,32 @@ class Piece(Game):
                     
                     # 0 -> R
                     if old_rotation == "0":
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, -1, 1): return
-                        if self._path_check(direct, 0, -2): return
-                        if self._path_check(direct, -1, -2): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, -1, 1, play_sound): return
+                        if self._path_check(direct, 0, -2, play_sound): return
+                        if self._path_check(direct, -1, -2, play_sound): return
 
 
                     # R -> 2
                     elif old_rotation == 'R':
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, 1, -1): return
-                        if self._path_check(direct, 0, 2): return
-                        if self._path_check(direct, 1, 2): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, 1, -1, play_sound): return
+                        if self._path_check(direct, 0, 2, play_sound): return
+                        if self._path_check(direct, 1, 2, play_sound): return
                     
                     # 2 -> L
                     elif old_rotation == '2':
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, 1, 1): return
-                        if self._path_check(direct, 0, -2): return
-                        if self._path_check(direct, 1, -2): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, 1, 1, play_sound): return
+                        if self._path_check(direct, 0, -2, play_sound): return
+                        if self._path_check(direct, 1, -2, play_sound): return
 
                     # L -> 0
                     elif old_rotation == "L":
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, -1, -1): return
-                        if self._path_check(direct, 0, 2): return
-                        if self._path_check(direct, -1, 2): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, -1, -1, play_sound): return
+                        if self._path_check(direct, 0, 2, play_sound): return
+                        if self._path_check(direct, -1, 2, play_sound): return
 
 
                 # counterclockwise
@@ -2046,31 +2121,31 @@ class Piece(Game):
 
                     # R -> 0
                     if old_rotation == "R":
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, 1, -1): return
-                        if self._path_check(direct, 0, 2): return
-                        if self._path_check(direct, 1, 2): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, 1, -1, play_sound): return
+                        if self._path_check(direct, 0, 2, play_sound): return
+                        if self._path_check(direct, 1, 2, play_sound): return
 
                     # 2 -> R
                     elif old_rotation == "2":
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, -1, 1): return
-                        if self._path_check(direct, 0, -2): return
-                        if self._path_check(direct, -1, -2): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, -1, 1, play_sound): return
+                        if self._path_check(direct, 0, -2, play_sound): return
+                        if self._path_check(direct, -1, -2, play_sound): return
 
                     # L -> 2
                     elif old_rotation == "L":
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, -1, -1): return
-                        if self._path_check(direct, 0, 2): return
-                        if self._path_check(direct, -1, 2): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, -1, -1, play_sound): return
+                        if self._path_check(direct, 0, 2, play_sound): return
+                        if self._path_check(direct, -1, 2, play_sound): return
                     
                     # 0 -> L
                     elif old_rotation == "0":
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, 1, 1): return
-                        if self._path_check(direct, 0, -2): return
-                        if self._path_check(direct, 1, -2): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, 1, 1, play_sound): return
+                        if self._path_check(direct, 0, -2, play_sound): return
+                        if self._path_check(direct, 1, -2, play_sound): return
             
 
             # if all tests fail
@@ -2085,7 +2160,7 @@ class Piece(Game):
                     coords = org_corner_coords[index]
   
 
-        else:
+        elif play_sound:
             game.correct_rotateSFX.play()
             
             

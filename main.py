@@ -227,6 +227,11 @@ def game_over(win: bool):
             if event.type == pygame.QUIT:
                 stop()
 
+            elif event.type == pygame.VIDEORESIZE:
+                game.width, game.height = event.w, event.h
+                game.resize_all_screens()
+            
+
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
                 # find new match
@@ -764,6 +769,11 @@ while True:
                 elif key_name == controls['Toggle Movement']:
                     game.continuous = not game.continuous
                     moving = 0
+
+
+            elif event.type == pygame.VIDEORESIZE:
+                game.width, game.height = event.w, event.h
+                game.resize_all_screens()
 
             elif event.type in (pygame.KEYUP, pygame.MOUSEBUTTONUP):
 

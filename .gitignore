@@ -2,3 +2,4 @@ __pycache__/
 .vscode/
 ip.py
 settings.json
+logs.txt

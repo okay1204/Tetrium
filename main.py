@@ -6,10 +6,11 @@ def error_handler(e_type, value, tb):
     error = traceback.format_exception(e_type, value, tb)
     text = "".join(error)
 
+    print(text)
+
     with open('logs.txt', 'a') as f:
         f.write(f"{text}\n\n\n")
-    
-    print(text)
+
 
 
 sys.excepthook = error_handler
@@ -125,6 +126,7 @@ def reset():
     global bag, next_bag, avoids, current, held, canSwitch, moving, fall_speed, speedUp, difficult_before
 
     game.resting.clear()
+    game.rows_cleared.clear()
     game.level = 1
     game.score = 0
     game.lines = 0
@@ -432,7 +434,7 @@ def server_connection():
             fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
 
             if speedUp:
-                fall_speed /= 10
+                fall_speed /= sds
 
         
         if data.countdown > time.time():
@@ -551,6 +553,7 @@ while True:
 
     das = gameplay_settings['das'] * 0.5
     arr = 0.205 - ((gameplay_settings['arr'] * 0.195) + 0.005)
+    sds = int(gameplay_settings['sds']*118) + 2
 
     das_start = 0
     arr_start = 0
@@ -594,10 +597,7 @@ while True:
                 for row in game.rows_cleared:
 
                     for block in row:
-                        try:
-                            game.resting.remove(block)
-                        except:
-                            pass
+                        game.resting.remove(block)
 
                     for block in game.resting:
                         if block.y < row[0].y:
@@ -783,7 +783,7 @@ while True:
 
                 elif key_name == controls['Soft Drop']:
                     if not speedUp:
-                        fall_speed /= 10
+                        fall_speed /= sds
                         speedUp = True
                         last_fall -= 2
 
@@ -822,7 +822,7 @@ while True:
 
                 if key_name == controls['Soft Drop']:
                     if speedUp:
-                        fall_speed *= 10
+                        fall_speed *= sds
                         speedUp = False
 
                 elif key_name == controls['Move Left']:
@@ -1103,7 +1103,7 @@ while True:
 
         if display_until > time.time():
             text = game.font.render(
-                f'Speed Level {game.level}', True, (0, 0, 0))
+                f'Speed Level {game.level}', True, game.background_color)
             textRect = text.get_rect()
             textRect.center = (250, game.height // 2)
             game.screen.blit(text, textRect)

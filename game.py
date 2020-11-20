@@ -69,39 +69,22 @@ class Game:
 
             # then run the task on this loop
             asyncio.run_coroutine_threadsafe(self.start_connect_presence(), self.discord_rpc_loop)
-        self.volume = 0.05
-        self.lowered_volume = 0.015
 
         pygame.init()
         self.font = pygame.font.Font(get_path('assets/arial.ttf'), 32)
 
         pygame.mixer.music.load(get_path('assets/background_audio.wav'))
 
-        pygame.mixer.music.set_volume(self.lowered_volume)
-        pygame.mixer.music.play(-1)
 
-
-        self.correct_rotateSFX = pygame.mixer.Sound(get_path('assets/move_effect_success.wav'))
-        self.holdSFX = pygame.mixer.Sound(get_path('assets/hold_effect.wav'))
-        self.row_clearedSFX = pygame.mixer.Sound(get_path('assets/row_cleared.wav'))
-        self.row_clearedSFX.set_volume(0.5)
-        self.meter_sendSFX = pygame.mixer.Sound(get_path('assets/meter_send.wav'))
-        self.meter_recieveSFX = pygame.mixer.Sound(get_path('assets/meter_recieve.wav'))
-        self.countdownSFX = pygame.mixer.Sound(get_path('assets/countdown.wav'))
-        self.countdown_goSFX = pygame.mixer.Sound(get_path('assets/countdown_go.wav'))
-        self.garbage_recieveSFX = pygame.mixer.Sound(get_path('assets/garbage_recieve.wav'))
 
         self.time_opened = time.time()
 
-
-        
 
         self.width = 750
         self.height = 800
 
 
         self.running = True
-        self.muted = False
 
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((self.width, self.height),flags = pygame.SCALED)
@@ -153,7 +136,6 @@ class Game:
         self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
         self.opaque_bkg = pygame.image.load(get_path('assets/opaque_bkg.png'))
 
-
         self.default_controls = {
             "Move Right": "d",
             "Move Left": "a",
@@ -166,24 +148,43 @@ class Game:
             "Toggle Music": "m"
         }
 
-
-        # setting controls
         with open(get_path('settings.json')) as f:
-            temp = json.load(f)
+            settings = json.load(f)
+
+        self.music = settings['audio']['master'] * settings['audio']['music']
+        self.sfx = settings['audio']['master'] * settings['audio']['sfx']
+
+
+        self.sounds = {
+            "correct rotate": pygame.mixer.Sound(get_path('assets/move_effect_success.wav')),
+            "hold": pygame.mixer.Sound(get_path('assets/hold_effect.wav')),
+            "row cleared": pygame.mixer.Sound(get_path('assets/row_cleared.wav')),
+            "meter send": pygame.mixer.Sound(get_path('assets/meter_send.wav')),
+            "meter recieve": pygame.mixer.Sound(get_path('assets/meter_recieve.wav')),
+            "countdown": pygame.mixer.Sound(get_path('assets/countdown.wav')),
+            "countdown go": pygame.mixer.Sound(get_path('assets/countdown_go.wav')),
+            "garbage recieve": pygame.mixer.Sound(get_path('assets/garbage_recieve.wav'))
+        }
+
+        self.sfx_channel = pygame.mixer.Channel(1)
+        self.sfx_channel.set_volume(self.sfx)
+
+        pygame.mixer.music.set_volume(self.music)
+        pygame.mixer.music.play(-1)
        
         self.left_controls = {
-            "Move Left": temp["controls"]["Move Left"],
-            "Move Right": temp["controls"]["Move Right"],
-            "Soft Drop": temp["controls"]["Soft Drop"],
-            "Toggle Movement": temp["controls"]["Toggle Movement"],
-            "Toggle Music": temp["controls"]["Toggle Music"]
+            "Move Left": settings["controls"]["Move Left"],
+            "Move Right": settings["controls"]["Move Right"],
+            "Soft Drop": settings["controls"]["Soft Drop"],
+            "Toggle Movement": settings["controls"]["Toggle Movement"],
+            "Toggle Music": settings["controls"]["Toggle Music"]
         }
 
         self.right_controls = {
-            "Rotate Clockwise": temp["controls"]["Rotate Clockwise"],
-            "Rotate Counter-Clockwise": temp["controls"]["Rotate Counter-Clockwise"],
-            "Hold Piece": temp["controls"]["Hold Piece"],
-            "Hard Drop": temp["controls"]["Hard Drop"]
+            "Rotate Clockwise": settings["controls"]["Rotate Clockwise"],
+            "Rotate Counter-Clockwise": settings["controls"]["Rotate Counter-Clockwise"],
+            "Hold Piece": settings["controls"]["Hold Piece"],
+            "Hard Drop": settings["controls"]["Hard Drop"]
         }
 
         #first tuple is rgb of background color, second is foreground
@@ -202,7 +203,7 @@ class Game:
 
       
         try:
-            self.theme_index = temp['theme']
+            self.theme_index = settings['theme']
         
         except:
             self.theme_index = 0
@@ -222,7 +223,19 @@ class Game:
         self.set_grid_color(self.foreground_color)
         self.set_text_color(self.foreground_color)
         self.theme_text = theme[0]
-       
+
+
+
+    def update_volume(self):
+
+        with open(get_path('settings.json')) as f:
+            settings = json.load(f)
+            
+        self.music = settings['audio']['master'] * settings['audio']['music']
+        self.sfx = settings['audio']['master'] * settings['audio']['sfx']
+
+    def play_sound(self, sound):
+        self.sfx_channel.play(self.sounds[sound])
        
    
     def set_grid_color(self, color):
@@ -610,7 +623,7 @@ class Game:
     def countdown(self, countdown):
 
         # countdown is actually 4 seconds long, consisting of 3, 2, 1, and GO
-        pygame.mixer.music.set_volume(0)
+        pygame.mixer.music.pause()
         last_second = 100
         while countdown > time.time():
 
@@ -624,9 +637,9 @@ class Game:
             if seconds != last_second:
 
                 if seconds:
-                    self.countdownSFX.play()
+                    self.play_sound('countdown')
                 else:
-                    self.countdown_goSFX.play()
+                    self.play_sound('countdown go')
 
 
             last_second = seconds
@@ -647,8 +660,8 @@ class Game:
             pygame.display.update()
             self.clock.tick(60)
 
-        if not game.muted:
-            pygame.mixer.music.set_volume(game.volume)
+
+        pygame.mixer.music.unpause()
 
         game.time_started = time.time()
 
@@ -731,14 +744,9 @@ class StartScreen(Game):
         self.r, self.g, self.b = 255, 0, 0
         self.last_falls = [time.time() for _ in self.pieces]
         self.start_button_text_color = (255, 255, 255)
-        self.mute_button_pos = (int(game.width/2), int(game.height/2 + 100))
         self.start_button_rect = pygame.Rect(game.width/2-60, game.height/2, 120, 40)
         self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
 
-        self.mute_button_radius = 35
-        self.volume_on_icon = pygame.image.load(get_path('assets/volume-high.png'))
-        self.volume_off_icon = pygame.image.load(get_path('assets/volume-off.png'))
-        self.volume_icon_pos = (self.mute_button_pos[0] - 25, self.mute_button_pos[1] - 25)
         self.s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
         self.input_box_placeholder = game.medium_font.render("Enter a name...", True, (96, 93, 93))
         self.input_box_y =  game.height/2 - 85
@@ -761,7 +769,7 @@ class StartScreen(Game):
         self.started = False
         self.back_icon = pygame.image.load(get_path('assets/arrow-back.png'))
         self.back_button = pygame.Rect(10, 10, 75, 65)
-        self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
+        self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+70, 175, 40)
         self.disconnect_button_text = game.font.render('Disconnect', True, (self.r, self.g, self.b))
 
 
@@ -854,22 +862,6 @@ class StartScreen(Game):
 
 
         game.screen.blit(self.version_text, self.version_text_rect)
-        
-
-
-    def draw_mute_button_background(self):
-        pygame.draw.circle(game.screen, (255,255,255), self.mute_button_pos,  self.mute_button_radius)
-        
-
-    def check_mute_and_draw_icons(self):
-        self.draw_mute_button_background()
-        if game.muted:
-            game.lowered_volume, game.volume = 0, 0
-            game.screen.blit(self.volume_off_icon, self.volume_icon_pos)
-        
-        else:
-            game.lowered_volume, game.volume = 0.03, 0.1
-            game.screen.blit(self.volume_on_icon, self.volume_icon_pos)
 
     
     def draw_input_text(self):
@@ -1020,6 +1012,7 @@ class StartScreen(Game):
 
     
     def main(self):
+
         running = True
         initial_presence = False
         while running:
@@ -1060,7 +1053,6 @@ class StartScreen(Game):
 
                         self.start()
                         game.screen.fill((0, 0, 0))
-                        pygame.mixer.music.set_volume(game.volume)
                       
                     
                     if self.disconnect_button_rect.collidepoint(event.pos) and self.connected:
@@ -1074,10 +1066,6 @@ class StartScreen(Game):
                             start=game.time_opened,
                             large_image="tetrium_logo_512x512"
                         )
-
-
-                    elif self.mute_button_pos[0] - self.mute_button_radius <= self.mouse[0] <= self.mute_button_pos[0] + self.mute_button_radius and self.mute_button_pos[1] - self.mute_button_radius <= self.mouse[1] <=  self.mute_button_pos[1] + self.mute_button_radius: 
-                        game.muted = not game.muted
                     
                     elif self.credits_button.collidepoint(event.pos):
                         self.credits_screen(self.pieces, self.draw_tetris_pieces)
@@ -1103,7 +1091,6 @@ class StartScreen(Game):
                         if event.key == pygame.K_RETURN:
                             self.start()
                             game.screen.fill((0, 0, 0))
-                            pygame.mixer.music.set_volume(game.volume)
                                 
 
                         elif event.key == pygame.K_BACKSPACE:
@@ -1113,12 +1100,9 @@ class StartScreen(Game):
                             self.get_input(event.unicode)
 
                         
-            
-            pygame.mixer.music.set_volume(game.lowered_volume)
-            game.screen.blit(self.s, (0, 0))  
+            game.screen.blit(self.s, (0, 0))
             self.r, self.g, self.b = self.cycle_colors((self.r, self.g, self.b))
             self.draw_tetris_pieces(self.pieces)
-            self.check_mute_and_draw_icons()
             self.draw_credits_button(self.mouse)
             self.draw_settings_button(self.mouse)
 
@@ -1174,30 +1158,184 @@ class SettingsScreen(StartScreen):
         self.background_color = game.background_color
         self.buttons = [
             [
-                pygame.Rect(game.width/2 - 200/2, game.height/2 - 150, 200, 50), 
+                pygame.Rect(game.width/2 - 200/2, game.height/2 - 200, 200, 50), 
                 game.big_font.render('CONTROLS', True,  (0, 0, 0)),
                 self.buttons_color,
                 self.pick_controls_screen
             ], 
             [
-                pygame.Rect(game.width/2 - 200/2, game.height/2 - 50, 200, 50), 
+                pygame.Rect(game.width/2 - 200/2, game.height/2 - 100, 200, 50), 
                 game.big_font.render('THEMES', True, (0, 0, 0)), 
                 self.buttons_color,
                 self.pick_themes_screen
             ],
             [
-                pygame.Rect(game.width/2 - 200/2, game.height/2 + 50, 200, 50), 
+                pygame.Rect(game.width/2 - 200/2, game.height/2, 200, 50), 
                 game.big_font.render('GAMEPLAY', True, (0, 0, 0)), 
                 self.buttons_color,
                 self.gameplay_screen
+            ],
+            [
+                pygame.Rect(game.width/2 - 200/2, game.height/2 + 100, 200, 50), 
+                game.big_font.render('AUDIO', True, (0, 0, 0)), 
+                self.buttons_color,
+                self.audio_screen
             ]
-            
         ]
 
     def set_buttons_color(self, color):
         self.buttons_color = color
         for i in range(len(self.buttons)):
             self.buttons[i][2] = color
+
+
+    def audio_screen(self):
+
+        with open(get_path('settings.json')) as f:
+            settings = json.load(f)
+
+        audio_settings = settings['audio']
+        
+        slider_width = 500
+        slider_radius = 10
+
+        sliders = [
+            {
+                "json name": "master",
+                "name": "Master",
+                "pos": (game.width/2, game.height/8),
+                "default": 1.0
+            },
+            {
+                "json name": "music",
+                "name": "Music",
+                "pos": (game.width/2, game.height/4+50),
+                "default": 0.5
+            },
+            {
+                "json name": "sfx",
+                "name": "Sound Effects",
+                "pos": (game.width/2, game.height/2),
+                "default": 1.0
+            },
+        ]
+
+        for x in range(len(sliders)):
+            sliders[x]["value"] = audio_settings[sliders[x]["json name"]]
+
+        def draw_sliders():
+
+            for slider in sliders:
+                name, pos, value = slider["name"], slider["pos"], slider["value"]
+
+                text_element = game.big_font.render(name, True, game.foreground_color)
+                game.screen.blit(text_element, (pos[0] - text_element.get_rect().width/2, pos[1]))
+
+                pygame.draw.rect(game.screen, game.foreground_color, (pos[0] - slider_width/2, pos[1] + 70, slider_width, 4))
+                pygame.draw.circle(game.screen, game.foreground_color, center= ((pos[0]-slider_width/2) + int(value * slider_width), pos[1]+72), radius=slider_radius)
+
+                
+                measurement = f'{int(value*100)}%'
+                
+                
+                value_element = game.medium_font.render(measurement, True, game.foreground_color)
+                game.screen.blit(value_element, (pos[0] - value_element.get_rect().width/2, pos[1]+90))
+        
+
+
+        reset_button_y = game.height - 35
+        reset_button_rect = pygame.Rect(game.width/2-40, reset_button_y, 80, 25)
+        def draw_reset_button():
+
+            if reset_button_rect.collidepoint(mouse):
+                reset_button_color = tuple(darken(color) for color in game.foreground_color)
+            else:
+                reset_button_color = game.foreground_color
+           
+            pygame.draw.rect(game.screen, reset_button_color, reset_button_rect)
+
+            reset_button_text = game.medium_font.render("RESET", True, game.background_color)
+            game.screen.blit(reset_button_text, (game.width/2-reset_button_text.get_rect().width/2, reset_button_y))
+
+        running = True
+        dragging = None
+        while running:
+
+            running = start_screen.check_started()
+
+            for slider in sliders:
+                audio_settings[slider["json name"]] = slider["value"]
+
+
+            mouse = pygame.mouse.get_pos()
+            for event in pygame.event.get():
+
+                if event.type == pygame.QUIT:
+
+                    pygame.quit()
+                    sys.exit()
+
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+
+                    # back button
+                    if self.back_button.collidepoint(event.pos):
+                        running = False
+
+                        with open(get_path('settings.json'), 'w') as f:
+                            json.dump(settings, f, indent=2)
+                        
+                    elif reset_button_rect.collidepoint(mouse):
+
+                        for slider in sliders:
+                            slider['value'] = slider['default']
+
+                    elif not dragging:
+                        for slider in sliders:
+                            x, y = slider["pos"]
+                            value = slider["value"]
+
+                            if x - slider_width/2 + int(value * slider_width) - slider_radius < mouse[0] < x - slider_width/2 + int(value * slider_width) + slider_radius and y + 72 - slider_radius < mouse[1] < y + 72 + slider_radius:
+                                dragging = slider["name"]
+                                break
+
+                elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+
+                    if dragging: dragging = None
+
+            if dragging:
+                for slider in sliders:
+                    if slider["name"] == dragging:
+
+                        value = mouse[0] - (slider["pos"][0] - slider_width / 2)
+
+                        if value < 0: value = 0
+                        elif value > slider_width: value = slider_width
+
+                        value /= slider_width
+                        slider["value"] = value
+
+
+            game.screen.fill(game.background_color)
+
+            draw_sliders()
+            draw_reset_button()
+            self.draw_back_button(mouse)
+
+            game.music = audio_settings['master'] * audio_settings['music']
+            game.sfx = audio_settings['master'] * audio_settings['sfx']
+
+            pygame.mixer.music.set_volume(game.music)
+            game.sfx_channel.set_volume(game.sfx)
+
+            pygame.display.update()
+
+
+            if not running:
+                with open(get_path('settings.json'), 'w') as f:
+                    json.dump(settings, f, indent=2)
+
+
+        
 
 
     def gameplay_screen(self):
@@ -2098,7 +2236,7 @@ class Piece(Game):
         self.move(x, y)
 
         if not self.check_overlap():
-            game.correct_rotateSFX.play()
+            game.play_sound('correct rotate')
             return True
 
         # reset
@@ -2112,7 +2250,7 @@ class Piece(Game):
     def rotate(self, direct: int):
        
 
-        if self.piece_type == "O": return game.correct_rotateSFX.play()
+        if self.piece_type == "O": return game.play_sound('correct rotate')
 
         org_block_coords = []
 
@@ -2318,7 +2456,7 @@ class Piece(Game):
   
 
         else:
-            game.correct_rotateSFX.play()
+            game.play_sound('correct rotate')
             
             
         """

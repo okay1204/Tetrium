@@ -1,5 +1,6 @@
 import sys
 import traceback
+from oooooooooooooooooooooooooooooooooooooooooooootils import get_path
 
 def error_handler(e_type, value, tb):
 
@@ -26,7 +27,6 @@ import json
 import _thread
 import socket
 import onlineGame
-from oooooooooooooooooooooooooooooooooooooooooooootils import get_path
 from multiprocessing import Process
 
 
@@ -140,7 +140,6 @@ def reset():
     random.shuffle(next_bag)
     avoids = 0
     current = None
-    pygame.mixer.music.set_volume(game.volume)
     held = None
     canSwitch = True
     moving = 0
@@ -159,7 +158,6 @@ def game_over(win: bool):
 
     gameOver = True
 
-    pygame.mixer.music.set_volume(game.lowered_volume)
     button_dimensions = (250, 40)
     button_pos = (
         int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
@@ -440,7 +438,7 @@ def server_connection():
 
             if attacked:
                 start_meter_animation((700, 600), 0)
-                game.meter_recieveSFX.play()
+                game.play_sound('meter recieve')
             else:
                 attacked = True
 
@@ -554,6 +552,8 @@ def play_meter_animations():
 das_start = 0
 arr_start = 0
 presence_update = 0
+
+muted = False
 
 while True:
 
@@ -816,7 +816,7 @@ while True:
                 elif key_name == controls['Hold Piece']:
 
                     if canSwitch:
-                        game.holdSFX.play()
+                        game.play_sound('hold')
 
                         if not held:
                             held = current.piece_type
@@ -887,11 +887,12 @@ while True:
 
                 elif key_name == controls['Toggle Music']:
 
-                    if game.lowered_volume and game.volume:
-                        game.lowered_volume, game.volume = 0, 0
-
+                    if not muted:
+                        pygame.mixer.music.pause()
                     else:
-                        game.lowered_volume, game.volume = 0.025, 0.05
+                        pygame.mixer.music.unpause()
+
+                    muted = not muted
 
             elif event.type == pygame.QUIT:
                 stop()
@@ -989,7 +990,7 @@ while True:
 
                     if lines_cleared:
 
-                        game.row_clearedSFX.play()
+                        game.play_sound('row cleared')
                         game.lines += lines_cleared
 
                         combo += 1
@@ -1092,7 +1093,7 @@ while True:
                     
                     if lines_sent:
                         send(f"junk {lines_sent}")
-                        game.meter_sendSFX.play()
+                        game.play_sound('meter send')
 
                         # getting the block with the highest y
                         highest_y = 0
@@ -1120,7 +1121,7 @@ while True:
                             if meter_stage >= 3:
                                 attacked = False
                                 send("meter reset")
-                                game.garbage_recieveSFX.play()
+                                game.play_sound('garbage recieve')
 
                                 amount = game.meter[0]
                                 game.meter.pop(0)
@@ -1159,8 +1160,6 @@ while True:
             textRect = text.get_rect()
             textRect.center = (250, game.height // 2)
             game.screen.blit(text, textRect)
-
-        pygame.mixer.music.set_volume(game.volume)
 
         render_texts()
 

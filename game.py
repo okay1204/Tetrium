@@ -231,7 +231,7 @@ class Game:
         self.screen.blit(text, textRect)
 
         if held:
-            for color, x, y, width, height in pieces_lib.preview_piece(50, 130, held):
+            for color, x, y, width, height in pieces_lib.preview_piece(self.playing_field_rect.x - 50, self.playing_field_rect.y + 30, held):
                 pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
 
 
@@ -312,8 +312,28 @@ class Game:
                 if meter_block >= 10:
                     break
 
-                pygame.draw.rect(self.screen, darkened, (self.playing_field_junk_meter_rect.x, (self.playing_field_junk_meter_rect.y + self.playing_field_junk_meter_rect.height - 30) - (30 * meter_block), 30, 30))
-                pygame.draw.rect(self.screen, color, (self.playing_field_junk_meter_rect.x + 5, (self.playing_field_junk_meter_rect.y + self.playing_field_junk_meter_rect.height - 30 + 5) - (30 * meter_block), 20, 20)) #type: ignore
+                pygame.draw.rect(
+                    self.screen, 
+                    darkened, 
+                    (
+                        self.playing_field_junk_meter_rect.x, 
+                        (self.playing_field_junk_meter_rect.y + 
+                        self.playing_field_junk_meter_rect.height - 30) - 
+                        (30 * meter_block), 30, 30
+                    )
+                )
+
+                pygame.draw.rect(
+                    self.screen, 
+                    color, #type: ignore
+                    (
+                        self.playing_field_junk_meter_rect.x + 5, 
+                        (self.playing_field_junk_meter_rect.y + 
+                        self.playing_field_junk_meter_rect.height - 30 + 5) - 
+                        (30 * meter_block), 20, 20
+                    )
+                ) 
+               
                 meter_block += 1
 
         
@@ -328,7 +348,7 @@ class Game:
             return
         
         for x, y, color in self.opp_resting: # noqa pylint: disable=not-an-iterable
-            Block(x, y, color, colorByName=False).render_second()
+            Block(x, y, color, colorByName = False).render_second()
 
         
         if self.opp_piece_blocks:
@@ -360,8 +380,30 @@ class Game:
                 if meter_block >= 10:
                     break
 
-                pygame.draw.rect(self.screen, darkened, (self.opp_screen_junk_meter_rect.x, (self.opp_screen_junk_meter_rect.y + self.opp_screen_junk_meter_rect.height) - (15 * meter_block), 15, 15))
-                pygame.draw.rect(self.screen, color, (self.opp_screen_junk_meter_rect.x + 2, (self.opp_screen_junk_meter_rect.y + self.opp_screen_junk_meter_rect.height + 2) - (15 * meter_block), 11, 11)) #type: ignore
+                pygame.draw.rect(
+                    self.screen, 
+                    darkened, 
+                    (
+                        self.opp_screen_junk_meter_rect.x, 
+                        (self.opp_screen_junk_meter_rect.y + 
+                        self.opp_screen_junk_meter_rect.height - 15) - 
+                        (15 * meter_block), 15, 15
+                    )
+                )
+                
+                
+                pygame.draw.rect(
+                    self.screen, 
+                    color, #type: ignore
+                    (
+                        self.opp_screen_junk_meter_rect.x + 3, 
+                        (self.opp_screen_junk_meter_rect.y + 
+                        self.opp_screen_junk_meter_rect.height - 15 + 3) - 
+                        (15 * meter_block), 11, 11
+                    )
+                ) 
+                
+                
                 meter_block += 1
 
     def draw_grid(self, rect, block_size, color):
@@ -632,11 +674,16 @@ class Game:
 
 
 
-        #NOTE x and y for this rect have to be >= 100
+        #NOTE y and for this rect has to have 100 margin on both sides
+        #NOTE x and for this rect has to have 100 margin left, 350 margin right
         playing_field_rect_height = 600
         playing_field_rect_y = self.height/2 - playing_field_rect_height/2
-        self.playing_field_rect = pygame.Rect(100, self.height/2 - playing_field_rect_height/2, 300, 600)
+        # playing_field_rect_x = 100
+        playing_field_rect_x = (self.width - 350 - 200)/2
+        self.playing_field_rect = pygame.Rect(playing_field_rect_x, playing_field_rect_y, 300, 600)
         self.block_y_offset = playing_field_rect_y
+        self.second_block_y_offset = self.block_y_offset + 150
+        self.block_x_offset = playing_field_rect_x - 100
         
         playing_field_junk_meter_width = 36
         playing_field_junk_meter_height = self.playing_field_rect.width
@@ -692,6 +739,7 @@ class Game:
         self.resize_screen_setup()
         start_screen.resize_screen()
         settings_screen.resize_screen()
+        pygame.display.flip()
             
 
 
@@ -742,8 +790,8 @@ class StartScreen(Game):
         step_y = 5
         step_x = 1
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
-        self.x_pos = list(range(-3, self.max_x, step_x)) + [randint(0, self.max_x) for i in range(3)]
-        self.y_pos = list(range(-3, self.max_y, step_y)) + [randint(0, self.max_y) for i in range(3)]
+        self.x_pos = list(range(-3, self.max_x, step_x)) + [randint(0, self.max_x) for _ in range(3)]
+        self.y_pos = list(range(-3, self.max_y, step_y)) + [randint(0, self.max_y) for _ in range(3)]
 
         shuffle(self.x_pos)
         shuffle(self.y_pos)
@@ -752,6 +800,9 @@ class StartScreen(Game):
         self.pieces = [
             Piece(x_pos, y_pos, choice(self.piece_types)) for x_pos, y_pos in zip(self.x_pos, self.y_pos)
         ]
+
+
+
 
         rect = self.version_text.get_rect()
         self.version_text_rect = self.version_text.get_rect(center=(game.width-(rect.width/2)-10, rect.height+10))
@@ -783,6 +834,7 @@ class StartScreen(Game):
         pygame.draw.rect(game.screen, color, start_screen.back_button)
         game.screen.blit(start_screen.back_icon, (-3, -7))
 
+    
     def draw_start_button(self):
        
         #if mouse hovering make it lighter
@@ -1083,6 +1135,8 @@ class StartScreen(Game):
                 elif event.type == pygame.VIDEORESIZE:
                     game.width, game.height = event.w, event.h
                     game.resize_all_screens()
+
+                 
                     
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     
@@ -1372,6 +1426,9 @@ class SettingsScreen(StartScreen):
         while running:
             #bkg color
 
+
+            print(f'{game.playing_field_rect.y =}')
+
             mouse = pygame.mouse.get_pos()
     
             #Makes sure that if game starts while were in this screen it goes back to game
@@ -1385,6 +1442,7 @@ class SettingsScreen(StartScreen):
                 
                 elif event.type == pygame.VIDEORESIZE:
                     game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
                     left_arrow_pos = (offset, game.height/2 - dimensions/2)
                     right_arrow_pos =  (game.width - dimensions - offset, game.height/2 - dimensions/2)
                     left_arrow_rect = left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
@@ -1409,7 +1467,6 @@ class SettingsScreen(StartScreen):
                     ]
 
                     self.last_falls = [time.time() for _ in self.pieces]
-                    game.resize_all_screens()
 
    
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -1679,7 +1736,7 @@ class SettingsScreen(StartScreen):
                     clicked = False
 
 
-        
+            reset_button = pygame.Rect(game.width/2 - 50, game.height - 35, 100, 27)
             self.draw_back_button(mouse)
             draw_reset_button(mouse)
 
@@ -1773,16 +1830,18 @@ class Block(Game):
         self.fade_start = 0
         
     
-    def render(self):
+    def render(self, offset = True):
         
+        x_offset_val = game.playing_field_rect.x if offset else 100
         
         # normal
         if time.time() > self.flash_start + 0.2 and not self.fade_start:
 
             darker = tuple(darken(i) for i in self.color)
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + game.block_y_offset, 30, 30))
-            pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
-
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + x_offset_val, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + x_offset_val + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
+        
+        
         # flashing
         elif time.time() <= self.flash_start + 0.2:
 
@@ -1810,8 +1869,8 @@ class Block(Game):
 
             darker = tuple(darken(i) for i in flash_color)
 
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + game.block_y_offset, 30, 30))
-            pygame.draw.rect(game.screen, flash_color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            pygame.draw.rect(game.screen, flash_color, ((self.x-1) * self.size + game.playing_field_rect.x + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
 
 
         # fading
@@ -1832,8 +1891,8 @@ class Block(Game):
             
             darker = tuple(darken(i) for i in fade_color)
 
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + game.block_y_offset, 30, 30))
-            pygame.draw.rect(game.screen, fade_color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            pygame.draw.rect(game.screen, fade_color, ((self.x-1) * self.size + game.playing_field_rect.x + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
 
 
 
@@ -1842,14 +1901,14 @@ class Block(Game):
     def render_second(self):
 
         darker = tuple(darken(i) for i in self.color)
-        pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size/2 + 570, (self.y-1)* self.size/2 + 250, 15, 15))
-        pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size/2 + 572, (self.y-1)* self.size/2 + 252, 11, 11))                    
+        pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size/2 + 570 + game.block_x_offset, (self.y-1)* self.size/2 + game.second_block_y_offset, 15, 15))
+        pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size/2 + 572 + game.block_x_offset, (self.y-1)* self.size/2 + game.second_block_y_offset + 2, 11, 11))                    
 
 
     def render_preview(self):
 
-        pygame.draw.rect(game.screen, game.preview_color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + game.block_y_offset, 30, 30))
-        pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + 103, (self.y-1)* self.size + game.block_y_offset + 3, 24, 24))
+        pygame.draw.rect(game.screen, game.preview_color, ((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+        pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + game.playing_field_rect.x + 3, (self.y-1)* self.size + game.block_y_offset + 3, 24, 24))
 
 
         
@@ -2157,7 +2216,7 @@ class Piece(Game):
 
             if self.piece_type == "T":
                 for index, coords in enumerate(self.corners.values()):
-                    coords = org_corner_coords[index]
+                    coords = org_corner_coords[index] #type: ignore
   
 
         elif play_sound:
@@ -2253,7 +2312,6 @@ class Piece(Game):
     
     def render(self, preview = True):
         # to render preview
-        self.x, self.y
         
         if preview:
             downCount = 0
@@ -2273,7 +2331,7 @@ class Piece(Game):
             
         # for actual piece
         for block in self.blocks:
-            block.render()
+            block.render(preview)
 
 
 start_screen = StartScreen()

@@ -57,7 +57,7 @@ def render_texts():
                 textElement, textRect = element
 
                 textRect.center = (
-                    450, 500 + (texts.index((original, display_time, size)) * 50) + (index * 25))
+                    game.playing_field_rect.x + 350, game.playing_field_rect.y + 400 + (texts.index((original, display_time, size)) * 50) + (index * 25))
 
                 game.screen.blit(textElement, textRect)
 
@@ -1068,7 +1068,7 @@ while True:
             text = game.font.render(
                 f'Speed Level {game.level}', True, (0, 0, 0))
             textRect = text.get_rect()
-            textRect.center = (250, game.height // 2)
+            textRect.center = (game.playing_field_rect.x + 150, game.height // 2)
             game.screen.blit(text, textRect)
 
         pygame.mixer.music.set_volume(game.volume)

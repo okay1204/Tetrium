@@ -53,7 +53,7 @@ class Game:
         self.countdown_goSFX = pygame.mixer.Sound(resource_path('assets/countdown_go.wav'))
         self.garbage_recieveSFX = pygame.mixer.Sound(resource_path('assets/garbage_recieve.wav'))
 
-        self.width = 750
+        self.width = 759
         self.height = 800
 
         self.running = True
@@ -396,7 +396,7 @@ class Game:
                     self.screen, 
                     color, #type: ignore
                     (
-                        self.opp_screen_junk_meter_rect.x + 3, 
+                        self.opp_screen_junk_meter_rect.x + 2, 
                         (self.opp_screen_junk_meter_rect.y + 
                         self.opp_screen_junk_meter_rect.height - 15 + 3) - 
                         (15 * meter_block), 11, 11
@@ -678,14 +678,13 @@ class Game:
         #NOTE x and for this rect has to have 100 margin left, 350 margin right
         playing_field_rect_height = 600
         playing_field_rect_y = self.height/2 - playing_field_rect_height/2
-        # playing_field_rect_x = 100
         playing_field_rect_x = (self.width - 350 - 200)/2
         self.playing_field_rect = pygame.Rect(playing_field_rect_x, playing_field_rect_y, 300, 600)
         self.block_y_offset = playing_field_rect_y
         self.second_block_y_offset = self.block_y_offset + 150
         self.block_x_offset = playing_field_rect_x - 100
         
-        playing_field_junk_meter_width = 36
+        playing_field_junk_meter_width = 30
         playing_field_junk_meter_height = self.playing_field_rect.width
         self.playing_field_junk_meter_rect = pygame.Rect(
             self.playing_field_rect.x - 100/2 - playing_field_junk_meter_width/2, 
@@ -732,6 +731,16 @@ class Game:
             
             )
 
+    def toggle_full_screen(self):
+        width, height = pygame.display.get_window_size()
+        # if width < 1920 and height < 1080:
+        #     self.screen = pygame.display.set_mode((1920, 1080), flags = pygame.FULLSCREEN)
+
+        # else:
+        #     self.screen = pygame.display.set_mode((750, 1080), flags = pygame.RESIZABLE)
+
+        # pygame.display.toggle_fullscreen()
+        print('trying to toggle')
 
 
 
@@ -1139,6 +1148,9 @@ class StartScreen(Game):
                  
                     
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+
+                    if pygame.Rect(0, 0, 100, 100).collidepoint(self.mouse):
+                        game.toggle_full_screen()
                     
                     if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
 
@@ -1147,7 +1159,7 @@ class StartScreen(Game):
                         pygame.mixer.music.set_volume(game.volume)
                       
                     
-                    if self.disconnect_button_rect.collidepoint(event.pos) and self.connected:
+                    elif self.disconnect_button_rect.collidepoint(event.pos) and self.connected:
                         self.status = 'disconnect'
                         self.start_button_rect.x = game.width/2-60
                         game.screen.fill((0, 0, 0))
@@ -1425,9 +1437,6 @@ class SettingsScreen(StartScreen):
         running = True
         while running:
             #bkg color
-
-
-            print(f'{game.playing_field_rect.y =}')
 
             mouse = pygame.mouse.get_pos()
     
@@ -1757,7 +1766,6 @@ class SettingsScreen(StartScreen):
             game.screen.blit(text, text_rect)
 
        
-
 
     def buttons_hover(self, mouse):
         for index, button in enumerate(self.buttons):

@@ -13,6 +13,7 @@ import pyperclip
 from oooooooooooooooooooooooooooooooooooooooooooootils import *
 import _thread
 import asyncio
+import ntpath
 
 
 # these two lines saved my life
@@ -39,6 +40,7 @@ color_key = {
 
 
 class Game:
+
 
     def __init__(self):
 
@@ -71,9 +73,7 @@ class Game:
             asyncio.run_coroutine_threadsafe(self.start_connect_presence(), self.discord_rpc_loop)
 
         pygame.init()
-        self.font = pygame.font.Font(get_path('assets/arial.ttf'), 32)
-
-        pygame.mixer.music.load(get_path('assets/background_audio.wav'))
+        self.font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 32)
 
 
 
@@ -89,7 +89,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((self.width, self.height),flags = pygame.SCALED)
 
-        self.icon = pygame.image.load(get_path('assets/tetrium.png'))
+        self.icon = pygame.image.load(get_path('assets/images/tetrium.png'))
         pygame.display.set_icon(self.icon)
 
         self.caption = "Tetrium"
@@ -121,20 +121,20 @@ class Game:
 
         self.rows_cleared = []
 
-        self.small_font = pygame.font.Font(get_path('assets/arial.ttf'), 15)
-        self.medium_font = pygame.font.Font(get_path('assets/arial.ttf'), 20)
-        self.big_font = pygame.font.Font(get_path('assets/arial.ttf'), 30)
-        self.very_big_medium_font = pygame.font.Font(get_path('assets/arial.ttf'), 70)
-        self.very_big_font = pygame.font.Font(get_path('assets/arial.ttf'), 75)
+        self.small_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 15)
+        self.medium_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 20)
+        self.big_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 30)
+        self.very_big_medium_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 70)
+        self.very_big_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 75)
 
 
-        self.enormous_font = pygame.font.Font(get_path('assets/arial.ttf'), 120)
+        self.enormous_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 120)
         
        
 
         self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
         self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
-        self.opaque_bkg = pygame.image.load(get_path('assets/opaque_bkg.png'))
+        self.opaque_bkg = pygame.image.load(get_path('assets/images/opaque_bkg.png'))
 
         self.default_controls = {
             "Move Right": "d",
@@ -156,21 +156,37 @@ class Game:
 
 
         self.sounds = {
-            "correct rotate": pygame.mixer.Sound(get_path('assets/move_effect_success.wav')),
-            "hold": pygame.mixer.Sound(get_path('assets/hold_effect.wav')),
-            "row cleared": pygame.mixer.Sound(get_path('assets/row_cleared.wav')),
-            "meter send": pygame.mixer.Sound(get_path('assets/meter_send.wav')),
-            "meter recieve": pygame.mixer.Sound(get_path('assets/meter_recieve.wav')),
-            "countdown": pygame.mixer.Sound(get_path('assets/countdown.wav')),
-            "countdown go": pygame.mixer.Sound(get_path('assets/countdown_go.wav')),
-            "garbage recieve": pygame.mixer.Sound(get_path('assets/garbage_recieve.wav'))
+            "correct rotate": pygame.mixer.Sound(get_path('assets/sfx/move_effect_success.wav')),
+            "hold": pygame.mixer.Sound(get_path('assets/sfx/hold_effect.wav')),
+            "row cleared": pygame.mixer.Sound(get_path('assets/sfx/row_cleared.wav')),
+            "meter send": pygame.mixer.Sound(get_path('assets/sfx/meter_send.wav')),
+            "meter recieve": pygame.mixer.Sound(get_path('assets/sfx/meter_recieve.wav')),
+            "countdown": pygame.mixer.Sound(get_path('assets/sfx/countdown.wav')),
+            "countdown go": pygame.mixer.Sound(get_path('assets/sfx/countdown_go.wav')),
+            "garbage recieve": pygame.mixer.Sound(get_path('assets/sfx/garbage_recieve.wav'))
         }
 
         self.sfx_channel = pygame.mixer.Channel(1)
         self.sfx_channel.set_volume(self.sfx)
 
+        # list of all files in music folder
+        self.tracks = [get_path(f'assets/music/{filename}') for filename in os.listdir(get_path('assets/music'))]
+        self.current_track = settings['track']
+        self.random_track = False
+
+        if self.current_track == 'random':
+            self.current_track = randint(0, len(self.tracks)-1)
+            self.random_track = True
+            _thread.start_new_thread(self.cycle_music, ())
+
+        pygame.mixer.music.load(self.tracks[self.current_track])
+
         pygame.mixer.music.set_volume(self.music)
-        pygame.mixer.music.play(-1)
+
+        if self.random_track:
+            pygame.mixer.music.play(0)
+        else:
+            pygame.mixer.music.play(-1)
        
         self.left_controls = {
             "Move Left": settings["controls"]["Move Left"],
@@ -224,23 +240,30 @@ class Game:
         self.set_text_color(self.foreground_color)
         self.theme_text = theme[0]
 
+    
+    def cycle_music(self):
+        
+        try:
+            while self.random_track:
+
+                if not pygame.mixer.music.get_busy():
+
+                    self.current_track += 1
+                    if self.current_track >= len(self.tracks): self.current_track = 0
+
+                    pygame.mixer.music.load(self.tracks[self.current_track])
+                    pygame.mixer.music.play(0)
+                    pygame.mixer.music.set_volume(self.music)
+        except pygame.error as e:
+            print(e)
 
 
-    def update_volume(self):
-
-        with open(get_path('settings.json')) as f:
-            settings = json.load(f)
-            
-        self.music = settings['audio']['master'] * settings['audio']['music']
-        self.sfx = settings['audio']['master'] * settings['audio']['sfx']
 
     def play_sound(self, sound):
         self.sfx_channel.play(self.sounds[sound])
-       
    
     def set_grid_color(self, color):
         self.grid_color = tuple(darken(i, 10) for i in color)
-
     
     def complimentary_color(self, color: tuple): 
         
@@ -310,7 +333,7 @@ class Game:
         textRect.center = (250, 725)
         self.screen.blit(text, textRect)
 
-        font = pygame.font.Font(get_path('assets/arial.ttf'), 25)
+        font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 25)
 
         text = font.render(f"Level: {self.level}", True, self.text_color)
         textRect = text.get_rect()
@@ -322,7 +345,7 @@ class Game:
         textRect.center = (75, 725)
         self.screen.blit(text, textRect)
 
-        font = pygame.font.Font(get_path('assets/arial.ttf'), 20)
+        font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 20)
 
         time_elapsed = math.floor(time.time() - self.time_started)
 
@@ -767,7 +790,7 @@ class StartScreen(Game):
         self.credits_button = pygame.Rect(self.credits_button_pos[0], self.credits_button_pos[1], 70, self.credits_button_height)
         self.connected = False
         self.started = False
-        self.back_icon = pygame.image.load(get_path('assets/arrow-back.png'))
+        self.back_icon = pygame.image.load(get_path('assets/images/arrow-back.png'))
         self.back_button = pygame.Rect(10, 10, 75, 65)
         self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+70, 175, 40)
         self.disconnect_button_text = game.font.render('Disconnect', True, (self.r, self.g, self.b))
@@ -1245,6 +1268,15 @@ class SettingsScreen(StartScreen):
 
         reset_button_y = game.height - 35
         reset_button_rect = pygame.Rect(game.width/2-40, reset_button_y, 80, 25)
+
+
+
+        def path_leaf(path):
+            head, tail = ntpath.split(path)
+            return tail or ntpath.basename(head)
+
+        track_names = [path_leaf(path).replace('.wav', '') for path in game.tracks]
+
         def draw_reset_button():
 
             if reset_button_rect.collidepoint(mouse):
@@ -1256,6 +1288,144 @@ class SettingsScreen(StartScreen):
 
             reset_button_text = game.medium_font.render("RESET", True, game.background_color)
             game.screen.blit(reset_button_text, (game.width/2-reset_button_text.get_rect().width/2, reset_button_y))
+
+        
+        left_arrow = pygame.image.load(get_path('assets/images/left_arrow.png'))
+        left_arrow = pygame.transform.scale(left_arrow, (30, 30))
+        dimensions = left_arrow.get_height()
+        left_arrow_pos = (game.width/4 - left_arrow.get_width()/2, game.height - dimensions/2 - 140)
+        right_arrow = pygame.image.load(get_path('assets/images/right_arrow.png'))
+        right_arrow = pygame.transform.scale(right_arrow, (30, 30))
+        right_arrow_pos =  (((game.width/4)*3) - right_arrow.get_width()/2, game.height - dimensions/2 - 140)
+        left_arrow_rect = left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
+        right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
+        hover_scale_factor = 1.1
+
+
+        def is_dark(rgb):
+            
+            r, g, b = rgb
+            cutoff = 30
+            if r < cutoff and g < cutoff and b < cutoff:
+                return True
+            return False
+
+
+        def draw_arrows(mouse):
+            dark = is_dark(game.background_color)
+
+            #hover effect
+            if left_arrow_rect.collidepoint(mouse):
+                
+                if dark:
+                    new_left_arrow = left_arrow
+                    new_left_arrow_rect = new_left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
+                    new_left_arrow_rect_color = tuple(darken(i) for i in game.foreground_color)
+               
+            
+                else:
+                    new_left_arrow = pygame.transform.scale(left_arrow, (int(dimensions * hover_scale_factor), int(dimensions * hover_scale_factor)))
+                    new_left_arrow_rect = new_left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
+                    new_left_arrow_rect_color = game.foreground_color
+
+            else:
+                new_left_arrow = left_arrow
+                new_left_arrow_rect = left_arrow_rect
+                new_left_arrow_rect_color = game.foreground_color
+
+
+            if right_arrow_rect.collidepoint(mouse):
+
+                if dark:
+                    new_right_arrow = right_arrow
+                    new_right_arrow_rect = new_right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
+                    new_right_arrow_rect_color = tuple(darken(i) for i in game.foreground_color)
+                
+                
+                
+                else:
+                    new_right_arrow = pygame.transform.scale(right_arrow, (int(dimensions * hover_scale_factor), int(dimensions * hover_scale_factor)))
+                    new_right_arrow_rect = new_right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
+                    new_right_arrow_rect_color = game.foreground_color
+
+            else:
+                new_right_arrow = right_arrow
+                new_right_arrow_rect = right_arrow_rect
+                new_right_arrow_rect_color = game.foreground_color
+                
+
+
+            if dark:
+                pygame.draw.rect(game.screen, new_left_arrow_rect_color, new_left_arrow_rect)
+                pygame.draw.rect(game.screen, new_right_arrow_rect_color, new_right_arrow_rect)
+
+            game.screen.blit(new_left_arrow, left_arrow_pos)
+            game.screen.blit(new_right_arrow, right_arrow_pos)
+
+
+
+        if not game.random_track:
+            music_name = track_names[game.current_track]
+        else:
+            music_name = "Auto Cycle"
+
+        
+        def draw_music_switcher():
+
+            soundtrack_text = game.medium_font.render("Soundtrack", True, game.foreground_color)
+            game.screen.blit(soundtrack_text, (game.width/2-soundtrack_text.get_rect().width/2, game.height-210))
+
+            music_name_text = game.big_font.render(music_name, True, game.foreground_color)
+            game.screen.blit(music_name_text, (game.width/2-music_name_text.get_rect().width/2, game.height-160))
+
+            draw_arrows(mouse)
+
+        if not game.random_track:
+            track_number = game.current_track
+        else:
+            track_number = 0
+
+        def next_music(direction):
+            nonlocal music_name, track_number
+
+            options = track_names.copy()
+            options.insert(0, "Auto Cycle")
+
+
+            # right
+            if direction == 1:
+                track_number += 1
+
+                if track_number >= len(options):
+                    track_number = 0
+            # left
+            elif direction == 0:
+                track_number -= 1
+
+                if track_number < 0:
+                    track_number = len(options) - 1
+
+
+            music_name = options[track_number]
+
+            pygame.mixer.music.stop()
+
+            if track_number == 0:
+                game.random_track = True
+                game.current_track = randint(0, len(game.tracks)-1)
+
+                _thread.start_new_thread(game.cycle_music, ())
+            else:
+                game.random_track = False
+                game.current_track = track_number - 1
+
+                pygame.mixer.music.load(game.tracks[game.current_track])
+                pygame.mixer.music.play(-1)
+                pygame.mixer.music.set_volume(game.music)
+
+            
+        
+
 
         running = True
         dragging = None
@@ -1283,11 +1453,25 @@ class SettingsScreen(StartScreen):
 
                         with open(get_path('settings.json'), 'w') as f:
                             json.dump(settings, f, indent=2)
+
                         
                     elif reset_button_rect.collidepoint(mouse):
 
                         for slider in sliders:
                             slider['value'] = slider['default']
+
+                        track_number = 0
+                        next_music(-1)
+
+
+
+                    elif left_arrow_rect.collidepoint(event.pos):
+                        next_music(0)
+
+                    elif right_arrow_rect.collidepoint(event.pos):
+                        next_music(1)
+
+
 
                     elif not dragging:
                         for slider in sliders:
@@ -1319,6 +1503,7 @@ class SettingsScreen(StartScreen):
 
             draw_sliders()
             draw_reset_button()
+            draw_music_switcher()
             self.draw_back_button(mouse)
 
             game.music = audio_settings['master'] * audio_settings['music']
@@ -1690,11 +1875,11 @@ class SettingsScreen(StartScreen):
 
         
         offset = 10
-        left_arrow = pygame.image.load(get_path('assets/left_arrow.png'))
+        left_arrow = pygame.image.load(get_path('assets/images/left_arrow.png'))
         dimensions = left_arrow.get_height()
         left_arrow_pos = (offset, game.height/2 - dimensions/2)
         right_arrow_pos =  (game.width - dimensions - offset, game.height/2 - dimensions/2)
-        right_arrow = pygame.image.load(get_path('assets/right_arrow.png'))
+        right_arrow = pygame.image.load(get_path('assets/images/right_arrow.png'))
         left_arrow_rect = left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
         right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
         hover_scale_factor = 1.1

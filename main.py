@@ -58,7 +58,7 @@ def render_texts():
 
         if display_time > time.time():
 
-            font = pygame.font.Font(get_path('assets/arial.ttf'), size)
+            font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), size)
 
             original = text
 
@@ -162,19 +162,19 @@ def game_over(win: bool):
     button_pos = (
         int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
-    restart_button_font = pygame.font.Font(get_path('assets/arial.ttf'), 32)
+    restart_button_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 32)
     restart_button_rect = pygame.Rect(button_pos, button_dimensions)
     restart_button_color = game.foreground_color
     restart_button_text = restart_button_font.render(
         'Find new match', True, game.background_color)
-    game_over_font = pygame.font.Font(get_path('assets/arial.ttf'), 50)
+    game_over_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 50)
 
-    rematch_text_font = pygame.font.Font(get_path('assets/arial.ttf'), 40)
+    rematch_text_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 40)
     self_rematch_text = opp_rematch_text = "Deciding..."
     
     rematch_active = True
 
-    rematch_button_font = pygame.font.Font(get_path('assets/arial.ttf'), 26)
+    rematch_button_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 26)
     rematch_button_dimensions = (120, 40)
     rematch_button_text = rematch_button_font.render('Rematch', True, game.background_color)
 
@@ -183,7 +183,7 @@ def game_over(win: bool):
     self_rematch_button_color = game.foreground_color
 
 
-    text_font = pygame.font.Font(get_path('assets/arial.ttf'), 25)
+    text_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 25)
     you_text = text_font.render("You", True, game.foreground_color)
     opponent_text = text_font.render(game.opp_name, True, game.foreground_color)
     opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
@@ -935,7 +935,6 @@ while True:
 
                     # detect if a row was made
                     lines_cleared = 0
-                    lowest_y = 0
                     for y in range(1, 21):
                         row = list(
                             filter(lambda block: block.y == y, game.resting))
@@ -947,8 +946,6 @@ while True:
                                 block.fade_start = time.time()
 
                             lines_cleared += 1
-                            if lowest_y < y:
-                                lowest_y = y
 
                             game.rows_cleared.append(row)
 
@@ -1005,15 +1002,14 @@ while True:
                                     break
 
                         # calcualting combos
-                        game.score += 50 * combo * (21 - lowest_y)
+                        game.score += 50 * combo * game.level
 
                         if not tspin:
 
                             lines_sent += line_key[lines_cleared-1]
 
                             # for adding normal value
-                            line_clear_value = (
-                                21 - lowest_y) * score_key[lines_cleared-1]
+                            line_clear_value = game.level * score_key[lines_cleared-1]
 
                             # checking for back-to-back difficult line clear
                             if lines_cleared == 4:
@@ -1036,9 +1032,8 @@ while True:
                             lines_sent += t_spin_line_key[lines_cleared-1]
 
                             # any line clears with t-spins are considered difficult
-
-                            score_value = (21 - lowest_y) * \
-                                tspin_key[lines_cleared-1][tspin]
+ 
+                            score_value = game.level * tspin_key[lines_cleared-1][tspin]
 
                             if tspin == "normal":
                                 spin_text, size = "T-Spin", 30

@@ -259,7 +259,13 @@ class Game:
 
 
     def play_sound(self, sound):
-        self.sfx_channel.play(self.sounds[sound])
+
+        if not self.sfx_channel.get_busy():
+            self.sfx_channel.play(self.sounds[sound])
+        else:
+            self.sounds[sound].set_volume(self.sfx_channel.get_volume())
+            self.sounds[sound].play()
+            self.sounds[sound].set_volume(1)
        
 
        

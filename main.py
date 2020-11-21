@@ -439,7 +439,7 @@ def server_connection():
 
             if attacked:
                 start_meter_animation((game.opp_screen_junk_meter_rect.x + game.opp_screen_junk_meter_rect.width/2, game.opp_screen_junk_meter_rect.y + game.opp_screen_junk_meter_rect.height + 50), 0)
-                game.meter_recieveSFX.play()
+                game.play_sound('meter recieve')
             else:
                 attacked = True
 
@@ -958,8 +958,6 @@ while True:
                             lines_cleared += 1
 
                             game.rows_cleared.append(row)
-
-                    tspin = None
 
                     tspin = None
 

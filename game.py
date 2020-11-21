@@ -1583,7 +1583,7 @@ class SettingsScreen(StartScreen):
             draw_arrows(mouse)
 
         if not game.random_track:
-            track_number = game.current_track
+            track_number = game.current_track + 1
         else:
             track_number = 0
 

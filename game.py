@@ -1,5 +1,4 @@
-# pylint: disable=no-member
-# pylint: disable=unused-wildcard-import
+# pylint: disable=no-member, unused-wildcard-import, no-name-in-module
 
 import pygame
 from pygame.constants import NOFRAME

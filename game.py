@@ -1415,6 +1415,8 @@ class SettingsScreen(StartScreen):
                 game.current_track = randint(0, len(game.tracks)-1)
 
                 _thread.start_new_thread(game.cycle_music, ())
+
+                settings['track'] = 'random'
             else:
                 game.random_track = False
                 game.current_track = track_number - 1
@@ -1422,6 +1424,8 @@ class SettingsScreen(StartScreen):
                 pygame.mixer.music.load(game.tracks[game.current_track])
                 pygame.mixer.music.play(-1)
                 pygame.mixer.music.set_volume(game.music)
+
+                settings['track'] = game.current_track
 
             
         

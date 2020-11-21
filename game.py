@@ -178,7 +178,6 @@ class Game:
             _thread.start_new_thread(self.cycle_music, ())
 
         pygame.mixer.music.load(self.tracks[self.current_track])
-        pygame.mixer.music.load('./assets/music/Original.wav')
 
         pygame.mixer.music.set_volume(self.music)
 

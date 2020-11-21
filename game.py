@@ -1655,6 +1655,11 @@ class SettingsScreen(StartScreen):
                     pygame.quit()
                     sys.exit()
 
+
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
                     # back button
@@ -1854,6 +1859,10 @@ class SettingsScreen(StartScreen):
 
                     pygame.quit()
                     sys.exit()
+
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
 
                 elif event.type == pygame.KEYDOWN:
 

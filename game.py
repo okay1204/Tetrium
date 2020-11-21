@@ -83,6 +83,7 @@ class Game:
 
         self.width = 750
         self.height = 800
+        
 
         self.running = True
 

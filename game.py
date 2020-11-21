@@ -22,7 +22,6 @@ import nest_asyncio
 nest_asyncio.apply()
 
 
-
 if __name__ == "__main__":
     import main
 
@@ -83,7 +82,7 @@ class Game:
 
         self.width = 750
         self.height = 800
-        
+
 
         self.running = True
 
@@ -205,13 +204,16 @@ class Game:
         #first tuple is rgb of background color, second is foreground
         self.themes = [
             ['Default', (0, 0, 0), (101, 142, 156)],
+            ['Random', (0, 0, 0), (152, 136, 165)],
             ['Blue Mystique', (0, 20, 39), (101, 142, 156)],
             ['Sky High', (39, 38, 53), (177, 229, 242)],
             ['Jungle Adventure', (1, 38, 34), (184, 242, 230)],   
             ['Sahara Desert', (30, 47, 35), (179, 156, 77)],
             ['Cotton Candy', (61, 64, 91), (202, 156, 225)],
+            ['Velvety Mango', (60, 21, 24), (255, 140, 66)],
             ['Road to Heaven', (17, 20, 25), (92, 200, 255)],
             ['Night Sky', (0, 0, 0), (0, 20, 39)],
+            ['Camouflage', (13, 27, 30), (101, 104, 57)],
             ['Coral Reef', (38, 70, 83), (42, 157, 143)],
             ['Tropical Sands', (38, 70, 83), (233, 196, 106)],
         ]
@@ -2096,6 +2098,38 @@ class SettingsScreen(StartScreen):
             change_theme()
 
 
+        rgb_stage = 0
+
+        r, g, b = 255, 0, 0
+
+        def cycle_colors():
+            
+            nonlocal r, g, b, rgb_stage
+
+            if rgb_stage == 0:
+                if g < 255 and r > 0:
+                    g += 1
+                    r -= 1
+                else:
+                    rgb_stage = 1
+
+
+            elif rgb_stage == 1:
+                if b < 255 and g > 0:
+                    b += 1
+                    g -= 1
+                    
+                else:
+                    rgb_stage = 2
+
+            elif rgb_stage == 2:
+                if r < 255 and b > 0:
+                    r += 1
+                    b -= 1
+                else:
+                    rgb_stage = 0
+
+
     
         def draw_title():
             title = game.very_big_medium_font.render(game.theme_text, True, game.foreground_color)
@@ -2109,7 +2143,19 @@ class SettingsScreen(StartScreen):
             full_dict['theme'] = game.theme_index
 
             with open(get_path('settings.json'), 'w') as f:
-                json.dump(full_dict, f, indent=2)
+                json.dump(full_dict, f, indent = 2)
+
+
+        def random_theme():
+        
+            if game.theme_text == 'Random':
+                if not randint(0, 2):
+                    cycle_colors()
+                    
+                game.foreground_color = (r, g, b)
+                text = game.very_big_font.render('?', True, (game.background_color))
+                text_rect = text.get_rect(center = (new_playing_field_rect.x + new_playing_field_rect.width/2, new_playing_field_rect.y + new_playing_field_rect.height/2))
+                game.screen.blit(text, text_rect)
 
         
         offset = 10
@@ -2121,8 +2167,6 @@ class SettingsScreen(StartScreen):
         left_arrow_rect = left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
         right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
         hover_scale_factor = 1.1
-        
-        
         new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
         min_x = int(new_playing_field_rect.x/30)
         max_x = min_x + int(new_playing_field_rect.width/30) - 4 
@@ -2204,6 +2248,7 @@ class SettingsScreen(StartScreen):
 
 
             render_game_preview(game.background_color, game.foreground_color)
+            random_theme()
             draw_title()
             self.draw_back_button(mouse)
             draw_arrows(mouse)

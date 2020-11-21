@@ -1414,7 +1414,8 @@ class SettingsScreen(StartScreen):
                 game.random_track = True
                 game.current_track = randint(0, len(game.tracks)-1)
 
-                _thread.start_new_thread(game.cycle_music, ())
+                if direction != -1:
+                    _thread.start_new_thread(game.cycle_music, ())
 
                 settings['track'] = 'random'
             else:

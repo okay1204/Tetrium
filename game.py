@@ -2706,7 +2706,7 @@ class Piece(Game):
     def rotate(self, direct: int, play_sound = True):
        
 
-        if self.piece_type == "O": return game.play_sound('correct rotate')
+        if self.piece_type == "O": return game.play_sound('correct rotate') if play_sound else None
 
         org_block_coords = []
 
@@ -2911,7 +2911,7 @@ class Piece(Game):
                     coords = org_corner_coords[index] #type: ignore
   
 
-        else:
+        elif play_sound:
             game.play_sound('correct rotate')
             
             

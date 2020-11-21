@@ -1,0 +1,15 @@
+Fatal Python error: PyEval_SaveThread: the function must be called with the GIL held, but the GIL is released (the current Python thread state is NULL)
+Python runtime state: initialized
+
+Current thread 0x00003e38 (most recent call first):
+  File "c:\Users\User\Desktop\Code\Python\Tetrium\Tetris\game.py", line 1424 in next_music
+  File "c:\Users\User\Desktop\Code\Python\Tetrium\Tetris\game.py", line 1476 in audio_screen
+  File "c:\Users\User\Desktop\Code\Python\Tetrium\Tetris\game.py", line 2230 in main
+  File "c:\Users\User\Desktop\Code\Python\Tetrium\Tetris\game.py", line 1099 in main
+  File "c:\Users\User\Desktop\Code\Python\Tetrium\Tetris\main.py", line 564 in <module>
+  File "<frozen importlib._bootstrap>", line 228 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 790 in exec_module
+  File "<frozen importlib._bootstrap>", line 680 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 986 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1007 in _find_and_load
+  File "c:\Users\User\Desktop\Code\Python\Tetrium\Tetris\game.py", line 26 in <module>

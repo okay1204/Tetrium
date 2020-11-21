@@ -2690,7 +2690,8 @@ class Piece(Game):
         self.move(x, y)
 
         if not self.check_overlap():
-            game.play_sound('correct rotate')
+            if play_sound:
+                game.play_sound('correct rotate')
             return True
 
         # reset

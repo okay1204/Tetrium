@@ -2,11 +2,12 @@
 # pylint: disable=unused-wildcard-import
 
 import pygame
+from pygame.constants import NOFRAME
 import pieces as pieces_lib
 import math
 import time
 import sys
-from random import shuffle, randint
+from random import shuffle, randint, choice
 import network
 import json
 import pyperclip
@@ -83,11 +84,10 @@ class Game:
         self.width = 750
         self.height = 800
 
-
         self.running = True
 
         self.clock = pygame.time.Clock()
-        self.screen = pygame.display.set_mode((self.width, self.height),flags = pygame.SCALED)
+        self.screen = pygame.display.set_mode((self.width, self.height), flags = pygame.RESIZABLE)
 
         self.icon = pygame.image.load(get_path('assets/images/tetrium.png'))
         pygame.display.set_icon(self.icon)
@@ -130,11 +130,9 @@ class Game:
 
         self.enormous_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 120)
         
-       
-
-        self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
-        self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
+    
         self.opaque_bkg = pygame.image.load(get_path('assets/images/opaque_bkg.png'))
+
 
         self.default_controls = {
             "Move Right": "d",
@@ -240,6 +238,7 @@ class Game:
         self.set_grid_color(self.foreground_color)
         self.set_text_color(self.foreground_color)
         self.theme_text = theme[0]
+        self.resize_screen_setup()
 
     
     def cycle_music(self):
@@ -262,6 +261,9 @@ class Game:
 
     def play_sound(self, sound):
         self.sfx_channel.play(self.sounds[sound])
+       
+
+       
    
     def set_grid_color(self, color):
         self.grid_color = tuple(darken(i, 10) for i in color)
@@ -289,12 +291,12 @@ class Game:
             block.render()
 
         # for piece order
-        for x in range(1, 4):
-            pygame.draw.circle(self.screen, self.foreground_color, (450, 130*x), 40)
+        for i in range(1, 4):
+            pygame.draw.circle(self.screen, self.foreground_color, (self.playing_field_rect.x + self.playing_field_rect.width + 100/2,  (self.playing_field_rect.y - 100) +  130*i), 40)
 
         text = self.font.render('Next', True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (450, 60)
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width + 100/2, self.playing_field_rect.y - 40)
         self.screen.blit(text, textRect)
 
         # putting pieces in the circles
@@ -302,48 +304,44 @@ class Game:
             position = 1
             
             for piece in pieces:
-                for color, x, y, width, height in pieces_lib.preview_piece(450, position*130, piece):
+                for color, x, y, width, height in pieces_lib.preview_piece(self.playing_field_rect.x + self.playing_field_rect.width + 100/2, (self.playing_field_rect.y - 100) + position*130, piece):
                     pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
                 
                 position += 1
     
         # for hold area
-        pygame.draw.circle(self.screen, self.foreground_color, (50, 130), 40)
+        pygame.draw.circle(self.screen, self.foreground_color, (self.playing_field_rect.x - 100/2, self.playing_field_rect.y + 30), 40)
         text = self.font.render('Hold', True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (50, 60)
+        textRect.center = (self.playing_field_rect.x - 100/2, self.playing_field_rect.y - 40)
         self.screen.blit(text, textRect)
 
         if held:
-            for color, x, y, width, height in pieces_lib.preview_piece(50, 130, held):
+            for color, x, y, width, height in pieces_lib.preview_piece(self.playing_field_rect.x - 50, self.playing_field_rect.y + 30, held):
                 pygame.draw.rect(self.screen, color_key[color], (x, y, width, height))
 
 
-        # for continuous movement indication
-        if self.continuous: text = "On"
-        else: text = "Off"
-
-        text = self.font.render(f"Continuous Movement: {text}", True, self.text_color)
+        text = self.font.render(f"Continuous Movement: {'On' if self.continuous else 'Off'}", True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (300, 780)
-        self.screen.blit(text, textRect)
-
-        self.score = int(self.score)
-        text = self.font.render(f"Score: {self.score}", True, self.text_color)
-        textRect = text.get_rect()
-        textRect.center = (250, 725)
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width/2, self.playing_field_rect.y + self.playing_field_rect.height + 80)
         self.screen.blit(text, textRect)
 
         font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 25)
 
         text = font.render(f"Level: {self.level}", True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (420, 725)
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width + 20, self.playing_field_rect.y + self.playing_field_rect.height + 25)
+        self.screen.blit(text, textRect)
+
+        self.score = int(self.score)
+        text = self.font.render(f"Score: {self.score}", True, self.text_color)
+        textRect = text.get_rect()
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width/2, self.playing_field_rect.y + self.playing_field_rect.height + 25)
         self.screen.blit(text, textRect)
 
         text = font.render(f"Lines: {self.lines}", True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (75, 725)
+        textRect.center = (self.playing_field_junk_meter_rect.x + textRect.width/3, self.playing_field_rect.y + self.playing_field_rect.height + 25)
         self.screen.blit(text, textRect)
 
         font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 20)
@@ -357,25 +355,27 @@ class Game:
 
         text = font.render(f"Time Elapsed: {time_elapsed}", True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (250, 25)
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width/2,  self.playing_field_rect.y - 75)
         self.screen.blit(text, textRect)
 
 
         text = font.render(self.name, True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (250, 65)
+
+        textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width/2, self.playing_field_rect.y - 20)
         self.screen.blit(text, textRect)
 
 
         text = font.render(self.opp_name, True, self.text_color)
         textRect = text.get_rect()
-        textRect.center = (650, 230)
+        textRect.center = (self.second_screen_rect.x + self.second_screen_rect.width/2, self.second_screen_rect.y - 20)
         self.screen.blit(text, textRect)
 
 
         # junk line meter
-        pygame.draw.rect(self.screen, self.preview_color, (32, 394, 36, 306))
-        pygame.draw.rect(self.screen, self.foreground_color, (35, 397, 30, 300))
+        pygame.draw.rect(self.screen, self.preview_color, self.playing_field_junk_meter_rect_outline)
+        pygame.draw.rect(self.screen, self.foreground_color, self.playing_field_junk_meter_rect)
+        
 
         meter_block = 0
 
@@ -397,8 +397,29 @@ class Game:
 
                 if meter_block >= 10:
                     break
-                pygame.draw.rect(self.screen, darkened, (35, 667 - (30 * meter_block), 30, 30))
-                pygame.draw.rect(self.screen, color, (40, 672 - (30 * meter_block), 20, 20)) #type: ignore
+
+                pygame.draw.rect(
+                    self.screen, 
+                    darkened, 
+                    (
+                        self.playing_field_junk_meter_rect.x, 
+                        (self.playing_field_junk_meter_rect.y + 
+                        self.playing_field_junk_meter_rect.height - 30) - 
+                        (30 * meter_block), 30, 30
+                    )
+                )
+
+                pygame.draw.rect(
+                    self.screen, 
+                    color, #type: ignore
+                    (
+                        self.playing_field_junk_meter_rect.x + 5, 
+                        (self.playing_field_junk_meter_rect.y + 
+                        self.playing_field_junk_meter_rect.height - 30 + 5) - 
+                        (30 * meter_block), 20, 20
+                    )
+                ) 
+               
                 meter_block += 1
 
         
@@ -413,7 +434,7 @@ class Game:
             return
         
         for x, y, color in self.opp_resting: # noqa pylint: disable=not-an-iterable
-            Block(x, y, color, colorByName=False).render_second()
+            Block(x, y, color, colorByName = False).render_second()
 
         
         if self.opp_piece_blocks:
@@ -421,8 +442,8 @@ class Game:
                 Block(x, y, color, colorByName = False).render_second()
         
         # junk line meter
-        pygame.draw.rect(self.screen, self.preview_color, (539, 398, 17, 152))
-        pygame.draw.rect(self.screen, self.foreground_color, (540, 399, 15, 150))
+        pygame.draw.rect(self.screen, self.preview_color, self.opp_screen_junk_meter_rect_outline)
+        pygame.draw.rect(self.screen, self.foreground_color, self.opp_screen_junk_meter_rect)
 
 
         meter_block = 0
@@ -445,8 +466,29 @@ class Game:
                 if meter_block >= 10:
                     break
 
-                pygame.draw.rect(self.screen, darkened, (540, 534 - (15 * meter_block), 15, 15))
-                pygame.draw.rect(self.screen, color, (542, 536 - (15 * meter_block), 11, 11)) #type: ignore
+                pygame.draw.rect(
+                    self.screen, 
+                    darkened, 
+                    (
+                        self.opp_screen_junk_meter_rect.x, 
+                        (self.opp_screen_junk_meter_rect.y + 
+                        self.opp_screen_junk_meter_rect.height - 15) - 
+                        (15 * meter_block), 15, 15
+                    )
+                )
+                
+                
+                pygame.draw.rect(
+                    self.screen, 
+                    color, #type: ignore
+                    (
+                        self.opp_screen_junk_meter_rect.x + 2, 
+                        (self.opp_screen_junk_meter_rect.y + 
+                        self.opp_screen_junk_meter_rect.height - 15 + 3) - 
+                        (15 * meter_block), 11, 11
+                    )
+                ) 
+                
                 meter_block += 1
 
     def draw_grid(self, rect, block_size, color):
@@ -496,6 +538,9 @@ class Game:
                 
             copy_button_text = self.font.render("Copy download link", True, text_color)
             self.screen.blit(copy_button_text, (copy_button_pos[0] + 10, copy_button_pos[1] + 3))
+            
+
+
             pygame.draw.rect(self.screen, rect_color, quit_button_rect)
 
             quit_button_text = self.font.render("Go Back", True, text_color)
@@ -529,8 +574,12 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
 
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     check_click(event.pos)
 
 
@@ -630,6 +679,10 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     
                     check_click(event.pos)
@@ -655,6 +708,11 @@ class Game:
                 if event.type == pygame.QUIT:
 
                     return False
+
+
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
 
             seconds = int(countdown - time.time())
 
@@ -728,6 +786,93 @@ class Game:
         if not self.dev and self.presence_connected:
             self.discord_rpc_loop.create_task(self.async_update_presence(details, state, start, large_image))
 
+    def resize_screen_setup(self):
+        #BEFORE:
+            # self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
+            # self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
+            # self.playing_field_junk_meter_rect = pygame.Rect(35, 397, 30, 300)
+            # self.playing_field_junk_meter_rect_outline = pygame.Rect(32, 394, 36, 306)
+            # self.opp_screen_junk_meter = pygame.Rect(540, 399, 15, 150)
+            # self.opp_screen_junk_meter_outline = pygame.Rect(539, 398, 17, 152)
+
+
+
+        #NOTE y and for this rect has to have 100 margin on both sides
+        #NOTE x and for this rect has to have 100 margin left, 350 margin right
+        playing_field_rect_height = 600
+        playing_field_rect_y = self.height/2 - playing_field_rect_height/2
+        playing_field_rect_x = (self.width - 350 - 200)/2
+        self.playing_field_rect = pygame.Rect(playing_field_rect_x, playing_field_rect_y, 300, 600)
+        self.block_y_offset = playing_field_rect_y
+        self.second_block_y_offset = self.block_y_offset + 150
+        self.block_x_offset = playing_field_rect_x - 100
+        
+        playing_field_junk_meter_width = 30
+        playing_field_junk_meter_height = self.playing_field_rect.width
+        self.playing_field_junk_meter_rect = pygame.Rect(
+            self.playing_field_rect.x - 100/2 - playing_field_junk_meter_width/2, 
+            self.playing_field_rect.y + self.playing_field_rect.height - playing_field_junk_meter_height,
+            playing_field_junk_meter_width,
+            playing_field_junk_meter_height
+            )
+
+        offset = 6
+        self.playing_field_junk_meter_rect_outline = pygame.Rect(
+            self.playing_field_junk_meter_rect.x - offset/2,
+            self.playing_field_junk_meter_rect.y - offset/2,
+            self.playing_field_junk_meter_rect.width + offset,
+            self.playing_field_junk_meter_rect.height + offset,
+            
+            )
+
+
+        second_screen_rect_height = 150
+        self.second_screen_rect = pygame.Rect(
+            
+            self.playing_field_rect.x + self.playing_field_rect.width + 170, 
+            self.playing_field_rect.y + self.playing_field_rect.height/2 - second_screen_rect_height, 
+            second_screen_rect_height, 
+            300,
+            )
+
+
+        opp_screen_junk_meter_height = self.second_screen_rect.width
+        self.opp_screen_junk_meter_rect = pygame.Rect(
+            self.second_screen_rect.x - 30,
+            self.second_screen_rect.y + self.second_screen_rect.height - opp_screen_junk_meter_height,
+            15, 
+            opp_screen_junk_meter_height
+
+            )
+
+        offset = 3
+        self.opp_screen_junk_meter_rect_outline = pygame.Rect(
+            self.opp_screen_junk_meter_rect.x - offset/2,
+            self.opp_screen_junk_meter_rect.y - offset/2,
+            self.opp_screen_junk_meter_rect.width + offset,
+            self.opp_screen_junk_meter_rect.height + offset,
+            
+            )
+
+    def toggle_full_screen(self):
+        width, height = pygame.display.get_window_size()
+        # if width < 1920 and height < 1080:
+        #     self.screen = pygame.display.set_mode((1920, 1080), flags = pygame.FULLSCREEN)
+
+        # else:
+        #     self.screen = pygame.display.set_mode((750, 1080), flags = pygame.RESIZABLE)
+
+        # pygame.display.toggle_fullscreen()
+        print('trying to toggle')
+
+
+
+    def resize_all_screens(self):
+        self.resize_screen_setup()
+        start_screen.resize_screen()
+        settings_screen.resize_screen()
+        pygame.display.flip()
+            
 
 
 game = Game()
@@ -739,29 +884,53 @@ class StartScreen(Game):
 
     def __init__(self):
 
+
+
         self.ready = False
-
-        #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
-        self.x_pos = [0, 4, 8, 12, 16, 20, 0, 4, 8]
-        shuffle(self.x_pos)
-
-        self.pieces = [
-
-            Piece(self.x_pos[0], randint(-9, -6), 'T'), 
-            Piece(self.x_pos[1], randint(-6, -3), 'L'), 
-            Piece(self.x_pos[2], randint(-3, 0), 'J'), 
-            Piece(self.x_pos[3], randint(0, 3), 'S'), 
-            Piece(self.x_pos[4], randint(3, 6), 'Z'), 
-            Piece(self.x_pos[5], randint(6, 9), 'I'),
-            Piece(self.x_pos[6], randint(9, 12), 'T'),
-            Piece(self.x_pos[7], randint(12, 15), 'L'),
-            Piece(self.x_pos[8], randint(-15, -12), 'J'),
-            
-        ]
 
         self.rgb_stage = 0
 
         self.version_text = game.small_font.render(f"v {network.version}", True, (255, 255, 255))
+        self.input_box_width = 300
+        self.input_box_height = 50
+        self.mute_button_radius = 35
+        self.start_button_text_color = (255, 255, 255)
+        self.credits_button_height = 30
+        self.input_text_width = 0
+        self.back_button = pygame.Rect(10, 10, 75, 65)
+        self.piece_types = ['I', 'O', 'T', 'L', 'J', 'Z', 'S']
+        self.resize_screen()
+    
+        self.r, self.g, self.b = 255, 0, 0
+        self.last_falls = [time.time() for _ in self.pieces]
+
+        self.input_box_placeholder = game.medium_font.render("Enter a name...", True, (96, 93, 93))
+        self.input_active = False
+        self.input_text = ''
+        self.settings_button_text = game.medium_font.render('SETTINGS', True, (0, 0, 0))
+        self.credits_button_text = game.small_font.render('CREDITS', True, (0, 0, 0))
+        self.connected = False
+        self.started = False
+        self.back_icon = pygame.image.load(get_path('assets/images/arrow-back.png'))
+        self.disconnect_button_text = game.font.render('Disconnect', True, (self.r, self.g, self.b))
+
+    def resize_screen(self):
+        self.max_x = int((game.width/30)-4) 
+        self.max_y = int((game.height/30))
+        step_y = 5
+        step_x = 1
+        #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
+        self.x_pos = list(range(-3, self.max_x, step_x)) + [randint(0, self.max_x) for _ in range(3)]
+        self.y_pos = list(range(-3, self.max_y, step_y)) + [randint(0, self.max_y) for _ in range(3)]
+
+        shuffle(self.x_pos)
+        shuffle(self.y_pos)
+
+
+        self.pieces = [
+            Piece(x_pos, y_pos, choice(self.piece_types)) for x_pos, y_pos in zip(self.x_pos, self.y_pos)
+        ]
+
         rect = self.version_text.get_rect()
         self.version_text_rect = self.version_text.get_rect(center=(game.width-(rect.width/2)-10, rect.height+10))
     
@@ -772,21 +941,14 @@ class StartScreen(Game):
         self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
 
         self.s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
-        self.input_box_placeholder = game.medium_font.render("Enter a name...", True, (96, 93, 93))
         self.input_box_y =  game.height/2 - 85
-        self.input_box_width = 300
+        
         self.input_box_x = (game.width - self.input_box_width)/2
-        self.input_box_height = 50
+        
         self.input_box = pygame.Rect(self.input_box_x, self.input_box_y, self.input_box_width, self.input_box_height)
         self.input_box_bkg = pygame.Rect((game.width - self.input_box_width)/2 , game.height/2 - 85, self.input_box_width, self.input_box_height)
-        self.input_active = False
-        self.input_text = ''
-        self.input_text_width = 0
         self.settings_button_pos = (0 , game.height - 30)
-        self.settings_button = pygame.Rect(0, game.height - 30, 125, 30)
-        self.settings_button_text = game.medium_font.render('SETTINGS', True, (0, 0, 0))
-        self.credits_button_text = game.small_font.render('CREDITS', True, (0, 0, 0))
-        self.credits_button_height = 30
+        self.settings_button = pygame.Rect(0, game.height - self.credits_button_height, 125, self.credits_button_height)
         self.credits_button_pos = (game.width - 70, game.height - self.credits_button_height)
         self.credits_button = pygame.Rect(self.credits_button_pos[0], self.credits_button_pos[1], 70, self.credits_button_height)
         self.connected = False
@@ -802,10 +964,11 @@ class StartScreen(Game):
 
     def draw_back_button(self, pos = (-10, -10)):
         white = (255, 255, 255)
-        color = tuple(darken(i) for i in white) if self.back_button.collidepoint(pos) else white
-        pygame.draw.rect(game.screen, color, self.back_button)
-        game.screen.blit(self.back_icon, (-3, -7))
+        color = tuple(darken(i) for i in white) if start_screen.back_button.collidepoint(pos) else white
+        pygame.draw.rect(game.screen, color, start_screen.back_button)
+        game.screen.blit(start_screen.back_icon, (-3, -7))
 
+    
     def draw_start_button(self):
        
         #if mouse hovering make it lighter
@@ -820,14 +983,14 @@ class StartScreen(Game):
         pygame.draw.rect(game.screen, colooooooooor, self.start_button_rect)
 
     
-    def credits_screen(self, pieces, draw_tetris_pieces):
+    def credits_screen(self):
 
         
         credits_list = ['Made by', 'okay#2996', 'and', 'AliMan21#6527']
         text_y = 0
-        text_offset = 80
-        text_scroll_dist = 0.1
-        
+        text_offset = 80    
+        text_scroll_dist_multiplier = 4000
+
         def draw_text(tup):
             index, text = tup
             rendered_text = game.font.render(text, True, (255,255,255))
@@ -848,16 +1011,20 @@ class StartScreen(Game):
                     pygame.quit()
                     sys.exit()
 
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.back_button.collidepoint(event.pos):
                         running = False
                         break
 
-           
-            game.screen.fill((0,0,0))
-            draw_tetris_pieces(pieces)
+            text_scroll_dist = game.width / text_scroll_dist_multiplier
+            game.screen.fill((0, 0, 0))
+            self.draw_tetris_pieces(self.pieces)
             self.draw_back_button(mouse)
-            text_y = text_y + text_scroll_dist if text_y <= game.width + 100 else -1 * (len(credits_list) * text_offset)
+            text_y = text_y + text_scroll_dist if text_y <= (game.height + 100) else -1 * (len(credits_list) * text_offset)
             list(map(draw_text, enumerate(credits_list)))
             pygame.display.update()
     
@@ -981,7 +1148,7 @@ class StartScreen(Game):
         
         return (r, g, b)
         
-    def draw_tetris_pieces(self, pieces):
+    def draw_tetris_pieces(self, pieces, rotate = True):
         for i, piece in enumerate(pieces):
             #means piece is off the screen
             if piece.y >= 28:
@@ -990,9 +1157,18 @@ class StartScreen(Game):
 
 
             piece.render(False)
-            if time.time() > self.last_falls[i]:
-                piece.move(0, 1)
-                self.last_falls[i] = time.time() + 0.75
+
+            try:
+                if time.time() > self.last_falls[i]:
+                    piece.move(0, 1)
+                    self.last_falls[i] = time.time() + 0.75
+                    #this is just an algorithm for occasionally turning the pieces
+                    if rotate and randint(0, 7) == 3:
+                        piece.rotate(randint(0, 1), False)
+
+
+            except:
+                break
 
 
 
@@ -1034,6 +1210,32 @@ class StartScreen(Game):
                     raise e
                 break
 
+
+        
+    def no_connection_screen(self):
+
+        display_time = time.time() + 3
+
+        game.screen.fill(game.background_color)
+
+        text = game.very_big_font.render("No connection", True, game.foreground_color)
+        game.screen.blit(text, (game.width/2-text.get_rect().width/2, 300))
+        pygame.display.update()
+
+        while display_time > time.time():
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+
+            game.clock.tick(60)
+
+
     
     def main(self):
 
@@ -1070,8 +1272,17 @@ class StartScreen(Game):
 
                     pygame.quit()
                     sys.exit()
+                
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+
+                 
                     
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+
+                    if pygame.Rect(0, 0, 100, 100).collidepoint(self.mouse):
+                        game.toggle_full_screen()
                     
                     if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
 
@@ -1079,7 +1290,7 @@ class StartScreen(Game):
                         game.screen.fill((0, 0, 0))
                       
                     
-                    if self.disconnect_button_rect.collidepoint(event.pos) and self.connected:
+                    elif self.disconnect_button_rect.collidepoint(event.pos) and self.connected:
                         self.status = 'disconnect'
                         self.start_button_rect.x = game.width/2-60
                         game.screen.fill((0, 0, 0))
@@ -1092,7 +1303,7 @@ class StartScreen(Game):
                         )
                     
                     elif self.credits_button.collidepoint(event.pos):
-                        self.credits_screen(self.pieces, self.draw_tetris_pieces)
+                        self.credits_screen()
                         #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
                         self.s.fill((0, 0, 0))
 
@@ -1153,33 +1364,24 @@ class StartScreen(Game):
         game.running = True
 
 
-    def no_connection_screen(self):
-
-        display_time = time.time() + 3
-
-        game.screen.fill(game.background_color)
-
-        text = game.very_big_font.render("No connection", True, game.foreground_color)
-        game.screen.blit(text, (game.width/2-text.get_rect().width/2, 300))
-        pygame.display.update()
-
-        while display_time > time.time():
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-            game.clock.tick(60)
-
 
 class SettingsScreen(StartScreen):
 
 
     def __init__(self):
-        super().__init__()
         self.buttons_color = game.foreground_color
         self.background_color = game.background_color
+        self.resize_screen()
+    
+        
+
+    def set_buttons_color(self, color):
+        self.buttons_color = color
+        for i in range(len(self.buttons)):
+            self.buttons[i][2] = color
+
+
+    def resize_screen(self):
         self.buttons = [
             [
                 pygame.Rect(game.width/2 - 200/2, game.height/2 - 200, 200, 50), 
@@ -1456,7 +1658,7 @@ class SettingsScreen(StartScreen):
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
                     # back button
-                    if self.back_button.collidepoint(event.pos):
+                    if start_screen.back_button.collidepoint(event.pos):
                         running = False
 
                         with open(get_path('settings.json'), 'w') as f:
@@ -1687,11 +1889,11 @@ class SettingsScreen(StartScreen):
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
                     # back button
-                    if self.back_button.collidepoint(event.pos):
+                    if start_screen.back_button.collidepoint(event.pos):
                         running = False
 
                         with open(get_path('settings.json'), 'w') as f:
-                            json.dump(settings, f, indent=2)
+                            json.dump(settings, f, indent = 2)
                         
                     elif reset_button_rect.collidepoint(mouse):
 
@@ -1742,16 +1944,21 @@ class SettingsScreen(StartScreen):
     
     def pick_themes_screen(self):
 
+        #issue: we need to call setup function for this outside of this function but we cant cause its not a class
+
+
         def render_game_preview(bkg_color, fgd_color):
             
             pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, 0, game.width, game.height))
             pygame.draw.rect(game.screen, fgd_color, new_playing_field_rect)
-            self.draw_tetris_pieces(pieces)
+            self.draw_tetris_pieces(self.pieces)
            
         
             #It was a lot of work to change the start and end position of the blocks, so i just cover them with a rect so look like theyre not going off screen
             pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, 0, game.width, (game.height - new_playing_field_rect.height)/2))
-            pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, new_playing_field_rect.y + new_playing_field_rect.height, game.width, (game.height - new_playing_field_rect.height)/2))
+            pygame.draw.rect(game.screen, bkg_color, pygame.Rect(0, new_playing_field_rect.y + new_playing_field_rect.height, game.width, (game.height - new_playing_field_rect.height)))
+
+
 
         def is_dark(rgb):
             
@@ -1804,8 +2011,7 @@ class SettingsScreen(StartScreen):
                 new_right_arrow = right_arrow
                 new_right_arrow_rect = right_arrow_rect
                 new_right_arrow_rect_color = game.foreground_color
-                
-
+            
 
             if dark:
                 pygame.draw.rect(game.screen, new_left_arrow_rect_color, new_left_arrow_rect)
@@ -1851,8 +2057,6 @@ class SettingsScreen(StartScreen):
 
 
     
-
-
         def draw_title():
             title = game.very_big_medium_font.render(game.theme_text, True, game.foreground_color)
             title_rect = title.get_rect()
@@ -1867,20 +2071,6 @@ class SettingsScreen(StartScreen):
             with open(get_path('settings.json'), 'w') as f:
                 json.dump(full_dict, f, indent=2)
 
-        new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
-        x_pos = [8, 9, 10, 11, 12]
-        shuffle(x_pos)
-
-        pieces = [
-
-            Piece(x_pos[0], randint(-9, -7), 'T'), 
-            Piece(x_pos[1], randint(-5, -2), 'J'), 
-            Piece(x_pos[2], randint(0, 3), 'S'), 
-            Piece(x_pos[3], randint(5, 8), 'Z'), 
-            Piece(x_pos[4], randint(10, 12), 'I'),
-            
-        ]
-
         
         offset = 10
         left_arrow = pygame.image.load(get_path('assets/images/left_arrow.png'))
@@ -1892,26 +2082,77 @@ class SettingsScreen(StartScreen):
         right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
         hover_scale_factor = 1.1
         
+        
+        new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
+        min_x = int(new_playing_field_rect.x/30)
+        max_x = min_x + int(new_playing_field_rect.width/30) - 4 
+        max_y = int(new_playing_field_rect.height/30)
+        
+
+        step_y = int(max_y/5) or 1
+        step_x = 1
+        #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out
+        x_pos = list(range(min_x, max_x, step_x))
+        y_pos = list(range(0, max_y, step_y)) 
+
+        shuffle(x_pos)
+
+
+        self.pieces = [
+
+            Piece(x_pos, y_pos, choice(start_screen.piece_types)) for x_pos, y_pos in zip(x_pos, y_pos)
+           
+        ]
+
+        self.last_falls = [time.time() for _ in self.pieces]
+
+
         running = True
         while running:
             #bkg color
 
             mouse = pygame.mouse.get_pos()
-
     
             #Makes sure that if game starts while were in this screen it goes back to game
             running = start_screen.check_started()
-
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
 
                     pygame.quit()
                     sys.exit()
+                
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+                    left_arrow_pos = (offset, game.height/2 - dimensions/2)
+                    right_arrow_pos =  (game.width - dimensions - offset, game.height/2 - dimensions/2)
+                    left_arrow_rect = left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
+                    right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
+                    new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
+                    min_x = int(new_playing_field_rect.x/30)
+                    max_x = min_x + int(new_playing_field_rect.width/30) - 4
+                    max_y = int(new_playing_field_rect.height/30)
+                    step_y = int(max_y/5) or 1
+                    step_x = 1
+
+                    x_pos = list(range(min_x, max_x, step_x))
+
+                    y_pos = list(range(0, max_y, step_y))
+                    shuffle(x_pos)
 
 
+                    self.pieces = [
+
+                        Piece(x_pos, y_pos, choice(start_screen.piece_types)) for x_pos, y_pos in zip(x_pos, y_pos)
+                    
+                    ]
+
+                    self.last_falls = [time.time() for _ in self.pieces]
+
+   
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if self.back_button.collidepoint(event.pos):
+                    if start_screen.back_button.collidepoint(event.pos):
                         store_theme()
                         running = False
 
@@ -1920,6 +2161,7 @@ class SettingsScreen(StartScreen):
 
                     elif right_arrow_rect.collidepoint(event.pos):
                         next_theme(1)
+
 
             render_game_preview(game.background_color, game.foreground_color)
             draw_title()
@@ -2138,6 +2380,11 @@ class SettingsScreen(StartScreen):
                     pygame.quit()
                     sys.exit()
 
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+                    
+
 
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
@@ -2148,7 +2395,7 @@ class SettingsScreen(StartScreen):
                             
                     elif event.button == 1:
  
-                        if self.back_button.collidepoint(event.pos):
+                        if start_screen.back_button.collidepoint(event.pos):
                             running = False
 
                         elif reset_button.collidepoint(event.pos):
@@ -2178,7 +2425,7 @@ class SettingsScreen(StartScreen):
                     clicked = False
 
 
-        
+            reset_button = pygame.Rect(game.width/2 - 50, game.height - 35, 100, 27)
             self.draw_back_button(mouse)
             draw_reset_button(mouse)
 
@@ -2199,7 +2446,6 @@ class SettingsScreen(StartScreen):
             game.screen.blit(text, text_rect)
 
        
-
 
     def buttons_hover(self, mouse):
         for index, button in enumerate(self.buttons):
@@ -2227,26 +2473,26 @@ class SettingsScreen(StartScreen):
                     pygame.quit()
                     sys.exit()
 
+                elif event.type == pygame.VIDEORESIZE:
+                    game.width, game.height = event.w, event.h
+                    game.resize_all_screens()
+
+
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     
                     for button, _, _, func in self.buttons:
                         if button.collidepoint(event.pos):
                             func()
 
-                    if self.back_button.collidepoint(event.pos):
+                    if start_screen.back_button.collidepoint(event.pos):
                         running = False
 
-            
-          
 
             self.buttons_hover(mouse)
             self.draw_back_button(mouse)
             self.draw_buttons()
             pygame.display.update()
             game.clock.tick(60)
-
-        
-
 
 
 class Block(Game):
@@ -2268,15 +2514,18 @@ class Block(Game):
         self.fade_start = 0
         
     
-    def render(self):
-
+    def render(self, offset = True):
+        
+        x_offset_val = game.playing_field_rect.x if offset else 100
+        
         # normal
         if time.time() > self.flash_start + 0.2 and not self.fade_start:
 
             darker = tuple(darken(i) for i in self.color)
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-            pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
-
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + x_offset_val, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + x_offset_val + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
+        
+        
         # flashing
         elif time.time() <= self.flash_start + 0.2:
 
@@ -2304,8 +2553,9 @@ class Block(Game):
 
             darker = tuple(darken(i) for i in flash_color)
 
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-            pygame.draw.rect(game.screen, flash_color, ((self.x-1) * self.size + 105, (self.y-1)* self.size + 105, 20, 20))
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            pygame.draw.rect(game.screen, flash_color, ((self.x-1) * self.size + game.playing_field_rect.x + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
+
 
         # fading
         else:
@@ -2325,25 +2575,27 @@ class Block(Game):
             
             darker = tuple(darken(i) for i in fade_color)
 
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-            pygame.draw.rect(game.screen, fade_color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
+            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            pygame.draw.rect(game.screen, fade_color, ((self.x-1) * self.size + game.playing_field_rect.x + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
+
+
 
 
     # for putting blocks on second screen
     def render_second(self):
 
         darker = tuple(darken(i) for i in self.color)
-        pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size/2 + 570, (self.y-1)* self.size/2 + 250, 15, 15))
-        pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size/2 + 572, (self.y-1)* self.size/2 + 252, 11, 11))                    
+        pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size/2 + 570 + game.block_x_offset, (self.y-1)* self.size/2 + game.second_block_y_offset, 15, 15))
+        pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size/2 + 572 + game.block_x_offset, (self.y-1)* self.size/2 + game.second_block_y_offset + 2, 11, 11))                    
 
 
     def render_preview(self):
 
-        pygame.draw.rect(game.screen, game.preview_color, ((self.x-1) * self.size + 100, (self.y-1)* self.size + 100, 30, 30))
-        pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + 103, (self.y-1)* self.size + 103, 24, 24))
+        pygame.draw.rect(game.screen, game.preview_color, ((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+        pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + game.playing_field_rect.x + 3, (self.y-1)* self.size + game.block_y_offset + 3, 24, 24))
 
 
-
+        
 class Piece(Game):
 
     def __init__(self, x, y, piece):
@@ -2421,7 +2673,7 @@ class Piece(Game):
                 self.rotation = '0'
 
 
-    def _path_check(self, direct, x, y):
+    def _path_check(self, direct, x, y, play_sound = True):
 
         # invert y direction
         y *= -1
@@ -2437,10 +2689,12 @@ class Piece(Game):
         
         return False
 
+        
+
 
 
     #0 means clockwise, 1 means counterclockwise
-    def rotate(self, direct: int):
+    def rotate(self, direct: int, play_sound = True):
        
 
         if self.piece_type == "O": return game.play_sound('correct rotate')
@@ -2507,32 +2761,32 @@ class Piece(Game):
                     
                     # 0 -> R
                     if old_rotation == "0":
-                        if self._path_check(direct, -2, 0): return
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, -2, -1): return
-                        if self._path_check(direct, 1, 2): return
+                        if self._path_check(direct, -2, 0, play_sound): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, -2, -1, play_sound): return
+                        if self._path_check(direct, 1, 2, play_sound): return
 
 
                     # R -> 2
                     elif old_rotation == 'R':
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, 2, 0): return
-                        if self._path_check(direct, -1, 2): return
-                        if self._path_check(direct, 2, -1): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, 2, 0, play_sound): return
+                        if self._path_check(direct, -1, 2, play_sound): return
+                        if self._path_check(direct, 2, -1, play_sound): return
                     
                     # 2 -> L
                     elif old_rotation == '2':
-                        if self._path_check(direct, 2, 0): return
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, 2, 1): return
-                        if self._path_check(direct, -1, -2): return
+                        if self._path_check(direct, 2, 0, play_sound): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, 2, 1, play_sound): return
+                        if self._path_check(direct, -1, -2, play_sound): return
 
                     # L -> 0
                     elif old_rotation == "L":
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, -2, 0): return
-                        if self._path_check(direct, 1, -2): return
-                        if self._path_check(direct, -2, 1): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, -2, 0, play_sound): return
+                        if self._path_check(direct, 1, -2, play_sound): return
+                        if self._path_check(direct, -2, 1, play_sound): return
 
 
                 # counterclockwise
@@ -2540,31 +2794,31 @@ class Piece(Game):
 
                     # R -> 0
                     if old_rotation == "R":
-                        if self._path_check(direct, 2, 0): return
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, 2, 1): return
-                        if self._path_check(direct, -1, -2): return
+                        if self._path_check(direct, 2, 0, play_sound): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, 2, 1, play_sound): return
+                        if self._path_check(direct, -1, -2, play_sound): return
 
                     # 2 -> R
                     elif old_rotation == "2":
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, -2, 0): return
-                        if self._path_check(direct, 1, -2): return
-                        if self._path_check(direct, -2, 1): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, -2, 0, play_sound): return
+                        if self._path_check(direct, 1, -2, play_sound): return
+                        if self._path_check(direct, -2, 1, play_sound): return
 
                     # L -> 2
                     elif old_rotation == "L":
-                        if self._path_check(direct, -2, 0): return
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, -2, -1): return
-                        if self._path_check(direct, 1, 2): return
+                        if self._path_check(direct, -2, 0, play_sound): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, -2, -1, play_sound): return
+                        if self._path_check(direct, 1, 2, play_sound): return
                     
                     # 0 -> L
                     elif old_rotation == "0":
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, 2, 0): return
-                        if self._path_check(direct, -1, 2): return
-                        if self._path_check(direct, 2, -1): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, 2, 0, play_sound): return
+                        if self._path_check(direct, -1, 2, play_sound): return
+                        if self._path_check(direct, 2, -1, play_sound): return
 
 
 
@@ -2576,32 +2830,32 @@ class Piece(Game):
                     
                     # 0 -> R
                     if old_rotation == "0":
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, -1, 1): return
-                        if self._path_check(direct, 0, -2): return
-                        if self._path_check(direct, -1, -2): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, -1, 1, play_sound): return
+                        if self._path_check(direct, 0, -2, play_sound): return
+                        if self._path_check(direct, -1, -2, play_sound): return
 
 
                     # R -> 2
                     elif old_rotation == 'R':
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, 1, -1): return
-                        if self._path_check(direct, 0, 2): return
-                        if self._path_check(direct, 1, 2): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, 1, -1, play_sound): return
+                        if self._path_check(direct, 0, 2, play_sound): return
+                        if self._path_check(direct, 1, 2, play_sound): return
                     
                     # 2 -> L
                     elif old_rotation == '2':
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, 1, 1): return
-                        if self._path_check(direct, 0, -2): return
-                        if self._path_check(direct, 1, -2): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, 1, 1, play_sound): return
+                        if self._path_check(direct, 0, -2, play_sound): return
+                        if self._path_check(direct, 1, -2, play_sound): return
 
                     # L -> 0
                     elif old_rotation == "L":
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, -1, -1): return
-                        if self._path_check(direct, 0, 2): return
-                        if self._path_check(direct, -1, 2): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, -1, -1, play_sound): return
+                        if self._path_check(direct, 0, 2, play_sound): return
+                        if self._path_check(direct, -1, 2, play_sound): return
 
 
                 # counterclockwise
@@ -2609,31 +2863,31 @@ class Piece(Game):
 
                     # R -> 0
                     if old_rotation == "R":
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, 1, -1): return
-                        if self._path_check(direct, 0, 2): return
-                        if self._path_check(direct, 1, 2): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, 1, -1, play_sound): return
+                        if self._path_check(direct, 0, 2, play_sound): return
+                        if self._path_check(direct, 1, 2, play_sound): return
 
                     # 2 -> R
                     elif old_rotation == "2":
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, -1, 1): return
-                        if self._path_check(direct, 0, -2): return
-                        if self._path_check(direct, -1, -2): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, -1, 1, play_sound): return
+                        if self._path_check(direct, 0, -2, play_sound): return
+                        if self._path_check(direct, -1, -2, play_sound): return
 
                     # L -> 2
                     elif old_rotation == "L":
-                        if self._path_check(direct, -1, 0): return
-                        if self._path_check(direct, -1, -1): return
-                        if self._path_check(direct, 0, 2): return
-                        if self._path_check(direct, -1, 2): return
+                        if self._path_check(direct, -1, 0, play_sound): return
+                        if self._path_check(direct, -1, -1, play_sound): return
+                        if self._path_check(direct, 0, 2, play_sound): return
+                        if self._path_check(direct, -1, 2, play_sound): return
                     
                     # 0 -> L
                     elif old_rotation == "0":
-                        if self._path_check(direct, 1, 0): return
-                        if self._path_check(direct, 1, 1): return
-                        if self._path_check(direct, 0, -2): return
-                        if self._path_check(direct, 1, -2): return
+                        if self._path_check(direct, 1, 0, play_sound): return
+                        if self._path_check(direct, 1, 1, play_sound): return
+                        if self._path_check(direct, 0, -2, play_sound): return
+                        if self._path_check(direct, 1, -2, play_sound): return
             
 
             # if all tests fail
@@ -2645,7 +2899,7 @@ class Piece(Game):
 
             if self.piece_type == "T":
                 for index, coords in enumerate(self.corners.values()):
-                    coords = org_corner_coords[index]
+                    coords = org_corner_coords[index] #type: ignore
   
 
         else:
@@ -2741,7 +2995,6 @@ class Piece(Game):
     
     def render(self, preview = True):
         # to render preview
-        self.x, self.y
         
         if preview:
             downCount = 0
@@ -2761,7 +3014,7 @@ class Piece(Game):
             
         # for actual piece
         for block in self.blocks:
-            block.render()
+            block.render(preview)
 
 
 start_screen = StartScreen()

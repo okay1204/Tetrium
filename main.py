@@ -76,7 +76,7 @@ def render_texts():
                 textElement, textRect = element
 
                 textRect.center = (
-                    450, 500 + (texts.index((original, display_time, size)) * 50) + (index * 25))
+                    game.playing_field_rect.x + 350, game.playing_field_rect.y + 400 + (texts.index((original, display_time, size)) * 50) + (index * 25))
 
                 game.screen.blit(textElement, textRect)
 
@@ -262,6 +262,11 @@ def game_over(win: bool):
             if event.type == pygame.QUIT:
                 stop()
 
+            elif event.type == pygame.VIDEORESIZE:
+                game.width, game.height = event.w, event.h
+                game.resize_all_screens()
+            
+
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
                 # find new match
@@ -437,8 +442,8 @@ def server_connection():
         if len(meter) > len(game.meter):
 
             if attacked:
-                start_meter_animation((700, 600), 0)
-                game.play_sound('meter recieve')
+                start_meter_animation((game.opp_screen_junk_meter_rect.x + game.opp_screen_junk_meter_rect.width/2, game.opp_screen_junk_meter_rect.y + game.opp_screen_junk_meter_rect.height + 50), 0)
+                game.meter_recieveSFX.play()
             else:
                 attacked = True
 
@@ -487,7 +492,6 @@ def start_meter_animation(pos, against):
 
 def start_number_animation(pos, number):
     global number_animations
-
     number_animations.append((pos, time.time(), number))
 
 
@@ -528,10 +532,11 @@ def play_meter_animations():
 
         # going to opponent
         if against == 1:
-            destination = (550, 550)
+            destination = (game.opp_screen_junk_meter_rect.x + game.opp_screen_junk_meter_rect.width/2, game.opp_screen_junk_meter_rect.y + game.opp_screen_junk_meter_rect.height)
+
         # coming from opponent
         else:
-            destination = (50, 700)
+            destination = (game.playing_field_junk_meter_rect.x + game.playing_field_junk_meter_rect.width/2, game.playing_field_junk_meter_rect.y + game.playing_field_junk_meter_rect.height)
 
         if time.time() - start_time > duration:
             removed.append((pos, start_time, size, against))
@@ -862,6 +867,11 @@ while True:
                     game.continuous = not game.continuous
                     moving = 0
 
+
+            elif event.type == pygame.VIDEORESIZE:
+                game.width, game.height = event.w, event.h
+                game.resize_all_screens()
+
             elif event.type in (pygame.KEYUP, pygame.MOUSEBUTTONUP):
 
                 if event.type == pygame.KEYUP:
@@ -1098,8 +1108,7 @@ while True:
                                 highest_y = block.y
                                 chosen_block = block
 
-                        pos = (block.x-1) * block.size + \
-                            100, (block.y-1) * block.size + 100
+                        pos = (block.x-1) * block.size + game.playing_field_rect.x, (block.y-1) * block.size + game.block_y_offset
 
                         start_meter_animation(pos, 1)
                         start_number_animation(pos, lines_sent)
@@ -1153,7 +1162,7 @@ while True:
             text = game.font.render(
                 f'Speed Level {game.level}', True, game.background_color)
             textRect = text.get_rect()
-            textRect.center = (250, game.height // 2)
+            textRect.center = (game.playing_field_rect.x + 150, game.height // 2)
             game.screen.blit(text, textRect)
 
         render_texts()

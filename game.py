@@ -1408,11 +1408,6 @@ class SettingsScreen(StartScreen):
             ]
         ]
 
-    def set_buttons_color(self, color):
-        self.buttons_color = color
-        for i in range(len(self.buttons)):
-            self.buttons[i][2] = color
-
 
     def audio_screen(self):
 

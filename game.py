@@ -1805,8 +1805,6 @@ class SettingsScreen(StartScreen):
                     if start_screen.back_button.collidepoint(event.pos):
                         running = False
 
-            
-          
 
             self.buttons_hover(mouse)
             self.draw_back_button(mouse)

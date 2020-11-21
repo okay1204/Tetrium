@@ -408,7 +408,7 @@ def server_connection():
         if len(meter) > len(game.meter):
 
             if attacked:
-                start_meter_animation((game.playing_field_junk_meter_rect.x + game.playing_field_junk_meter_rect.width/2, game.playing_field_junk_meter_rect.y + game.playing_field_junk_meter_rect.height + 50), 0)
+                start_meter_animation((game.opp_screen_junk_meter_rect.x + game.opp_screen_junk_meter_rect.width/2, game.opp_screen_junk_meter_rect.y + game.opp_screen_junk_meter_rect.height + 50), 0)
                 game.meter_recieveSFX.play()
             else:
                 attacked = True
@@ -1013,8 +1013,7 @@ while True:
                                 highest_y = block.y
                                 chosen_block = block
 
-                        pos = (block.x-1) * block.size + \
-                            100, (block.y-1) * block.size + 100
+                        pos = (block.x-1) * block.size + game.playing_field_rect.x, (block.y-1) * block.size + game.block_y_offset
 
                         start_meter_animation(pos, 1)
                         start_number_animation(pos, lines_sent)

@@ -1414,6 +1414,7 @@ class SettingsScreen(StartScreen):
                 game.current_track = randint(0, len(game.tracks)-1)
 
                 if not game.random_track:
+                    pygame.mixer.music.stop()
                     game.random_track = True
                     _thread.start_new_thread(game.cycle_music, ())
 

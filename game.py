@@ -403,7 +403,6 @@ class Game:
                     )
                 ) 
                 
-                
                 meter_block += 1
 
     def draw_grid(self, rect, block_size, color):
@@ -667,8 +666,8 @@ class Game:
         #BEFORE:
             # self.playing_field_rect = pygame.Rect(100, 100, 300, 600)
             # self.second_screen_rect = pygame.Rect(570, 250, 150, 300)
-            # self.playing_field_junk_meter_rect_outline = pygame.Rect(32, 394, 36, 306)
             # self.playing_field_junk_meter_rect = pygame.Rect(35, 397, 30, 300)
+            # self.playing_field_junk_meter_rect_outline = pygame.Rect(32, 394, 36, 306)
             # self.opp_screen_junk_meter = pygame.Rect(540, 399, 15, 150)
             # self.opp_screen_junk_meter_outline = pygame.Rect(539, 398, 17, 152)
 
@@ -809,9 +808,6 @@ class StartScreen(Game):
         self.pieces = [
             Piece(x_pos, y_pos, choice(self.piece_types)) for x_pos, y_pos in zip(self.x_pos, self.y_pos)
         ]
-
-
-
 
         rect = self.version_text.get_rect()
         self.version_text_rect = self.version_text.get_rect(center=(game.width-(rect.width/2)-10, rect.height+10))

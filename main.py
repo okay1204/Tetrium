@@ -408,7 +408,7 @@ def server_connection():
         if len(meter) > len(game.meter):
 
             if attacked:
-                start_meter_animation((700, 600), 0)
+                start_meter_animation((game.playing_field_junk_meter_rect.x + game.playing_field_junk_meter_rect.width/2, game.playing_field_junk_meter_rect.y + game.playing_field_junk_meter_rect.height + 50), 0)
                 game.meter_recieveSFX.play()
             else:
                 attacked = True
@@ -458,7 +458,6 @@ def start_meter_animation(pos, against):
 
 def start_number_animation(pos, number):
     global number_animations
-
     number_animations.append((pos, time.time(), number))
 
 
@@ -499,10 +498,11 @@ def play_meter_animations():
 
         # going to opponent
         if against == 1:
-            destination = (550, 550)
+            destination = (game.opp_screen_junk_meter_rect.x + game.opp_screen_junk_meter_rect.width/2, game.opp_screen_junk_meter_rect.y + game.opp_screen_junk_meter_rect.height)
+
         # coming from opponent
         else:
-            destination = (50, 700)
+            destination = (game.playing_field_junk_meter_rect.x + game.playing_field_junk_meter_rect.width/2, game.playing_field_junk_meter_rect.y + game.playing_field_junk_meter_rect.height)
 
         if time.time() - start_time > duration:
             removed.append((pos, start_time, size, against))

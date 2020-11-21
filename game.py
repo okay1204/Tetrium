@@ -14,6 +14,7 @@ from oooooooooooooooooooooooooooooooooooooooooooootils import *
 import _thread
 import asyncio
 import ntpath
+from pyautogui import size as screen_size
 
 
 # these two lines saved my life
@@ -109,6 +110,9 @@ class Game:
 
 
         self.time_started = 0
+
+
+        self.fullscreen = False
 
 
         # list of numbers, with numbers being attack amounts
@@ -860,15 +864,28 @@ class Game:
             )
 
     def toggle_full_screen(self):
-        width, height = pygame.display.get_window_size()
-        # if width < 1920 and height < 1080:
-        #     self.screen = pygame.display.set_mode((1920, 1080), flags = pygame.FULLSCREEN)
 
-        # else:
-        #     self.screen = pygame.display.set_mode((750, 1080), flags = pygame.RESIZABLE)
+        self.fullscreen = not self.fullscreen
 
-        # pygame.display.toggle_fullscreen()
-        print('trying to toggle')
+        if self.fullscreen:
+            
+            self.width, self.height = screen_size()
+
+            pygame.display.quit()
+            self.screen = pygame.display.set_mode((self.width, self.height), flags = pygame.FULLSCREEN)
+            pygame.display.init()
+        else:
+
+            self.width, self.height = 750, 800
+
+            pygame.display.quit()
+            self.screen = pygame.display.set_mode((750, 800), flags = pygame.RESIZABLE)
+            pygame.display.init()
+
+            pygame.display.set_icon(self.icon)
+            pygame.display.set_caption(self.caption)
+
+        self.resize_all_screens()
 
 
 

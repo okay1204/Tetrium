@@ -219,9 +219,6 @@ def game_over(win: bool):
         game.screen.blit(restart_button_text,
                          (button_pos[0] + 10, button_pos[1] + 3))
 
-    def draw_bkg():
-        game.screen.blit(game.opaque_bkg, (0, 0))
-        game.opaque_bkg.set_alpha(120)
 
     def draw_self_rematch_button():
         pygame.draw.rect(game.screen, self_rematch_button_color, self_rematch_button_rect)
@@ -318,7 +315,6 @@ def game_over(win: bool):
 
         draw_self_rematch_text()
         draw_texts()
-        draw_bkg()
 
         pygame.display.update()
         game.clock.tick(60)

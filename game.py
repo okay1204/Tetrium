@@ -82,6 +82,7 @@ class Game:
 
         self.width = 750
         self.height = 800
+        
 
         self.running = True
 
@@ -1415,29 +1416,43 @@ class SettingsScreen(StartScreen):
 
         audio_settings = settings['audio']
         
-        slider_width = 500
-        slider_radius = 10
+        slider_width = game.width/1.5
+        slider_radius = game.height/80
 
         sliders = [
             {
                 "json name": "main",
                 "name": "Main Volume",
-                "pos": (game.width/2, game.height/8),
+                "pos": (0, 0),
                 "default": 1.0
             },
             {
                 "json name": "music",
                 "name": "Music",
-                "pos": (game.width/2, game.height/4+50),
+                "pos": (0, 0),
                 "default": 0.5
             },
             {
                 "json name": "sfx",
                 "name": "Sound Effects",
-                "pos": (game.width/2, game.height/2),
+                "pos": (0, 0),
                 "default": 1.0
             },
         ]
+
+        def set_slider_pos():
+            for i in range(len(sliders)):
+                y_pos = (game.height/8 + game.height/16) * (i + 0.5)
+                sliders[i]['pos'] = (game.width/2, y_pos)
+
+        set_slider_pos()
+
+        def screen_size_change():
+            set_slider_pos()
+            reset_button_rect.x = game.width/2-40
+            reset_button_rect.y = game.height - 35
+
+
 
         for x in range(len(sliders)):
             sliders[x]["value"] = audio_settings[sliders[x]["json name"]]
@@ -1455,17 +1470,11 @@ class SettingsScreen(StartScreen):
 
                 
                 measurement = f'{int(value*100)}%'
-                
-                
                 value_element = game.medium_font.render(measurement, True, game.foreground_color)
                 game.screen.blit(value_element, (pos[0] - value_element.get_rect().width/2, pos[1]+90))
         
 
-
-        reset_button_y = game.height - 35
-        reset_button_rect = pygame.Rect(game.width/2-40, reset_button_y, 80, 25)
-
-
+        reset_button_rect = pygame.Rect(game.width/2-40, game.height - 35, 80, 25)
 
         def path_leaf(path):
             head, tail = ntpath.split(path)
@@ -1483,7 +1492,7 @@ class SettingsScreen(StartScreen):
             pygame.draw.rect(game.screen, reset_button_color, reset_button_rect)
 
             reset_button_text = game.medium_font.render("RESET", True, game.background_color)
-            game.screen.blit(reset_button_text, (game.width/2-reset_button_text.get_rect().width/2, reset_button_y))
+            game.screen.blit(reset_button_text, (game.width/2-reset_button_text.get_rect().width/2, reset_button_rect.y))
 
         
         left_arrow = pygame.image.load(get_path('assets/images/left_arrow.png'))
@@ -1627,9 +1636,7 @@ class SettingsScreen(StartScreen):
                 settings['track'] = game.current_track
 
             
-        
-
-
+    
         running = True
         dragging = None
         while running:
@@ -1652,6 +1659,16 @@ class SettingsScreen(StartScreen):
                 elif event.type == pygame.VIDEORESIZE:
                     game.width, game.height = event.w, event.h
                     game.resize_all_screens()
+                    screen_size_change()
+                    left_arrow_pos = (game.width/4 - left_arrow.get_width()/2, game.height - dimensions/2 - 140)
+                    right_arrow_pos =  (((game.width/4)*3) - right_arrow.get_width()/2, game.height - dimensions/2 - 140)
+                    left_arrow_rect = left_arrow.get_rect(center = (left_arrow_pos[0] + dimensions/2, left_arrow_pos[1] + dimensions/2))
+                    right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
+                    slider_width = game.width/1.5
+                    slider_radius = game.height/80
+
+
+
 
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
@@ -1739,29 +1756,43 @@ class SettingsScreen(StartScreen):
         gameplay_settings = settings["gameplay"]
         controls = settings["controls"]
 
-        slider_width = 500
-        slider_radius = 10
+        slider_width = game.width/1.5
+        slider_radius = game.height/80
 
         sliders = [
             {
                 "json name": "das",
                 "name": "Delayed Auto Shift",
-                "pos": (game.width/2, game.height/8),
+                "pos": (0, 0),
                 "default": 0.8
             },
             {
                 "json name": "arr",
                 "name": "Auto Repeat Rate",
-                "pos": (game.width/2, game.height/4+50),
+                "pos": (0, 0),
                 "default": 0.85
             },
             {
                 "json name": "sds",
                 "name": "Soft Drop Speed",
-                "pos": (game.width/2, game.height/2),
+                "pos": (0, 0),
                 "default": 0.17
             }
         ]
+
+        def set_slider_pos():
+            for i in range(len(sliders)):
+                y_pos = (game.height/8 + game.height/16) * (i + 0.5)
+                sliders[i]['pos'] = (game.width/2, y_pos)
+
+        set_slider_pos()
+
+        def screen_size_change():
+            set_slider_pos()
+            reset_button_rect.x = game.width/2-40
+            reset_button_rect.y = game.height - 35
+
+
 
         for x in range(len(sliders)):
             sliders[x]["value"] = gameplay_settings[sliders[x]["json name"]]
@@ -1786,7 +1817,8 @@ class SettingsScreen(StartScreen):
                     measurement = 205 - (int(value * 195) + 5)
                     measurement = f"{measurement}ms"
 
-                elif name == "Soft Drop Speed":
+                else:
+                    #name == "Soft Drop Speed"
                     measurement = int(value*78) + 2
                     measurement = f"x{measurement}"
                 
@@ -1795,7 +1827,7 @@ class SettingsScreen(StartScreen):
                 game.screen.blit(value_element, (pos[0] - value_element.get_rect().width/2, pos[1]+90))
 
         
-        piece = Piece(9, 20, "O")
+        piece = Piece((game.width/2)/30 - 3.3, 20, "O")
         def draw_preview():
             text_element = game.big_font.render("Preview", True, game.foreground_color)
             game.screen.blit(text_element, (game.width/2 - text_element.get_rect().width/2, game.height/2+140))
@@ -1808,13 +1840,13 @@ class SettingsScreen(StartScreen):
 
         def can_move(moving):
 
-            if moving == 1 and piece.x < 20: return True
-            elif moving == -1 and piece.x > -2: return True
+            if moving == 1 and piece.x < game.width//30 - 5: return True
+            elif moving == -1 and piece.x > -1.3: return True
             return False
 
 
-        reset_button_y = game.height - 35
-        reset_button_rect = pygame.Rect(game.width/2-40, reset_button_y, 80, 25)
+        reset_button_rect = pygame.Rect(game.width/2-40, game.height - 35, 80, 25)
+
         def draw_reset_button():
 
             if reset_button_rect.collidepoint(mouse):
@@ -1825,7 +1857,7 @@ class SettingsScreen(StartScreen):
             pygame.draw.rect(game.screen, reset_button_color, reset_button_rect)
 
             reset_button_text = game.medium_font.render("RESET", True, game.background_color)
-            game.screen.blit(reset_button_text, (game.width/2-reset_button_text.get_rect().width/2, reset_button_y))
+            game.screen.blit(reset_button_text, (game.width/2-reset_button_text.get_rect().width/2, reset_button_rect.y))
 
         running = True
         dragging = None
@@ -1856,6 +1888,10 @@ class SettingsScreen(StartScreen):
                 elif event.type == pygame.VIDEORESIZE:
                     game.width, game.height = event.w, event.h
                     game.resize_all_screens()
+                    screen_size_change()
+                    piece = Piece((game.width/2)/30 - 3.3, 20, "O")
+                    slider_width = game.width/1.5
+                    slider_radius = game.height/80
 
                 elif event.type == pygame.KEYDOWN:
 
@@ -1903,6 +1939,9 @@ class SettingsScreen(StartScreen):
 
                             slider['value'] = slider['default']
 
+                        with open(get_path('settings.json'), 'w') as f:
+                            json.dump(settings, f, indent = 2)
+
                     elif not dragging:
                         for slider in sliders:
                             x, y = slider["pos"]
@@ -1928,21 +1967,19 @@ class SettingsScreen(StartScreen):
                         value /= slider_width
                         slider["value"] = value
 
-
             game.screen.fill(game.background_color)
 
             draw_sliders()
             draw_preview()
             draw_reset_button()
             self.draw_back_button(mouse)
-
-
             pygame.display.update()
 
+        #Write to json if loop stopped, meaning they pressed back or game started            
+        with open(get_path('settings.json'), 'w') as f:
+            json.dump(settings, f, indent = 2)
 
-            if not running:
-                with open(get_path('settings.json'), 'w') as f:
-                    json.dump(settings, f, indent=2)
+
     
     def pick_themes_screen(self):
 

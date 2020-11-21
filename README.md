@@ -1,5 +1,5 @@
-# Tetris
-Code for the Online Tetris game.
+# Tetrium
+Code for the Online Tetrium.
 
 
-Fun little Tetris game made with pygame. Hoping to make it online and multiplayer soon.
+Online Multliplayer Tetris made with pygame.

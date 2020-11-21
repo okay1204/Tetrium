@@ -254,8 +254,8 @@ class Game:
                     pygame.mixer.music.load(self.tracks[self.current_track])
                     pygame.mixer.music.play(0)
                     pygame.mixer.music.set_volume(self.music)
-        except pygame.error as e:
-            print(e)
+        except:
+            pass
 
 
 
@@ -1411,10 +1411,10 @@ class SettingsScreen(StartScreen):
             pygame.mixer.music.stop()
 
             if track_number == 0:
-                game.random_track = True
                 game.current_track = randint(0, len(game.tracks)-1)
 
-                if direction != -1:
+                if not game.random_track:
+                    game.random_track = True
                     _thread.start_new_thread(game.cycle_music, ())
 
                 settings['track'] = 'random'

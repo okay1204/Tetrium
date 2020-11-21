@@ -3,3 +3,4 @@ __pycache__/
 ip.py
 settings.json
 logs.txt
+test.py

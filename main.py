@@ -576,6 +576,8 @@ while True:
     with open(get_path('settings.json')) as f:
         settings = json.load(f)
 
+    music_volume = settings['audio']['main'] * settings['audio']['music']
+
     controls = settings['controls']
     gameplay_settings = settings['gameplay']
 
@@ -898,9 +900,11 @@ while True:
                 elif key_name == controls['Toggle Music']:
 
                     if not muted:
-                        pygame.mixer.music.pause()
+                        game.music = 0
+                        pygame.mixer.music.set_volume(0)
                     else:
-                        pygame.mixer.music.unpause()
+                        game.music = music_volume
+                        pygame.mixer.music.set_volume(game.music)
 
                     muted = not muted
 

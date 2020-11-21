@@ -151,8 +151,8 @@ class Game:
         with open(get_path('settings.json')) as f:
             settings = json.load(f)
 
-        self.music = settings['audio']['master'] * settings['audio']['music']
-        self.sfx = settings['audio']['master'] * settings['audio']['sfx']
+        self.music = settings['audio']['main'] * settings['audio']['music']
+        self.sfx = settings['audio']['main'] * settings['audio']['sfx']
 
 
         self.sounds = {
@@ -1224,8 +1224,8 @@ class SettingsScreen(StartScreen):
 
         sliders = [
             {
-                "json name": "master",
-                "name": "Master",
+                "json name": "main",
+                "name": "Main Volume",
                 "pos": (game.width/2, game.height/8),
                 "default": 1.0
             },
@@ -1511,8 +1511,8 @@ class SettingsScreen(StartScreen):
             draw_music_switcher()
             self.draw_back_button(mouse)
 
-            game.music = audio_settings['master'] * audio_settings['music']
-            game.sfx = audio_settings['master'] * audio_settings['sfx']
+            game.music = audio_settings['main'] * audio_settings['music']
+            game.sfx = audio_settings['main'] * audio_settings['sfx']
 
             pygame.mixer.music.set_volume(game.music)
             game.sfx_channel.set_volume(game.sfx)

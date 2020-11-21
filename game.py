@@ -1477,7 +1477,7 @@ class SettingsScreen(StartScreen):
         def draw_reset_button():
 
             if reset_button_rect.collidepoint(mouse):
-                reset_button_color = tuple(darken(color) for color in game.foreground_color)
+                reset_button_color = tuple(darken(color, 15) for color in game.foreground_color)
             else:
                 reset_button_color = game.foreground_color
            
@@ -1819,7 +1819,7 @@ class SettingsScreen(StartScreen):
         def draw_reset_button():
 
             if reset_button_rect.collidepoint(mouse):
-                reset_button_color = tuple(darken(color) for color in game.foreground_color)
+                reset_button_color = tuple(darken(color, 15) for color in game.foreground_color)
             else:
                 reset_button_color = game.foreground_color
            

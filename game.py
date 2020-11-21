@@ -133,9 +133,6 @@ class Game:
 
         self.enormous_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 120)
         
-    
-        self.opaque_bkg = pygame.image.load(get_path('assets/images/opaque_bkg.png'))
-
 
         self.default_controls = {
             "Move Right": "d",
@@ -207,7 +204,7 @@ class Game:
         #first tuple is rgb of background color, second is foreground
         self.themes = [
             ['Default', (0, 0, 0), (101, 142, 156)],
-            ['Random', (0, 0, 0), (152, 136, 165)],
+            ['Random', (0, 0, 0), (255, 255, 255)],
             ['Blue Mystique', (0, 20, 39), (101, 142, 156)],
             ['Sky High', (39, 38, 53), (177, 229, 242)],
             ['Jungle Adventure', (1, 38, 34), (184, 242, 230)],   
@@ -221,7 +218,7 @@ class Game:
             ['Tropical Sands', (38, 70, 83), (233, 196, 106)],
         ]
 
-      
+
         try:
             self.theme_index = settings['theme']
         
@@ -243,7 +240,9 @@ class Game:
         self.set_grid_color(self.foreground_color)
         self.set_text_color(self.foreground_color)
         self.theme_text = theme[0]
+        self.random_theme = True if self.theme_text == 'Random' else False
         self.resize_screen_setup()
+
 
     
     def cycle_music(self):
@@ -796,6 +795,23 @@ class Game:
     def update_presence(self, state, details, start, large_image):
         if not self.dev and self.presence_connected:
             self.discord_rpc_loop.create_task(self.async_update_presence(details, state, start, large_image))
+
+    def check_random_theme(self):
+        if self.random_theme:
+            random_theme_pick = randint(0, len(self.themes) -1)
+            theme = self.themes[randint(0, len(self.themes) -1)]
+
+            while theme[0] == 'Random':
+                random_theme_pick = randint(0, len(self.themes) -1)
+                theme = self.themes[random_theme_pick]
+
+            self.background_color = theme[1]
+            self.foreground_color = theme[2]
+            self.set_text_color(self.foreground_color)
+            self.set_grid_color(self.foreground_color)
+            settings_screen.set_buttons_color(self.foreground_color)
+
+
 
     def resize_screen_setup(self):
         #BEFORE:
@@ -2096,6 +2112,13 @@ class SettingsScreen(StartScreen):
             self.set_buttons_color(foreground_color)
             self.background_color = background_color
 
+            #we need a seperate var because if we rely on theme text, then once we change the theme (since its random), it will no longer think its random
+            if game.theme_text == 'Random':
+                game.random_theme = True
+            
+            else:
+                game.random_theme = False
+
         
         def next_theme(direction):
             #direction 0 = left, 1 = right
@@ -2154,6 +2177,7 @@ class SettingsScreen(StartScreen):
 
     
         def draw_title():
+
             title = game.very_big_medium_font.render(game.theme_text, True, game.foreground_color)
             title_rect = title.get_rect()
             game.screen.blit(title, (game.width/2 - title_rect.width/2, 10))
@@ -2170,12 +2194,11 @@ class SettingsScreen(StartScreen):
 
         def random_theme():
         
-            if game.theme_text == 'Random':
+            if game.random_theme:
                 if not randint(0, 2):
                     cycle_colors()
-                    
-                game.foreground_color = (r, g, b)
-                text = game.very_big_font.render('?', True, (game.background_color))
+
+                text = game.enormous_font.render('?', True, (game.background_color))
                 text_rect = text.get_rect(center = (new_playing_field_rect.x + new_playing_field_rect.width/2, new_playing_field_rect.y + new_playing_field_rect.height/2))
                 game.screen.blit(text, text_rect)
 
@@ -2191,7 +2214,7 @@ class SettingsScreen(StartScreen):
         hover_scale_factor = 1.1
         new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
         min_x = int(new_playing_field_rect.x/30)
-        max_x = min_x + int(new_playing_field_rect.width/30) - 4 
+        max_x = min_x + int(new_playing_field_rect.width/30) - 5 
         max_y = int(new_playing_field_rect.height/30)
         
 
@@ -2237,7 +2260,7 @@ class SettingsScreen(StartScreen):
                     right_arrow_rect = right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
                     new_playing_field_rect =  pygame.Rect(game.width/2 - game.playing_field_rect.width/2, game.playing_field_rect.y, game.playing_field_rect.width, game.playing_field_rect.height)
                     min_x = int(new_playing_field_rect.x/30)
-                    max_x = min_x + int(new_playing_field_rect.width/30) - 4
+                    max_x = min_x + int(new_playing_field_rect.width/30) - 5
                     max_y = int(new_playing_field_rect.height/30)
                     step_y = int(max_y/5) or 1
                     step_x = 1
@@ -2269,12 +2292,14 @@ class SettingsScreen(StartScreen):
                         next_theme(1)
 
 
-            render_game_preview(game.background_color, game.foreground_color)
+            render_game_preview(game.background_color, (r, g, b) if game.random_theme else game.foreground_color)
             random_theme()
             draw_title()
             self.draw_back_button(mouse)
             draw_arrows(mouse)
             pygame.display.update()
+        
+        game.check_random_theme()
 
 
     
@@ -2551,6 +2576,7 @@ class SettingsScreen(StartScreen):
             pygame.draw.rect(game.screen, color, button)
             text_rect = text.get_rect(center = (button.x + button.width/2, button.y +button.height/2))
             game.screen.blit(text, text_rect)
+        
 
        
 
@@ -2569,7 +2595,7 @@ class SettingsScreen(StartScreen):
         running = True
         while running:
             #bkg color
-            game.screen.fill(self.background_color)
+            game.screen.fill(game.background_color)
             mouse = pygame.mouse.get_pos()
             #Makes sure that if game starts while were in this screen it goes back to game
             running = start_screen.check_started()

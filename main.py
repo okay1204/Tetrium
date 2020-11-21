@@ -290,14 +290,14 @@ def game_over(win: bool):
 
         # for hover effects
         if restart_button_rect.collidepoint(mouse):
-            restart_button_color = tuple(map(darken, game.foreground_color))
+            restart_button_color = tuple(darken(i, 15) for i in game.foreground_color)
         else:
             restart_button_color = game.foreground_color
 
         
 
         if self_rematch_button_rect.collidepoint(mouse):
-            self_rematch_button_color = tuple(map(darken, game.foreground_color))
+            self_rematch_button_color = tuple(darken(i, 15) for i in game.foreground_color)
         else:
             self_rematch_button_color = game.foreground_color
 
@@ -562,6 +562,7 @@ while True:
     start_screen.ready = False
     start_screen.started = False
 
+    game.check_random_theme()
     start_screen.main()
     _thread.start_new_thread(server_connection, ())
 
@@ -614,6 +615,8 @@ while True:
             if not rematch:
                 game.screen.fill((0, 0, 0))
                 break
+
+            game.check_random_theme()
 
         
         if countdown > time.time():

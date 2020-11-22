@@ -574,14 +574,16 @@ class Game:
 
             for event in pygame.event.get():
 
-                game.check_fullscreen(event)
-
+    
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 
-                elif event.type == pygame.VIDEORESIZE:
-                    game.width, game.height = event.w, event.h
+                elif event.type == pygame.VIDEORESIZE or self.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
                     game.resize_all_screens()
                     copy_button_pos = (self.width/2 - copy_button_dimensions[0]/2, self.height/2 - copy_button_dimensions[1]/2)
                     copy_button_rect = pygame.Rect(*copy_button_pos, *copy_button_dimensions)
@@ -638,14 +640,16 @@ class Game:
 
             for event in pygame.event.get():
 
-                game.check_fullscreen(event)
 
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.VIDEORESIZE:
-                    game.width, game.height = event.w, event.h
+                elif event.type == pygame.VIDEORESIZE or self.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
                     game.resize_all_screens()
                     button_pos = (self.width/2 - button_dimensions[0]/2, self.height/2 - button_dimensions[1]/2)
                     button_rect = pygame.Rect(*button_pos, *button_dimensions)
@@ -673,14 +677,15 @@ class Game:
 
             for event in pygame.event.get():
 
-                game.check_fullscreen(event)
-
                 if event.type == pygame.QUIT:
                     return False
 
 
-                elif event.type == pygame.VIDEORESIZE:
-                    game.width, game.height = event.w, event.h
+                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
                     game.resize_all_screens()
 
             seconds = int(countdown - time.time())
@@ -1031,15 +1036,18 @@ class StartScreen(Game):
             #Game over loop
             for event in pygame.event.get():
 
-                game.check_fullscreen(event)
+               
 
                 if event.type == pygame.QUIT:
 
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.VIDEORESIZE:
-                    game.width, game.height = event.w, event.h
+                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
                     game.resize_all_screens()
 
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -1253,14 +1261,15 @@ class StartScreen(Game):
 
             for event in pygame.event.get():
 
-                game.check_fullscreen(event)
-
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.VIDEORESIZE:
-                    game.width, game.height = event.w, event.h
+                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
                     game.resize_all_screens()
 
             game.clock.tick(60)
@@ -1296,7 +1305,6 @@ class StartScreen(Game):
             #Game over loop
             for event in pygame.event.get():
 
-                game.check_fullscreen(event)
 
                 if event.type == pygame.QUIT:
 
@@ -1306,8 +1314,11 @@ class StartScreen(Game):
                     pygame.quit()
                     sys.exit()
                 
-                elif event.type == pygame.VIDEORESIZE:
-                    game.width, game.height = event.w, event.h
+                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
                     game.resize_all_screens()
 
                  
@@ -1684,16 +1695,16 @@ class SettingsScreen(StartScreen):
             mouse = pygame.mouse.get_pos()
             for event in pygame.event.get():
 
-                game.check_fullscreen(event)
-
-
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
 
-                elif event.type == pygame.VIDEORESIZE:
-                    game.width, game.height = event.w, event.h
+                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
                     game.resize_all_screens()
                     screen_size_change()
                     left_arrow_pos = (game.width/4 - left_arrow.get_width()/2, game.height - dimensions/2 - 140)
@@ -1916,14 +1927,15 @@ class SettingsScreen(StartScreen):
             mouse = pygame.mouse.get_pos()
             for event in pygame.event.get():
 
-                game.check_fullscreen(event)
-
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.VIDEORESIZE:
-                    game.width, game.height = event.w, event.h
+                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
                     game.resize_all_screens()
                     screen_size_change()
                     piece = Piece((game.width/2)/30 - 3.3, 20, "O")
@@ -2240,14 +2252,15 @@ class SettingsScreen(StartScreen):
 
             for event in pygame.event.get():
 
-                game.check_fullscreen(event)
-
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 
-                elif event.type == pygame.VIDEORESIZE:
-                    game.width, game.height = event.w, event.h
+                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
                     game.resize_all_screens()
                     left_arrow_pos = (offset, game.height/2 - dimensions/2)
                     right_arrow_pos =  (game.width - dimensions - offset, game.height/2 - dimensions/2)
@@ -2388,7 +2401,12 @@ class SettingsScreen(StartScreen):
 
                 for event in pygame.event.get():
 
-                    game.check_fullscreen(event)
+                    if event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                        try: 
+                            game.width, game.height = event.w, event.h
+                        except:
+                            pass
+                        game.resize_all_screens()
 
                     if event.type == pygame.QUIT:
                         pygame.quit()
@@ -2513,14 +2531,16 @@ class SettingsScreen(StartScreen):
 
             for event in pygame.event.get():
 
-                game.check_fullscreen(event)
 
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.VIDEORESIZE:
-                    game.width, game.height = event.w, event.h
+                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
                     game.resize_all_screens()
                     
 
@@ -2607,14 +2627,15 @@ class SettingsScreen(StartScreen):
 
             for event in pygame.event.get():
 
-                game.check_fullscreen(event)
-
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.VIDEORESIZE:
-                    game.width, game.height = event.w, event.h
+                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
                     game.resize_all_screens()
 
 

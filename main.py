@@ -1,5 +1,7 @@
 import sys
 import traceback
+
+from pygame.display import toggle_fullscreen
 from oooooooooooooooooooooooooooooooooooooooooooootils import get_path
 
 def error_handler(e_type, value, tb):
@@ -768,6 +770,9 @@ while True:
 
                     if game.continuous:
                         moving = -1
+
+                elif key_name == controls['Toggle Fullscreen']:
+                    game.toggle_fullscreen()
 
                 elif key_name == controls['Move Right']:
 

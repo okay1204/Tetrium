@@ -74,9 +74,6 @@ class Game:
 
         pygame.init()
         self.font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 32)
-
-
-
         self.time_opened = time.time()
 
 
@@ -143,7 +140,8 @@ class Game:
             "Rotate Clockwise": "right",
             "Rotate Counter-Clockwise": "left",
             "Toggle Movement": "g",
-            "Toggle Music": "m"
+            "Toggle Music": "m",
+            "Toggle Fullscreen": "f11"
         }
 
         with open(get_path('settings.json')) as f:
@@ -198,7 +196,8 @@ class Game:
             "Rotate Clockwise": settings["controls"]["Rotate Clockwise"],
             "Rotate Counter-Clockwise": settings["controls"]["Rotate Counter-Clockwise"],
             "Hold Piece": settings["controls"]["Hold Piece"],
-            "Hard Drop": settings["controls"]["Hard Drop"]
+            "Hard Drop": settings["controls"]["Hard Drop"],
+            "Toggle Fullscreen": settings["controls"]["Toggle Fullscreen"],
         }
 
         #first tuple is rgb of background color, second is foreground
@@ -823,7 +822,6 @@ class Game:
             # self.opp_screen_junk_meter_outline = pygame.Rect(539, 398, 17, 152)
 
 
-
         #NOTE y and for this rect has to have 100 margin on both sides
         #NOTE x and for this rect has to have 100 margin left, 350 margin right
         playing_field_rect_height = 600
@@ -881,7 +879,7 @@ class Game:
             
             )
 
-    def toggle_full_screen(self):
+    def toggle_fullscreen(self):
 
         self.fullscreen = not self.fullscreen
 
@@ -923,8 +921,6 @@ game = Game()
 class StartScreen(Game):
 
     def __init__(self):
-
-
 
         self.ready = False
 
@@ -1322,7 +1318,7 @@ class StartScreen(Game):
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
                     if pygame.Rect(0, 0, 100, 100).collidepoint(self.mouse):
-                        game.toggle_full_screen()
+                        game.toggle_fullscreen()
                     
                     if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
 
@@ -2429,7 +2425,8 @@ class SettingsScreen(StartScreen):
                     "Rotate Clockwise": game.default_controls["Rotate Clockwise"],
                     "Rotate Counter-Clockwise": game.default_controls["Rotate Counter-Clockwise"],
                     "Hold Piece": game.default_controls["Hold Piece"],
-                    "Hard Drop": game.default_controls["Hard Drop"]
+                    "Hard Drop": game.default_controls["Hard Drop"],
+                    "Toggle Fullscreen": game.default_controls["Toggle Fullscreen"]
             }
 
         def draw_title():
@@ -2455,7 +2452,6 @@ class SettingsScreen(StartScreen):
 
             else:
                 key = mouse_number_key[key]
-
 
 
             keys = list(list(game.left_controls.values()) + list(game.right_controls.values()))
@@ -2517,7 +2513,6 @@ class SettingsScreen(StartScreen):
                     game.resize_all_screens()
                     
 
-
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
                     if clicked:
@@ -2550,7 +2545,6 @@ class SettingsScreen(StartScreen):
                         
 
                 elif event.type == pygame.KEYDOWN:
-                    # z = pygame.key.name(event.key)
                     if clicked:
                         get_key_input(event.key)
                     

@@ -1125,9 +1125,8 @@ while True:
 
                         if game.meter:
                             # increasing the stage of the incoming junk
+                            meter_stage = game.meter_stage + 1
                             send("meter increase")
-
-                            meter_stage = game.meter_stage
 
                             if meter_stage >= 3:
                                 attacked = False

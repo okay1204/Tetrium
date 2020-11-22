@@ -12,7 +12,6 @@ def lighten(value, amt  = 60):
 
 
 
-
 # whether this is a mac pyinstaller build or not
 is_frozen_mac = False
 if sys.platform == "darwin":

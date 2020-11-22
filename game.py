@@ -395,12 +395,14 @@ class Game:
                     color = color_key["yellow"]
                 elif self.meter_stage  == 2:
                     color = color_key["orange"]
-                elif self.meter_stage  == 3:
+                else:
                     color = color_key["red"]
             else:
                 color = color_key["gray"]
 
-            darkened = tuple(darken(i) for i in color) #type: ignore
+            print(f'{self.meter_stage = }')
+            darkened = tuple(darken(i) for i in color)
+
 
             for block in range(amount):
 
@@ -420,7 +422,7 @@ class Game:
 
                 pygame.draw.rect(
                     self.screen, 
-                    color, #type: ignore
+                    color,
                     (
                         self.playing_field_junk_meter_rect.x + 5, 
                         (self.playing_field_junk_meter_rect.y + 
@@ -463,12 +465,12 @@ class Game:
                     color = color_key["yellow"]
                 elif self.opp_meter_stage  == 2:
                     color = color_key["orange"]
-                elif self.opp_meter_stage  == 3:
+                else:
                     color = color_key["red"]
             else:
                 color = color_key["gray"]
 
-            darkened = tuple(darken(i) for i in color) #type: ignore
+            darkened = tuple(darken(i) for i in color)
 
             for _ in range(amount):
 
@@ -489,7 +491,7 @@ class Game:
                 
                 pygame.draw.rect(
                     self.screen, 
-                    color, #type: ignore
+                    color,
                     (
                         self.opp_screen_junk_meter_rect.x + 2, 
                         (self.opp_screen_junk_meter_rect.y + 
@@ -564,9 +566,6 @@ class Game:
 
             elif quit_button_rect.collidepoint(pos):
                 breakOut = True
-
-
-
 
         while True:
 

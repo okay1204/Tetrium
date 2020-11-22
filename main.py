@@ -1061,7 +1061,7 @@ while True:
                                 lines_text = "Single"
                             elif lines_cleared == 2:
                                 lines_text = "Double"
-                            elif lines_cleared == 3:
+                            else:
                                 lines_text = "Triple"
 
                             texts.append(
@@ -1115,7 +1115,7 @@ while True:
                                 highest_y = block.y
                                 chosen_block = block
 
-                        pos = (block.x-1) * block.size + game.playing_field_rect.x, (block.y-1) * block.size + game.block_y_offset
+                        pos = (chosen_block.x-1) * chosen_block.size + game.playing_field_rect.x, (chosen_block.y-1) * chosen_block.size + game.block_y_offset
 
                         start_meter_animation(pos, 1)
                         start_number_animation(pos, lines_sent)

@@ -923,7 +923,7 @@ while True:
 
         current.move(0, 1)
         if current.check_floor() and not touched_floor and not rotation_last:
-            fall = time.time() + 0.95
+            fall = time.time() + 0.5
             touched_floor = True
         elif not current.check_floor():
             touched_floor = False

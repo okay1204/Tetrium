@@ -200,6 +200,8 @@ class Game:
             "Toggle Fullscreen": settings["controls"]["Toggle Fullscreen"],
         }
 
+        self.fullscreen_key = settings["controls"]["Toggle Fullscreen"]
+
         #first tuple is rgb of background color, second is foreground
         self.themes = [
             ['Default', (0, 0, 0), (101, 142, 156)],
@@ -580,6 +582,8 @@ class Game:
 
             for event in pygame.event.get():
 
+                game.check_fullscreen(event)
+
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
@@ -684,6 +688,9 @@ class Game:
             mouse = pygame.mouse.get_pos() 
 
             for event in pygame.event.get():
+
+                game.check_fullscreen(event)
+
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
@@ -714,8 +721,10 @@ class Game:
         while countdown > time.time():
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
 
+                game.check_fullscreen(event)
+
+                if event.type == pygame.QUIT:
                     return False
 
 
@@ -879,6 +888,37 @@ class Game:
             
             )
 
+    def check_fullscreen(self, event, ingame=False):
+
+        mouse_number_key = {
+            1: 'left click',
+            2: 'middle click',
+            3: 'right click'
+        }
+
+        if event.type in (pygame.MOUSEBUTTONDOWN, pygame.KEYDOWN):
+
+            if event.type == pygame.KEYDOWN:
+                key_name = pygame.key.name(event.key)
+
+            else:
+
+                if 1 <= event.button <= 3:
+                    key_name = mouse_number_key[event.button]
+                else:
+                    key_name = None
+
+            
+            if key_name == self.fullscreen_key:
+                self.toggle_fullscreen()
+                if ingame:
+                    pygame.mouse.set_visible(False)
+
+                return True
+        
+        return False
+
+
     def toggle_fullscreen(self):
 
         self.fullscreen = not self.fullscreen
@@ -890,6 +930,7 @@ class Game:
             pygame.display.quit()
             self.screen = pygame.display.set_mode((self.width, self.height), flags = pygame.FULLSCREEN)
             pygame.display.init()
+
         else:
 
             self.width, self.height = 750, 800
@@ -1042,6 +1083,9 @@ class StartScreen(Game):
 
             #Game over loop
             for event in pygame.event.get():
+
+                game.check_fullscreen(event)
+
                 if event.type == pygame.QUIT:
 
                     pygame.quit()
@@ -1261,6 +1305,9 @@ class StartScreen(Game):
         while display_time > time.time():
 
             for event in pygame.event.get():
+
+                game.check_fullscreen(event)
+
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
@@ -1301,6 +1348,9 @@ class StartScreen(Game):
             
             #Game over loop
             for event in pygame.event.get():
+
+                game.check_fullscreen(event)
+
                 if event.type == pygame.QUIT:
 
                     if self.connected:
@@ -1687,8 +1737,10 @@ class SettingsScreen(StartScreen):
             mouse = pygame.mouse.get_pos()
             for event in pygame.event.get():
 
-                if event.type == pygame.QUIT:
+                game.check_fullscreen(event)
 
+
+                if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
@@ -1917,8 +1969,9 @@ class SettingsScreen(StartScreen):
             mouse = pygame.mouse.get_pos()
             for event in pygame.event.get():
 
-                if event.type == pygame.QUIT:
+                game.check_fullscreen(event)
 
+                if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
@@ -2186,8 +2239,7 @@ class SettingsScreen(StartScreen):
 
             with open(get_path('settings.json'), 'w') as f:
                 json.dump(full_dict, f, indent = 2)
-
-
+            
         def random_theme():
         
             if game.random_theme:
@@ -2242,8 +2294,10 @@ class SettingsScreen(StartScreen):
             running = start_screen.check_started()
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
 
+                game.check_fullscreen(event)
+
+                if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
                 
@@ -2385,7 +2439,11 @@ class SettingsScreen(StartScreen):
             text_rect = text.get_rect(center = (game.width/2, game.height/2 - 100))
             start_time = time.time()
             while time.time() - start_time <= 0.5:
+
                 for event in pygame.event.get():
+
+                    game.check_fullscreen(event)
+
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
@@ -2428,6 +2486,9 @@ class SettingsScreen(StartScreen):
                     "Hard Drop": game.default_controls["Hard Drop"],
                     "Toggle Fullscreen": game.default_controls["Toggle Fullscreen"]
             }
+
+            self.fullscreen_key = full_dict["controls"]["Toggle Fullscreen"]
+
 
         def draw_title():
             game.screen.blit(title_text_1, (game.width/2 - 140, 100))
@@ -2479,6 +2540,8 @@ class SettingsScreen(StartScreen):
             
             with open(get_path('settings.json'), 'w') as f:
                 json.dump(full_dict, f, indent=2)
+
+            self.fullscreen_key = full_dict["controls"]["Toggle Fullscreen"]
         
 
         title_text_1 = game.big_font.render('CLICK ON A BOX TO', True, (255, 255, 255))
@@ -2503,8 +2566,10 @@ class SettingsScreen(StartScreen):
     
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
 
+                game.check_fullscreen(event)
+
+                if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
@@ -2595,8 +2660,10 @@ class SettingsScreen(StartScreen):
             running = start_screen.check_started()
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
 
+                game.check_fullscreen(event)
+
+                if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 

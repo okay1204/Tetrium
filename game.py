@@ -2363,8 +2363,7 @@ class SettingsScreen(StartScreen):
                                                 #Dw about mechanics of this, just know that This just toggles True/False every half a second
                 if underline and index == clicked_index and int(str(round(time.time(), 1))[-1:]) < 5:
                         pygame.draw.rect(game.screen, (255, 255, 255), pygame.Rect(text_1_rect.x, text_1_rect.y + 2, text_1_rect.width, text_1_rect.height + 2))
-                
-        
+            
 
                 pygame.draw.rect(game.screen, value_bkg_color, text_1_rect)
                 pygame.draw.rect(game.screen, keys_bkg_color, text_2_rect)
@@ -2457,7 +2456,7 @@ class SettingsScreen(StartScreen):
         
         def draw_prompt():
             if clicked:
-                color = self.buttons_color if  int(str(round(time.time(), 1))[-1:]) < 5 else self.background_color
+                color = self.buttons_color if  int(str(round(time.time(), 1))[-1:]) < 5 else game.background_color
                 prompt_text = game.big_font.render('PRESS A KEY', True, color)
                 game.screen.blit(prompt_text, (game.width/2 - 100, 300))
 
@@ -2518,7 +2517,7 @@ class SettingsScreen(StartScreen):
         running = True
         while running:
             #bkg color
-            game.screen.fill(self.background_color)
+            game.screen.fill(game.background_color)
 
             mouse = pygame.mouse.get_pos()
             
@@ -2586,7 +2585,7 @@ class SettingsScreen(StartScreen):
             draw_title()
             draw_prompt()
 
-            keys_bkg_color = get_keys_bkg_color(self.background_color)
+            keys_bkg_color = get_keys_bkg_color(game.background_color)
             text_boxes_1 = draw_controls(game.left_controls.items(), 0, (255, 255, 255), keys_bkg_color = keys_bkg_color, value_bkg_color = self.buttons_color, underline = clicked, clicked_index = clicked_index_1)
             text_boxes_2 = draw_controls(game.right_controls.items(), 1,  (255, 255, 255),  keys_bkg_color = keys_bkg_color, value_bkg_color = self.buttons_color, underline = clicked, clicked_index = clicked_index_2)
             pygame.display.update()

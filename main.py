@@ -258,6 +258,8 @@ def game_over(win: bool):
 
         for event in pygame.event.get():
 
+            game.check_fullscreen(event)
+
             if event.type == pygame.QUIT:
                 stop()
 
@@ -735,6 +737,8 @@ while True:
         backToTop = False
         for event in pygame.event.get():
 
+            game.check_fullscreen(event, True)
+
             if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
 
                 if event.type == pygame.KEYDOWN:
@@ -770,9 +774,6 @@ while True:
 
                     if game.continuous:
                         moving = -1
-
-                elif key_name == controls['Toggle Fullscreen']:
-                    game.toggle_fullscreen()
 
                 elif key_name == controls['Move Right']:
 

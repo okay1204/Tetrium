@@ -1,7 +1,5 @@
 # pylint: disable=no-member, unused-wildcard-import, no-name-in-module
-
 import pygame
-from pygame.constants import NOFRAME
 import pieces as pieces_lib
 import math
 import time
@@ -9,12 +7,12 @@ import sys
 from random import shuffle, randint, choice
 import network
 import json
-import pyperclip
 from oooooooooooooooooooooooooooooooooooooooooooootils import *
 import _thread
 import asyncio
 import ntpath
 from pyautogui import size as screen_size
+from webbrowser import open_new
 
 
 # these two lines saved my life
@@ -538,19 +536,15 @@ class Game:
             self.screen.blit(text4, (self.width/2-140, 290))
 
 
-        copied_pos = 0
-        copy_animation = False
-
-        def draw_buttons():
+        def draw_buttons(mouse):
         
-            pygame.draw.rect(self.screen, rect_color, copy_button_rect)
+            pygame.draw.rect(self.screen, tuple(darken(i, 15) for i in rect_color) if copy_button_rect.collidepoint(mouse) else rect_color, copy_button_rect)
                 
-            copy_button_text = self.font.render("Copy download link", True, text_color)
-            self.screen.blit(copy_button_text, (copy_button_pos[0] + 10, copy_button_pos[1] + 3))
+            copy_button_text = self.font.render("UPDATE NOW", True, text_color)
+            self.screen.blit(copy_button_text, (copy_button_pos[0] + 40, copy_button_pos[1] + 3))
             
 
-
-            pygame.draw.rect(self.screen, rect_color, quit_button_rect)
+            pygame.draw.rect(self.screen, tuple(darken(i, 15) for i in rect_color) if quit_button_rect.collidepoint(mouse) else rect_color, quit_button_rect)
 
             quit_button_text = self.font.render("Go Back", True, text_color)
             self.screen.blit(quit_button_text, (quit_button_pos[0] + 10, quit_button_pos[1] + 3))
@@ -559,14 +553,12 @@ class Game:
 
         def check_click(pos):
 
-            nonlocal copied_pos, copy_animation, breakOut
+            nonlocal breakOut
             
 
             if copy_button_rect.collidepoint(pos):
-                pyperclip.copy(download_link)
-
-                copied_pos = self.height/2 - copy_button_dimensions[1]/2
-                copy_animation = True
+                open_new(download_link)
+        
 
             elif quit_button_rect.collidepoint(pos):
                 breakOut = True
@@ -587,22 +579,18 @@ class Game:
                 elif event.type == pygame.VIDEORESIZE:
                     game.width, game.height = event.w, event.h
                     game.resize_all_screens()
+                    copy_button_pos = (self.width/2 - copy_button_dimensions[0]/2, self.height/2 - copy_button_dimensions[1]/2)
+                    copy_button_rect = pygame.Rect(*copy_button_pos, *copy_button_dimensions)
+                    quit_button_pos = (self.width/2 - quit_button_dimensions[0]/2, 700)
+                    quit_button_rect = pygame.Rect(*quit_button_pos, *quit_button_dimensions)
 
+                
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     check_click(event.pos)
 
 
             draw_text()
-            draw_buttons()
-
-            if copy_animation:
-                copied_pos -= 2
-                
-                copied_text = self.font.render("Copied!", True, (49, 235, 228))
-                self.screen.blit(copied_text, (copy_button_pos[0]+100, copied_pos))
-
-                if copied_pos <= 320:
-                    copy_animation = False
+            draw_buttons(pygame.mouse.get_pos())
 
             if breakOut:
                 break
@@ -619,49 +607,11 @@ class Game:
             self.screen.blit(dc_text_1, (self.width/2 - dc_text_1.get_rect().width/2, 200))
             self.screen.blit(dc_text_2, (self.width/2 - dc_text_2.get_rect().width/2, 300))
 
-        rgb_stage = 0
-
-        def cycle_colors():
-            
-            nonlocal r, g, b, rgb_stage
-
-            if rgb_stage == 0:
-                if g < 255 and r > 0:
-                    g += 1
-                    r -= 1
-                else:
-                    rgb_stage = 1
-
-
-            elif rgb_stage == 1:
-                if b < 255 and g > 0:
-                    b += 1
-                    g -= 1
-                    
-                else:
-                    rgb_stage = 2
-
-            elif rgb_stage == 2:
-                if r < 255 and b > 0:
-                    r += 1
-                    b -= 1
-                else:
-                    rgb_stage = 0
-
-            
+   
         def draw_button():
-            nonlocal button_text_color
 
-            pygame.draw.rect(self.screen, tuple(darken(color) for color in game.foreground_color), button_rect)
+            pygame.draw.rect(self.screen, tuple(darken(color, 15) for color in game.foreground_color) if button_rect.collidepoint(mouse) else game.foreground_color, button_rect)
 
-            #if mouse hovering make it rgb
-            if button_rect.collidepoint(mouse): 
-                cycle_colors()
-                button_text_color = (r, g, b)
-
-            
-            else: 
-                button_text_color = game.foreground_color
                 
             button_text = self.font.render("FIND NEW MATCH", True, button_text_color)
             self.screen.blit(button_text, (button_pos[0] + 10, button_pos[1] + 3))
@@ -673,7 +623,6 @@ class Game:
                 game.running = False
 
 
-        r, g, b = 255, 0, 0
         button_text_color = (0,0,0)
         button_dimensions = (300, 40)
         button_pos = (self.width/2 - button_dimensions[0]/2, self.height/2 - button_dimensions[1]/2)
@@ -691,6 +640,8 @@ class Game:
                 elif event.type == pygame.VIDEORESIZE:
                     game.width, game.height = event.w, event.h
                     game.resize_all_screens()
+                    button_pos = (self.width/2 - button_dimensions[0]/2, self.height/2 - button_dimensions[1]/2)
+                    button_rect = pygame.Rect(*button_pos, *button_dimensions)
 
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     
@@ -911,11 +862,7 @@ class Game:
         settings_screen.resize_screen()
         pygame.display.flip()
             
-
-
 game = Game()
-
-
 
 
 class StartScreen(Game):
@@ -1288,10 +1235,10 @@ class StartScreen(Game):
             if not initial_presence and game.presence_connected:
 
                 game.update_presence(
-                    details="In Start Menu",
-                    state="Idling",
-                    start=game.time_opened,
-                    large_image="tetrium_logo_512x512"
+                    details = "In Start Menu",
+                    state = "Idling",
+                    start = game.time_opened,
+                    large_image = "tetrium_logo_512x512"
                 )
 
                 initial_presence = True
@@ -2284,6 +2231,7 @@ class SettingsScreen(StartScreen):
                     elif left_arrow_rect.collidepoint(event.pos):
                         next_theme(0)
 
+
                     elif right_arrow_rect.collidepoint(event.pos):
                         next_theme(1)
 
@@ -3123,7 +3071,6 @@ class Piece(Game):
     
     def render(self, preview = True):
         # to render preview
-        
         if preview:
             downCount = 0
 
@@ -3135,7 +3082,7 @@ class Piece(Game):
             for block in self.blocks:
                 block.render_preview()
             
-            for _ in range(downCount): # noqa pylint: disable=unused-variable
+            for _ in range(downCount):
                 self.move(0, -1)
 
             self.move(0, 1)

@@ -233,7 +233,7 @@ def game_over(win: bool):
 
 
         opp_rendered_text = rematch_text_font.render(opp_rematch_text, True, game.foreground_color)
-        game.screen.blit(opp_rendered_text, (int(game.width/2)+80, int(game.height/2)+250))
+        game.screen.blit(opp_rendered_text, (opponent_rect.x - opponent_rect.width/2, int(game.height/2)+250))
 
     def draw_texts():
         game.screen.blit(you_text, (int(game.width/4)-30, int(game.height/2)+100))
@@ -266,6 +266,16 @@ def game_over(win: bool):
             elif event.type == pygame.VIDEORESIZE:
                 game.width, game.height = event.w, event.h
                 game.resize_all_screens()
+                button_pos = (
+                    int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
+                restart_button_rect = pygame.Rect(button_pos, button_dimensions)
+                restart_button_color = game.foreground_color
+                restart_button_text = restart_button_font.render(
+                    'Find new match', True, game.background_color)
+                self_rematch_button_pos = (int(game.width/2 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
+                self_rematch_button_rect = pygame.Rect(self_rematch_button_pos, rematch_button_dimensions)
+                opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
+                textRect.center = (game.width // 2, 200)
             
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:

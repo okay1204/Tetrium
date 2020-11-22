@@ -2159,8 +2159,6 @@ class SettingsScreen(StartScreen):
         min_x = int(new_playing_field_rect.x/30)
         max_x = min_x + int(new_playing_field_rect.width/30) - 5 
         max_y = int(new_playing_field_rect.height/30)
-        
-
         step_y = int(max_y/5) or 1
         step_x = 1
         #It might seem confusing whats happeneing here but dw about it, just making sure blocks are spaced out

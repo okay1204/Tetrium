@@ -685,10 +685,10 @@ while True:
             if current.overlapping_blocks():
 
                 if current.piece_type != "O":
-                    current.rotate(1)
+                    current.rotate(1, play_sound=False)
 
                     if current.overlapping_blocks():
-                        current.rotate(-1)
+                        current.rotate(-1, play_sound=False)
 
                 else:
                     current.move(0, -1)

@@ -977,8 +977,6 @@ class StartScreen(Game):
         self.settings_button = pygame.Rect(0, game.height - self.credits_button_height, 125, self.credits_button_height)
         self.credits_button_pos = (game.width - 70, game.height - self.credits_button_height)
         self.credits_button = pygame.Rect(self.credits_button_pos[0], self.credits_button_pos[1], 70, self.credits_button_height)
-        self.connected = False
-        self.started = False
         self.back_icon = pygame.image.load(get_path('assets/images/arrow-back.png'))
         self.back_button = pygame.Rect(10, 10, 75, 65)
         self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+70, 175, 40)

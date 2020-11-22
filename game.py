@@ -842,7 +842,7 @@ class Game:
             
             )
 
-    def check_fullscreen(self, event, ingame=False):
+    def check_fullscreen(self, event, ingame = False):
 
         mouse_number_key = {
             1: 'left click',
@@ -856,7 +856,6 @@ class Game:
                 key_name = pygame.key.name(event.key)
 
             else:
-
                 if 1 <= event.button <= 3:
                     key_name = mouse_number_key[event.button]
                 else:
@@ -2449,7 +2448,7 @@ class SettingsScreen(StartScreen):
                     "Toggle Fullscreen": game.default_controls["Toggle Fullscreen"]
             }
 
-            self.fullscreen_key = full_dict["controls"]["Toggle Fullscreen"]
+            game.fullscreen_key = full_dict["controls"]["Toggle Fullscreen"]
 
 
         def draw_title():
@@ -2608,7 +2607,7 @@ class SettingsScreen(StartScreen):
               
             if button[0].collidepoint(mouse):
                                                                 #2 is the color index
-                self.buttons[index][2] = tuple(darken(i, 15) for i in self.buttons_color)
+                self.buttons[index][2] = tuple(darken(i, 20) for i in self.buttons_color)
             
             else:
                 self.buttons[index][2] = self.buttons_color

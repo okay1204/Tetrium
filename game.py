@@ -145,6 +145,8 @@ class Game:
         with open(get_path('settings.json')) as f:
             settings = json.load(f)
 
+        self.initial_nickname = settings['name']
+
         self.music = settings['audio']['main'] * settings['audio']['music']
         self.sfx = settings['audio']['main'] * settings['audio']['sfx']
 
@@ -932,7 +934,7 @@ class StartScreen(Game):
 
         self.input_box_placeholder = game.medium_font.render("Enter a name...", True, (96, 93, 93))
         self.input_active = False
-        self.input_text = ''
+        self.input_text = game.initial_nickname
         self.settings_button_text = game.medium_font.render('SETTINGS', True, (0, 0, 0))
         self.credits_button_text = game.small_font.render('CREDITS', True, (0, 0, 0))
         self.connected = False
@@ -1118,6 +1120,15 @@ class StartScreen(Game):
     def start(self):
         
         self.input_active = False
+
+        # saving nickname
+        with open(get_path('settings.json')) as f:
+            settings = json.load(f)
+
+        settings['name'] = self.input_text
+
+        with open(get_path('settings.json'), 'w') as f:
+            json.dump(settings, f, indent=2)
 
         game.n = network.Network()
         if game.n.p == "no connection":

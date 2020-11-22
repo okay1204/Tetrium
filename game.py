@@ -400,7 +400,6 @@ class Game:
             else:
                 color = color_key["gray"]
 
-            print(f'{self.meter_stage = }')
             darkened = tuple(darken(i) for i in color)
 
 

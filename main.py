@@ -695,10 +695,10 @@ while True:
             if current.overlapping_blocks():
 
                 if current.piece_type != "O":
-                    current.rotate(1)
+                    current.rotate(1, play_sound=False)
 
                     if current.overlapping_blocks():
-                        current.rotate(-1)
+                        current.rotate(-1, play_sound=False)
 
                 else:
                     current.move(0, -1)
@@ -1135,9 +1135,8 @@ while True:
 
                         if game.meter:
                             # increasing the stage of the incoming junk
+                            meter_stage = game.meter_stage + 1
                             send("meter increase")
-
-                            meter_stage = game.meter_stage
 
                             if meter_stage >= 3:
                                 attacked = False

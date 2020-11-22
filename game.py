@@ -2503,7 +2503,7 @@ class SettingsScreen(StartScreen):
             with open(get_path('settings.json'), 'w') as f:
                 json.dump(full_dict, f, indent=2)
 
-            self.fullscreen_key = full_dict["controls"]["Toggle Fullscreen"]
+            game.fullscreen_key = full_dict["controls"]["Toggle Fullscreen"]
         
 
         title_text_1 = game.big_font.render('CLICK ON A BOX TO', True, (255, 255, 255))

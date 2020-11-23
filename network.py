@@ -3,7 +3,7 @@ import pickle
 import traceback
 from ip import IP
 
-version = "1.0"
+version = "1.1"
 
 class Network:
     def __init__(self):

@@ -279,7 +279,8 @@ class Game:
     def set_grid_color(self, color):
         self.grid_color = tuple(darken(i, 10) for i in color)
     
-    def complimentary_color(self, color: tuple): 
+    @staticmethod
+    def complimentary_color(color: tuple): 
         
         def contrast(val):
             return int(abs((val + 255/2) - 255))
@@ -409,28 +410,21 @@ class Game:
 
                 if meter_block >= 10:
                     break
-
-                pygame.draw.rect(
-                    self.screen, 
-                    darkened, 
-                    (
+                
+                block_rect = pygame.Rect(
                         self.playing_field_junk_meter_rect.x, 
                         (self.playing_field_junk_meter_rect.y + 
                         self.playing_field_junk_meter_rect.height - 30) - 
                         (30 * meter_block), 30, 30
                     )
-                )
 
                 pygame.draw.rect(
                     self.screen, 
-                    color,
-                    (
-                        self.playing_field_junk_meter_rect.x + 5, 
-                        (self.playing_field_junk_meter_rect.y + 
-                        self.playing_field_junk_meter_rect.height - 30 + 5) - 
-                        (30 * meter_block), 20, 20
-                    )
-                ) 
+                    color, 
+                    block_rect
+                )
+
+                self.draw_block_borders(block_rect, darkened)
                
                 meter_block += 1
 
@@ -477,30 +471,19 @@ class Game:
 
                 if meter_block >= 10:
                     break
-
-                pygame.draw.rect(
-                    self.screen, 
-                    darkened, 
-                    (
+                
+                block_rect = pygame.Rect(
                         self.opp_screen_junk_meter_rect.x, 
                         (self.opp_screen_junk_meter_rect.y + 
                         self.opp_screen_junk_meter_rect.height - 15) - 
                         (15 * meter_block), 15, 15
                     )
-                )
-                
-                
                 pygame.draw.rect(
                     self.screen, 
-                    color,
-                    (
-                        self.opp_screen_junk_meter_rect.x + 2, 
-                        (self.opp_screen_junk_meter_rect.y + 
-                        self.opp_screen_junk_meter_rect.height - 15 + 3) - 
-                        (15 * meter_block), 11, 11
-                    )
-                ) 
-                
+                    color, 
+                    block_rect
+                )
+                game.draw_block_borders(block_rect, darkened, block_size_difference = 2)
                 meter_block += 1
 
     def draw_grid(self, rect, block_size, color):
@@ -774,6 +757,44 @@ class Game:
             self.set_text_color(self.foreground_color)
             self.set_grid_color(self.foreground_color)
             settings_screen.set_buttons_color(self.foreground_color)
+
+
+    @staticmethod
+    def draw_block_borders(block_rect, color, block_size_difference = 5):
+
+            block_size = block_rect.width
+            #draw trapezoid on bottom
+            pygame.draw.polygon(game.screen, color, 
+
+                [     
+                        #bottom left of trapezoid
+                    (block_rect.x, block_rect.y + block_rect.height),
+                        #top left of trapezoid
+                    (block_rect.x + block_size_difference, block_rect.y + block_size - block_size_difference),
+                         #top right of trapezoid
+                     (block_rect.x + block_size - block_size_difference, block_rect.y + block_size - block_size_difference),
+                        #bottom right of trapezoid
+                    (block_rect.x + block_rect.width, block_rect.y + block_rect.height)
+                ]
+      
+            )
+
+            #draw trapezoid on right
+            pygame.draw.polygon(game.screen, tuple(lighten(i, 15) for i in color), 
+
+                [     
+                        #bottom left of trapezoid
+                    (block_rect.x + block_rect.width, block_rect.y + block_rect.height),
+                        #top left of trapezoid
+                     (block_rect.x + block_size - block_size_difference, block_rect.y + block_size - block_size_difference),
+                         #top right of trapezoid
+                     (block_rect.x + block_size - block_size_difference, block_rect.y + block_size_difference),
+                        #bottom right of trapezoid
+                    (block_rect.x + block_rect.width, block_rect.y)
+                ]
+
+            )
+
 
 
 
@@ -2293,7 +2314,6 @@ class SettingsScreen(StartScreen):
 
                     self.last_falls = [time.time() for _ in self.pieces]
 
-   
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if start_screen.back_button.collidepoint(event.pos):
                         store_theme()
@@ -2305,7 +2325,6 @@ class SettingsScreen(StartScreen):
 
                     elif right_arrow_rect.collidepoint(event.pos):
                         next_theme(1)
-
 
             render_game_preview(game.background_color, (r, g, b) if game.random_theme else game.foreground_color)
             random_theme()
@@ -2465,7 +2484,7 @@ class SettingsScreen(StartScreen):
         
         def draw_prompt():
             if clicked:
-                color = self.buttons_color if  int(str(round(time.time(), 1))[-1:]) < 5 else game.background_color
+                color = self.buttons_color if int(str(round(time.time(), 1))[-1:]) < 5 else game.background_color
                 prompt_text = game.big_font.render('PRESS A KEY', True, color)
                 game.screen.blit(prompt_text, (game.width/2 - 100, 300))
 
@@ -2475,7 +2494,7 @@ class SettingsScreen(StartScreen):
             3: 'right click'
         }
 
-        def get_key_input(key, mouse_clicked=False):
+        def get_key_input(key, mouse_clicked = False):
 
             if not mouse_clicked:
                 key = pygame.key.name(key)
@@ -2532,10 +2551,8 @@ class SettingsScreen(StartScreen):
             
             #Makes sure that if game starts while were in this screen it goes back to game
             running = start_screen.check_started()
-    
 
             for event in pygame.event.get():
-
 
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -2678,9 +2695,12 @@ class Block(Game):
         self.flash_start = 0
         self.direction = 0
         self.fade_start = 0
+
+
         
     
     def render(self, offset = True):
+        
         
         x_offset_val = game.playing_field_rect.x if offset else 100
         
@@ -2688,9 +2708,14 @@ class Block(Game):
         if time.time() > self.flash_start + 0.2 and not self.fade_start:
 
             darker = tuple(darken(i) for i in self.color)
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + x_offset_val, (self.y-1)* self.size + game.block_y_offset, 30, 30))
-            pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + x_offset_val + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
-        
+            # pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + x_offset_val, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            # pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + x_offset_val + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
+            
+
+            block_rect = pygame.Rect((self.x-1) * self.size + x_offset_val, (self.y-1)* self.size + game.block_y_offset, 30, 30)
+            pygame.draw.rect(game.screen, self.color, block_rect)
+            game.draw_block_borders(block_rect, darker)
+
         
         # flashing
         elif time.time() <= self.flash_start + 0.2:
@@ -2718,8 +2743,9 @@ class Block(Game):
             flash_color = tuple(flash_color)
 
             darker = tuple(darken(i) for i in flash_color)
-
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            block_rect = pygame.Rect((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30)
+            game.draw_block_borders(block_rect, darker)
+            pygame.draw.rect(game.screen, flash_color, block_rect)
             pygame.draw.rect(game.screen, flash_color, ((self.x-1) * self.size + game.playing_field_rect.x + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
 
 
@@ -2740,23 +2766,21 @@ class Block(Game):
 
             
             darker = tuple(darken(i) for i in fade_color)
-
-            pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30))
+            block_rect = pygame.Rect((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30)
+            game.draw_block_borders(block_rect, darker)
             pygame.draw.rect(game.screen, fade_color, ((self.x-1) * self.size + game.playing_field_rect.x + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
-
-
 
 
     # for putting blocks on second screen
     def render_second(self):
-
         darker = tuple(darken(i) for i in self.color)
-        pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size/2 + 570 + game.block_x_offset, (self.y-1)* self.size/2 + game.second_block_y_offset, 15, 15))
+        block_rect = pygame.Rect((self.x-1) * self.size/2 + 570 + game.block_x_offset, (self.y-1)* self.size/2 + game.second_block_y_offset, 15, 15)
+        game.draw_block_borders(block_rect, darker, block_size_difference = 2)
+        pygame.draw.rect(game.screen, darker, block_rect)
         pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size/2 + 572 + game.block_x_offset, (self.y-1)* self.size/2 + game.second_block_y_offset + 2, 11, 11))                    
 
 
     def render_preview(self):
-
         pygame.draw.rect(game.screen, game.preview_color, ((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30))
         pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + game.playing_field_rect.x + 3, (self.y-1)* self.size + game.block_y_offset + 3, 24, 24))
 

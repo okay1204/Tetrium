@@ -208,7 +208,7 @@ def game_over(win: bool):
             details=f"In End Screen",
             state=f"Won against {game.opp_name}",
             start=game.time_started,
-            large_image="tetrium_logo_512x512"
+large_image="tetrium_logo_512x512"
         )
 
     textRect = game_over_text.get_rect()
@@ -258,13 +258,13 @@ def game_over(win: bool):
 
         for event in pygame.event.get():
 
-            game.check_fullscreen(event)
-
             if event.type == pygame.QUIT:
                 stop()
 
-            elif event.type == pygame.VIDEORESIZE:
-                game.width, game.height = event.w, event.h
+            elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                try:
+                    game.width, game.height = event.w, event.h
+                except: pass
                 game.resize_all_screens()
                 button_pos = (
                     int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
@@ -745,8 +745,8 @@ while True:
                         current.move(0, -1)
 
         backToTop = False
-        for event in pygame.event.get():
 
+        for event in pygame.event.get():
             game.check_fullscreen(event, True)
 
             if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
@@ -886,7 +886,9 @@ while True:
 
 
             elif event.type == pygame.VIDEORESIZE:
-                game.width, game.height = event.w, event.h
+                try:
+                    game.width, game.height = event.w, event.h
+                except: pass
                 game.resize_all_screens()
 
             elif event.type in (pygame.KEYUP, pygame.MOUSEBUTTONUP):

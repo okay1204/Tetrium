@@ -233,7 +233,7 @@ large_image="tetrium_logo_512x512"
 
 
         opp_rendered_text = rematch_text_font.render(opp_rematch_text, True, game.foreground_color)
-        game.screen.blit(opp_rendered_text, (opponent_rect.x - opponent_rect.width/2, int(game.height/2)+250))
+        game.screen.blit(opp_rendered_text, (opponent_rect.x -  opponent_rect.width*1.5, int(game.height/2)+250))
 
     def draw_texts():
         game.screen.blit(you_text, (int(game.width/4)-30, int(game.height/2)+100))

@@ -2708,10 +2708,6 @@ class Block(Game):
         if time.time() > self.flash_start + 0.2 and not self.fade_start:
 
             darker = tuple(darken(i) for i in self.color)
-            # pygame.draw.rect(game.screen, darker, ((self.x-1) * self.size + x_offset_val, (self.y-1)* self.size + game.block_y_offset, 30, 30))
-            # pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size + x_offset_val + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
-            
-
             block_rect = pygame.Rect((self.x-1) * self.size + x_offset_val, (self.y-1)* self.size + game.block_y_offset, 30, 30)
             pygame.draw.rect(game.screen, self.color, block_rect)
             game.draw_block_borders(block_rect, darker)

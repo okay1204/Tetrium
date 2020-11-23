@@ -24,7 +24,6 @@ if __name__ == "__main__":
     import main
 
 
-
 color_key = {
     'green': (13, 252, 65),
     'blue': (13, 29, 252),
@@ -44,7 +43,7 @@ class Game:
 
         #############################
         #############################
-        self.dev = True #############
+        self.dev = False #############
         #############################
         #############################
 
@@ -2771,9 +2770,8 @@ class Block(Game):
     def render_second(self):
         darker = tuple(darken(i) for i in self.color)
         block_rect = pygame.Rect((self.x-1) * self.size/2 + 570 + game.block_x_offset, (self.y-1)* self.size/2 + game.second_block_y_offset, 15, 15)
+        pygame.draw.rect(game.screen, self.color, block_rect)
         game.draw_block_borders(block_rect, darker, block_size_difference = 2)
-        pygame.draw.rect(game.screen, darker, block_rect)
-        pygame.draw.rect(game.screen, self.color, ((self.x-1) * self.size/2 + 572 + game.block_x_offset, (self.y-1)* self.size/2 + game.second_block_y_offset + 2, 11, 11))                    
 
 
     def render_preview(self):

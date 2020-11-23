@@ -13,6 +13,7 @@
 ;General
     !define APPNAME "Tetrium"
     !define COMPANYNAME "Tetrium Game"
+    !define INSTALL_FOLDER "Tetrium v1.1"
     !define DESCRIPTION "Online multiplayer tetris"
     # These three must be integers
     !define VERSIONMAJOR 1
@@ -32,7 +33,7 @@
     ;Name and file
 
     ;Default installation folder
-    InstallDir "$PROGRAMFILES\${COMPANYNAME}\${APPNAME}"
+    InstallDir "$PROGRAMFILES\${COMPANYNAME}\${INSTALL_FOLDER}"
 
     ;Get installation folder from registry if available
     InstallDirRegKey HKCU "Tetrium" ""
@@ -42,7 +43,7 @@
     # This will be in the installer/uninstaller's title bar
     Name "${COMPANYNAME} - ${APPNAME}"
     Icon "logo.ico"
-    outFile "Tetrium Installer.exe"
+    outFile "${APPNAME} Installer.exe"
 
     !include LogicLib.nsh
 
@@ -189,8 +190,10 @@ section "install"
 	file "Tetrium.exe"
 	file "logo.ico"
 	file "settings.json"
+
 	# Add any other files for the install directory (license files, app data, etc) here
 	file "settings.json"
+  File /r ".\*"
  
 	# Uninstaller - See function un.onInit and section "uninstall" for configuration
 	writeUninstaller "$INSTDIR\uninstall.exe"
@@ -245,7 +248,8 @@ section "Uninstall"
 	delete $INSTDIR\Tetrium.exe
 	delete $INSTDIR\logo.ico
 	delete $INSTDIR\settings.json
- 
+  delete "./*"
+
 	# Always delete uninstaller as the last action
 	delete $INSTDIR\uninstall.exe
  

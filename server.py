@@ -170,9 +170,9 @@ def threaded_client(conn, player, game):
 s.listen()
 print("Server Started, Waiting for connections")
 
-version = "1.0"
+version = "1.1"
 # NOTE replace with download link to newer version
-download_link = "www.google.com"
+download_link = "https://tetrium.me/download"
 
 while True:
         

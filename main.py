@@ -15,7 +15,6 @@ def error_handler(e_type, value, tb):
         f.write(f"{text}\n\n\n")
 
 
-
 sys.excepthook = error_handler
 
 

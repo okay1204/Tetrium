@@ -9,7 +9,7 @@ from ip import IP
 server = IP
 port = 6969
 
-timeout = 3.0
+timeout = 10.0
 
 games = []
 

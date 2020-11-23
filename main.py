@@ -158,6 +158,8 @@ def game_over(win: bool):
 
     global gameOver, opp_disconnected_after
 
+    game_over_start = time.time()
+
     gameOver = True
 
     button_dimensions = (250, 40)
@@ -330,7 +332,8 @@ large_image="tetrium_logo_512x512"
         draw_self_rematch_text()
         draw_texts()
 
-        pygame.display.update()
+        if (time.time() > game_over_start + 1 and won == False) or won == True:
+            pygame.display.update()
         game.clock.tick(60)
 
 
@@ -599,7 +602,6 @@ while True:
     sds = int(gameplay_settings['sds']*78) + 2
 
     pygame.mouse.set_visible(False)
-
 
     while game.running:
         

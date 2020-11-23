@@ -581,7 +581,9 @@ while True:
     _thread.start_new_thread(server_connection, ())
 
     # waiting for countdown so it doesn't flash
-    while countdown < time.time():
+    # failsafe just in case the message actually took longer than 5 seconds to deliver, so the game doesn't crash
+    failsafe = time.time() + 5
+    while countdown < time.time() or failsafe < time.time():
         pass
 
     with open(get_path('settings.json')) as f:

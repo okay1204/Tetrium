@@ -585,8 +585,8 @@ while True:
 
     # waiting for countdown so it doesn't flash
     # failsafe just in case the message actually took longer than 5 seconds to deliver, so the game doesn't crash
-    failsafe = time.time() + 5
-    while countdown < time.time() or failsafe < time.time():
+    failsafe = time.time() + 6
+    while countdown < time.time() and failsafe > time.time():
         pass
 
     with open(get_path('settings.json')) as f:

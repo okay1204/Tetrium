@@ -28,7 +28,6 @@ import json
 import _thread
 import socket
 import onlineGame
-from multiprocessing import Process
 
 
 
@@ -135,7 +134,6 @@ def reset():
     game.level = 1
     game.score = 0
     game.lines = 0
-    bag = pieces.copy()
     random.shuffle(bag)
     next_bag = pieces.copy()
     random.shuffle(next_bag)
@@ -1143,7 +1141,7 @@ while True:
                             meter_stage = game.meter_stage + 1
                             send("meter increase")
 
-                            if meter_stage >= 3:
+                            if meter_stage > 3:
                                 attacked = False
                                 send("meter reset")
                                 game.play_sound('garbage recieve')

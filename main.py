@@ -42,10 +42,14 @@ random.shuffle(next_bag)
 def stop():
 
     game.running = False
-    while True:
-        if can_disconnect:
-            game.n.disconnect()
-            break
+
+    if game.multiplayer:
+        
+        while True:
+            if can_disconnect:
+                game.n.disconnect()
+                break
+
     pygame.quit()
     sys.exit()
 
@@ -362,9 +366,8 @@ specials = []
 
 
 def send(string):
-    global specials
-
-    specials.append(string)
+    if game.multiplayer:
+        specials.append(string)
 
 
 # for getting information about opponent
@@ -487,82 +490,84 @@ number_animations = []
 
 
 def start_meter_animation(pos, against):
-    global meter_animations
 
-    meter_animations.append((pos, time.time(), 15, against))
+    if game.multiplayer:
+        meter_animations.append((pos, time.time(), 15, against))
 
-    for _ in range(randint(3, 5)):
-        random_pos = pos[0] + \
-            random.randint(-60, 60), pos[1] + random.randint(-60, 60)
-        random_size = random.randint(3, 10)
+        for _ in range(randint(3, 5)):
+            random_pos = pos[0] + \
+                random.randint(-60, 60), pos[1] + random.randint(-60, 60)
+            random_size = random.randint(3, 10)
 
-        meter_animations.append(
-            (random_pos, time.time(), random_size, against))
+            meter_animations.append(
+                (random_pos, time.time(), random_size, against))
 
 
 def start_number_animation(pos, number):
-    global number_animations
-    number_animations.append((pos, time.time(), number))
+    if game.multiplayer:
+        number_animations.append((pos, time.time(), number))
 
 
 def play_number_animations():
-    global number_animations
+    
+    if game.multiplayer:
 
-    duration = 0.5
-    travel_distance = 30
+        duration = 0.5
+        travel_distance = 30
 
-    removed = []
+        removed = []
 
-    for pos, start_time, number in number_animations:
+        for pos, start_time, number in number_animations:
 
-        if time.time() - start_time > duration:
-            removed.append((pos, start_time, number))
-            continue
+            if time.time() - start_time > duration:
+                removed.append((pos, start_time, number))
+                continue
 
-        start_time = time.time() - start_time
+            start_time = time.time() - start_time
 
-        traveled = (pos[0], (travel_distance /
-                             duration * start_time * -1) + pos[1])
+            traveled = (pos[0], (travel_distance /
+                                duration * start_time * -1) + pos[1])
 
-        text = game.font.render(str(number), True, game.preview_color)
-        game.screen.blit(text, traveled)
+            text = game.font.render(str(number), True, game.preview_color)
+            game.screen.blit(text, traveled)
 
-    for remove in removed:
-        number_animations.remove(remove)
+        for remove in removed:
+            number_animations.remove(remove)
 
 
 def play_meter_animations():
-    global meter_animations
+    
+    if game.multiplayer:
 
-    duration = 0.5
+        duration = 0.5
 
-    removed = []
+        removed = []
 
-    for pos, start_time, size, against in meter_animations:
+        for pos, start_time, size, against in meter_animations:
 
-        # going to opponent
-        if against == 1:
-            destination = (game.opp_screen_junk_meter_rect.x + game.opp_screen_junk_meter_rect.width/2, game.opp_screen_junk_meter_rect.y + game.opp_screen_junk_meter_rect.height)
+            # going to opponent
+            if against == 1:
+                destination = (game.opp_screen_junk_meter_rect.x + game.opp_screen_junk_meter_rect.width/2, game.opp_screen_junk_meter_rect.y + game.opp_screen_junk_meter_rect.height)
 
-        # coming from opponent
-        else:
-            destination = (game.playing_field_junk_meter_rect.x + game.playing_field_junk_meter_rect.width/2, game.playing_field_junk_meter_rect.y + game.playing_field_junk_meter_rect.height)
+            # coming from opponent
+            else:
+                destination = (game.playing_field_junk_meter_rect.x + game.playing_field_junk_meter_rect.width/2, game.playing_field_junk_meter_rect.y + game.playing_field_junk_meter_rect.height)
 
-        if time.time() - start_time > duration:
-            removed.append((pos, start_time, size, against))
-            continue
+            if time.time() - start_time > duration:
+                removed.append((pos, start_time, size, against))
+                continue
 
-        start_time = time.time() - start_time
+            start_time = time.time() - start_time
 
-        distance = (destination[0] - pos[0], destination[1] - pos[1])
-        traveled = ((distance[0]/duration * start_time) +
-                    pos[0], (distance[1]/duration * start_time) + pos[1])
+            distance = (destination[0] - pos[0], destination[1] - pos[1])
+            traveled = ((distance[0]/duration * start_time) +
+                        pos[0], (distance[1]/duration * start_time) + pos[1])
 
-        pos_size = traveled[0], traveled[1], size, size
-        pygame.draw.rect(game.screen, (255, 255, 255), pos_size)
+            pos_size = traveled[0], traveled[1], size, size
+            pygame.draw.rect(game.screen, (255, 255, 255), pos_size)
 
-    for remove in removed:
-        meter_animations.remove(remove)
+        for remove in removed:
+            meter_animations.remove(remove)
 
 das_start = 0
 arr_start = 0
@@ -578,7 +583,11 @@ while True:
 
     game.check_random_theme()
     start_screen.main()
-    _thread.start_new_thread(server_connection, ())
+
+    if game.multiplayer:
+        _thread.start_new_thread(server_connection, ())
+    else:
+        countdown = time.time() + 6
 
     # waiting for countdown so it doesn't flash
     # failsafe just in case the message actually took longer than 5 seconds to deliver, so the game doesn't crash
@@ -658,6 +667,18 @@ while True:
                 start=game.time_started,
                 large_image="tetrium"
             )
+
+
+        # increasing speed level FOR SINGLEPLAYER
+        if not game.multiplayer:
+            level = (game.lines // 10) + 1
+
+            if level > game.level:
+                game.level = level
+                fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
+                display_until = time.time() + 3
+            
+
 
 
 
@@ -1118,7 +1139,9 @@ while True:
                     
                     if lines_sent:
                         send(f"junk {lines_sent}")
-                        game.play_sound('meter send')
+
+                        if game.multiplayer:
+                            game.play_sound('meter send')
 
                         # getting the block with the highest y
                         highest_y = 0

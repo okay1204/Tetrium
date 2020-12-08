@@ -11,7 +11,6 @@ from oooooooooooooooooooooooooooooooooooooooooooootils import *
 import _thread
 import asyncio
 import ntpath
-from pyautogui import size as screen_size
 from webbrowser import open_new
 
 
@@ -900,7 +899,7 @@ class Game:
 
         if self.fullscreen:
             
-            self.width, self.height = screen_size()
+            self.width, self.height = pygame.display.get_desktop_sizes()[0]
 
             pygame.display.quit()
             self.screen = pygame.display.set_mode((self.width, self.height), flags = pygame.FULLSCREEN)
@@ -2687,7 +2686,6 @@ class Block(Game):
 
         self.size = 30
 
-
         self.flash_start = 0
         self.direction = 0
         self.fade_start = 0
@@ -2704,7 +2702,7 @@ class Block(Game):
         if time.time() > self.flash_start + 0.2 and not self.fade_start:
 
             darker = tuple(darken(i) for i in self.color)
-            block_rect = pygame.Rect((self.x-1) * self.size + x_offset_val, (self.y-1)* self.size + game.block_y_offset, 30, 30)
+            block_rect = pygame.Rect((self.x-1) * self.size + x_offset_val, (self.y-1)* self.size + game.block_y_offset, self.size, self.size)
             pygame.draw.rect(game.screen, self.color, block_rect)
             game.draw_block_borders(block_rect, darker)
 

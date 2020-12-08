@@ -14,7 +14,7 @@
     !define APPNAME "Tetrium"
     !define COMPANYNAME "Tetrium Game"
     !define INSTALL_FOLDER "Tetrium v1.1"
-    !define DESCRIPTION "Online multiplayer tetris"
+    !define DESCRIPTION "Online multiplayer block stacking game"
     # These three must be integers
     !define VERSIONMAJOR 1
     !define VERSIONMINOR 1

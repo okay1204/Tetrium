@@ -197,7 +197,7 @@ def game_over(win: bool):
             details=f"In End Screen",
             state=f"Lost to {game.opp_name}",
             start=game.time_started,
-            large_image="tetrium_logo_512x512"
+            large_image="tetrium"
         )
 
     else:
@@ -207,7 +207,7 @@ def game_over(win: bool):
             details=f"In End Screen",
             state=f"Won against {game.opp_name}",
             start=game.time_started,
-large_image="tetrium_logo_512x512"
+large_image="tetrium"
         )
 
     textRect = game_over_text.get_rect()
@@ -609,7 +609,7 @@ while True:
                 details=f"In Disconnected Screen",
                 state=f"Idle",
                 start=game.time_opened,
-                large_image="tetrium_logo_512x512"
+                large_image="tetrium"
             )
 
             game.running = False
@@ -656,7 +656,7 @@ while True:
                 details=f"Dueling {game.opp_name}",
                 state=f"{highest_y} Lines High",
                 start=game.time_started,
-                large_image="tetrium_logo_512x512"
+                large_image="tetrium"
             )
 
 

@@ -1171,7 +1171,7 @@ class StartScreen(Game):
             details="In Start Menu",
             state="Waiting for match",
             start=game.time_opened,
-            large_image="tetrium_logo_512x512"
+            large_image="tetrium"
         )
 
         self.start_button_rect.x -=  100
@@ -1320,7 +1320,7 @@ class StartScreen(Game):
                     details = "In Start Menu",
                     state = "Idling",
                     start = game.time_opened,
-                    large_image = "tetrium_logo_512x512"
+                    large_image = "tetrium"
                 )
 
                 initial_presence = True
@@ -1350,9 +1350,6 @@ class StartScreen(Game):
                  
                     
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-
-                    if pygame.Rect(0, 0, 100, 100).collidepoint(self.mouse):
-                        game.toggle_fullscreen()
                     
                     if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
 
@@ -1369,7 +1366,7 @@ class StartScreen(Game):
                             details="In Start Menu",
                             state="Idling",
                             start=game.time_opened,
-                            large_image="tetrium_logo_512x512"
+                            large_image="tetrium"
                         )
                     
                     elif self.credits_button.collidepoint(event.pos):

@@ -1341,6 +1341,15 @@ class StartScreen(Game):
                         self.started = True
                         game.name = self.input_text
 
+                        # saving nickname
+                        with open(get_path('settings.json')) as f:
+                            settings = json.load(f)
+
+                        settings['name'] = self.input_text
+
+                        with open(get_path('settings.json'), 'w') as f:
+                            json.dump(settings, f, indent=2)
+
                 if event.type == pygame.QUIT:
 
                     if self.connected:

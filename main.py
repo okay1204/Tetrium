@@ -167,11 +167,11 @@ def game_over(win: bool):
     button_pos = (
         int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
 
-    restart_button_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 32)
-    restart_button_rect = pygame.Rect(button_pos, button_dimensions)
-    restart_button_color = game.foreground_color
-    restart_button_text = restart_button_font.render(
-        'Find new match', True, game.background_color)
+    menu_button_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 32)
+    menu_button_rect = pygame.Rect(button_pos, button_dimensions)
+    menu_button_color = game.foreground_color
+    menu_button_text = menu_button_font.render(
+        'Return to menu', True, game.background_color)
     game_over_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 50)
 
     rematch_text_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 40)
@@ -180,12 +180,18 @@ def game_over(win: bool):
     rematch_active = True
 
     rematch_button_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 26)
-    rematch_button_dimensions = (120, 40)
-    rematch_button_text = rematch_button_font.render('Rematch', True, game.background_color)
 
-    self_rematch_button_pos = (int(game.width/2 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
-    self_rematch_button_rect = pygame.Rect(self_rematch_button_pos, rematch_button_dimensions)
-    self_rematch_button_color = game.foreground_color
+    if game.multiplayer:
+        rematch_button_text = rematch_button_font.render('Rematch', True, game.background_color)
+        rematch_button_dimensions = (120, 40)
+    else:
+        rematch_button_text = rematch_button_font.render('Retry', True, game.background_color)
+        rematch_button_dimensions = (80, 40)
+
+
+    rematch_button_pos = (int(game.width/2 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
+    rematch_button_rect = pygame.Rect(rematch_button_pos, rematch_button_dimensions)
+    rematch_button_color = game.foreground_color
 
 
     text_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 25)
@@ -193,41 +199,46 @@ def game_over(win: bool):
     opponent_text = text_font.render(game.opp_name, True, game.foreground_color)
     opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
 
-    if not win:
-        send('game over')
-        game_over_text = game_over_font.render('You lost...', True, game.foreground_color)
+    if game.multiplayer:
+        if not win:
+            send('game over')
+            game_over_text = game_over_font.render('You lost...', True, game.foreground_color)
 
-        game.update_presence(
-            details=f"In End Screen",
-            state=f"Lost to {game.opp_name}",
-            start=game.time_started,
-            large_image="tetrium"
-        )
+            game.update_presence(
+                details=f"In End Screen",
+                state=f"Lost to {game.opp_name}",
+                start=game.time_started,
+                large_image="tetrium"
+            )
 
+        else:
+            game_over_text = game_over_font.render('You win!', True, game.foreground_color)
+
+            game.update_presence(
+                details=f"In End Screen",
+                state=f"Won against {game.opp_name}",
+                start=game.time_started,
+                large_image="tetrium"
+            )
     else:
-        game_over_text = game_over_font.render('You win!', True, game.foreground_color)
+        game_over_text = game_over_font.render('Game over', True, game.foreground_color)
 
-        game.update_presence(
-            details=f"In End Screen",
-            state=f"Won against {game.opp_name}",
-            start=game.time_started,
-large_image="tetrium"
-        )
+        score_text = game.big_font.render(f'Score: {game.score}', True, game.foreground_color)
 
     textRect = game_over_text.get_rect()
     textRect.center = (game.width // 2, 200)
 
-    def draw_restart_button():
+    def draw_menu_button():
 
-        pygame.draw.rect(game.screen, restart_button_color,
-                         restart_button_rect)
-        game.screen.blit(restart_button_text,
+        pygame.draw.rect(game.screen, menu_button_color,
+                         menu_button_rect)
+        game.screen.blit(menu_button_text,
                          (button_pos[0] + 10, button_pos[1] + 3))
 
 
-    def draw_self_rematch_button():
-        pygame.draw.rect(game.screen, self_rematch_button_color, self_rematch_button_rect)
-        game.screen.blit(rematch_button_text, (self_rematch_button_pos[0]+10, self_rematch_button_pos[1]+4))
+    def draw_rematch_button():
+        pygame.draw.rect(game.screen, rematch_button_color, rematch_button_rect)
+        game.screen.blit(rematch_button_text, (rematch_button_pos[0]+10, rematch_button_pos[1]+4))
 
     def draw_self_rematch_text():
         
@@ -243,6 +254,9 @@ large_image="tetrium"
 
         game.screen.blit(opponent_text, opponent_rect)
 
+    def draw_stats():
+
+        game.screen.blit(score_text, (game.width // 2 - score_text.get_rect().width//2, 240))
 
     while gameOver:
 
@@ -271,12 +285,12 @@ large_image="tetrium"
                 game.resize_all_screens()
                 button_pos = (
                     int(game.width/2 - button_dimensions[0]/2), int(game.height/2))
-                restart_button_rect = pygame.Rect(button_pos, button_dimensions)
-                restart_button_color = game.foreground_color
-                restart_button_text = restart_button_font.render(
-                    'Find new match', True, game.background_color)
-                self_rematch_button_pos = (int(game.width/2 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
-                self_rematch_button_rect = pygame.Rect(self_rematch_button_pos, rematch_button_dimensions)
+                menu_button_rect = pygame.Rect(button_pos, button_dimensions)
+                menu_button_color = game.foreground_color
+                menu_button_text = menu_button_font.render(
+                    'Return to menu', True, game.background_color)
+                rematch_button_pos = (int(game.width/2 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
+                rematch_button_rect = pygame.Rect(rematch_button_pos, rematch_button_dimensions)
                 opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
                 textRect.center = (game.width // 2, 200)
             
@@ -284,11 +298,10 @@ large_image="tetrium"
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 
                 # find new match
-                if restart_button_rect.collidepoint(event.pos):
-                    reset()
+                if menu_button_rect.collidepoint(event.pos):
                     game.running = False
 
-                    if not opp_disconnected_after:
+                    if game.multiplayer and not opp_disconnected_after:
 
                         # while loop to wait until it can disonnect safely
                         while True:
@@ -300,24 +313,33 @@ large_image="tetrium"
                     return False
 
                 
-                if self_rematch_button_rect.collidepoint(event.pos) and rematch_active and not opp_disconnected_after:
-                    rematch_active = False
-                    self_rematch_text = "Rematching..."
-                    send("rematch")
+                if rematch_button_rect.collidepoint(event.pos) and rematch_active and not opp_disconnected_after:
+
+                    if game.multiplayer:
+                        rematch_active = False
+                        self_rematch_text = "Rematching..."
+                        send("rematch")
+                    else:
+                        gameOver = False
+                        return True
 
         # for hover effects
-        if restart_button_rect.collidepoint(mouse):
-            restart_button_color = tuple(darken(i, 15) for i in game.foreground_color)
+        if menu_button_rect.collidepoint(mouse):
+            menu_button_color = tuple(darken(i, 15) for i in game.foreground_color)
         else:
-            restart_button_color = game.foreground_color
-
+            menu_button_color = game.foreground_color
         
 
-        if self_rematch_button_rect.collidepoint(mouse):
-            self_rematch_button_color = tuple(darken(i, 15) for i in game.foreground_color)
+        if rematch_button_rect.collidepoint(mouse):
+            rematch_button_color = tuple(darken(i, 15) for i in game.foreground_color)
         else:
-            self_rematch_button_color = game.foreground_color
+            rematch_button_color = game.foreground_color
 
+        if game.multiplayer:
+            draw_self_rematch_text()
+            draw_texts()
+        else:
+            draw_stats()
 
         if won == None:
             gameOver = False
@@ -325,10 +347,10 @@ large_image="tetrium"
 
         game.screen.blit(game_over_text, textRect)
 
-        draw_restart_button()
+        draw_menu_button()
 
         if not opp_disconnected_after:
-            draw_self_rematch_button()
+            draw_rematch_button()
 
         if (time.time() > game_over_start + 1 and won == False) or won == True:
             pygame.display.update()
@@ -629,13 +651,16 @@ while True:
         if won != None:
             opp_rematched = False
             pygame.mouse.set_visible(True)
+            restart = game_over(won)
             reset()
-            rematch = game_over(won)
             won = None
 
-            if not rematch:
+            if not restart:
                 game.screen.fill((0, 0, 0))
                 break
+
+            if not game.multiplayer and restart:
+                countdown = time.time() + 6
 
             game.check_random_theme()
 

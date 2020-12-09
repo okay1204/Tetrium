@@ -1350,6 +1350,7 @@ class StartScreen(Game):
                         game.multiplayer = False
                         running = False
                         self.started = True
+                        game.name = self.input_text
 
                 
                 elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):

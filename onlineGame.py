@@ -133,7 +133,7 @@ class OnlineGame:
     def _reset(self):
         self.rematch = [False, False]
         self.winner = None
-        self.countdown = time.time() + 5
+        self.countdown = time.time() + 6
         self.time_started = time.time() + 5
         self.round += 1
         self.meters = [[], []]

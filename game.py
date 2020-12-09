@@ -40,7 +40,7 @@ class Game:
     def __init__(self):
         #############################
         #############################
-        self.dev = False #############
+        self.dev = True #############
         #############################
         #############################
 
@@ -74,8 +74,11 @@ class Game:
         self.width = 750
         self.height = 800
 
+        self.name = ""
+
 
         self.running = True
+        self.multiplayer = True
 
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((self.width, self.height), flags = pygame.RESIZABLE)
@@ -109,8 +112,10 @@ class Game:
         self.meter = []
         self.meter_stage = 1
  
-
-        self.opp_resting = self.opp_meter = self.opp_meter_stage = self.opp_piece_blocks = None
+        self.opp_meter_stage = None
+        self.opp_resting = []
+        self.opp_meter = []
+        self.opp_piece_blocks = []
         self.opp_name = None
 
         self.rows_cleared = []
@@ -366,7 +371,6 @@ class Game:
         textRect.center = (self.playing_field_rect.x + self.playing_field_rect.width/2,  self.playing_field_rect.y - 75)
         self.screen.blit(text, textRect)
 
-
         text = font.render(self.name, True, self.text_color)
         textRect = text.get_rect()
 
@@ -380,52 +384,53 @@ class Game:
         self.screen.blit(text, textRect)
 
 
-        # junk line meter
-        pygame.draw.rect(self.screen, self.preview_color, self.playing_field_junk_meter_rect_outline)
-        pygame.draw.rect(self.screen, self.foreground_color, self.playing_field_junk_meter_rect)
-        
+        if self.multiplayer:
+            # junk line meter
+            pygame.draw.rect(self.screen, self.preview_color, self.playing_field_junk_meter_rect_outline)
+            pygame.draw.rect(self.screen, self.foreground_color, self.playing_field_junk_meter_rect)
+            
 
-        meter_block = 0
+            meter_block = 0
 
-        for index, amount in enumerate(self.meter):
+            for index, amount in enumerate(self.meter):
 
-            if not index and self.meter_stage != 4:
-                if self.meter_stage == 1:
-                    color = color_key["yellow"]
-                elif self.meter_stage  == 2:
-                    color = color_key["orange"]
+                if not index and self.meter_stage != 4:
+                    if self.meter_stage == 1:
+                        color = color_key["yellow"]
+                    elif self.meter_stage  == 2:
+                        color = color_key["orange"]
+                    else:
+                        color = color_key["red"]
                 else:
-                    color = color_key["red"]
-            else:
-                color = color_key["gray"]
+                    color = color_key["gray"]
 
-            darkened = tuple(darken(i) for i in color)
+                darkened = tuple(darken(i) for i in color)
 
 
-            for block in range(amount):
+                for block in range(amount):
 
-                if meter_block >= 10:
-                    break
-                
-                block_rect = pygame.Rect(
-                        self.playing_field_junk_meter_rect.x, 
-                        (self.playing_field_junk_meter_rect.y + 
-                        self.playing_field_junk_meter_rect.height - 30) - 
-                        (30 * meter_block), 30, 30
+                    if meter_block >= 10:
+                        break
+                    
+                    block_rect = pygame.Rect(
+                            self.playing_field_junk_meter_rect.x, 
+                            (self.playing_field_junk_meter_rect.y + 
+                            self.playing_field_junk_meter_rect.height - 30) - 
+                            (30 * meter_block), 30, 30
+                        )
+
+                    pygame.draw.rect(
+                        self.screen, 
+                        color, 
+                        block_rect
                     )
 
-                pygame.draw.rect(
-                    self.screen, 
-                    color, 
-                    block_rect
-                )
+                    self.draw_block_borders(block_rect, darkened)
+                
+                    meter_block += 1
 
-                self.draw_block_borders(block_rect, darkened)
-               
-                meter_block += 1
-
-        
-        self.render_second_screen()
+        if game.multiplayer:
+            self.render_second_screen()
 
 
     def render_second_screen(self):
@@ -649,9 +654,8 @@ class Game:
 
     def countdown(self, countdown):
 
-        # countdown is actually 4 seconds long, consisting of 3, 2, 1, and GO
         pygame.mixer.music.pause()
-        last_second = 100
+        last_second = int(countdown - time.time())
         while countdown > time.time():
 
             for event in pygame.event.get():
@@ -665,6 +669,7 @@ class Game:
                         game.width, game.height = event.w, event.h
                     except:
                         pass
+                    
                     game.resize_all_screens()
 
             seconds = int(countdown - time.time())
@@ -1168,7 +1173,7 @@ class StartScreen(Game):
             details="In Start Menu",
             state="Waiting for match",
             start=game.time_opened,
-            large_image="tetrium_logo_512x512"
+            large_image="tetrium"
         )
 
         self.start_button_rect.x -=  100
@@ -1317,7 +1322,7 @@ class StartScreen(Game):
                     details = "In Start Menu",
                     state = "Idling",
                     start = game.time_opened,
-                    large_image = "tetrium_logo_512x512"
+                    large_image = "tetrium"
                 )
 
                 initial_presence = True
@@ -1336,6 +1341,15 @@ class StartScreen(Game):
 
                     pygame.quit()
                     sys.exit()
+
+
+                if event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_s:
+                        game.multiplayer = False
+                        running = False
+                        self.started = True
+
                 
                 elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
                     try: 
@@ -1344,12 +1358,8 @@ class StartScreen(Game):
                         pass
                     game.resize_all_screens()
 
-                 
                     
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-
-                    if pygame.Rect(0, 0, 100, 100).collidepoint(self.mouse):
-                        game.toggle_fullscreen()
                     
                     if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
 
@@ -1366,7 +1376,7 @@ class StartScreen(Game):
                             details="In Start Menu",
                             state="Idling",
                             start=game.time_opened,
-                            large_image="tetrium_logo_512x512"
+                            large_image="tetrium"
                         )
                     
                     elif self.credits_button.collidepoint(event.pos):
@@ -1416,6 +1426,7 @@ class StartScreen(Game):
 
             # checking if game started
             if self.connected and self.ready:
+                game.multiplayer = True
                 self.connected = False
                 self.start_button_rect = pygame.Rect(game.width/2-60, game.height/2, 120, 40)
                 self.started = True

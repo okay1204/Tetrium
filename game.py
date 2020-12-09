@@ -808,7 +808,6 @@ class Game:
             # self.opp_screen_junk_meter = pygame.Rect(540, 399, 15, 150)
             # self.opp_screen_junk_meter_outline = pygame.Rect(539, 398, 17, 152)
 
-
         #NOTE y and for this rect has to have 100 margin on both sides
         #NOTE x and for this rect has to have 100 margin left, 350 margin right
         playing_field_rect_height = 600

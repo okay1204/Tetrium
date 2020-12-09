@@ -224,6 +224,9 @@ def game_over(win: bool):
         game_over_text = game_over_font.render('Game over', True, game.foreground_color)
 
         score_text = game.big_font.render(f'Score: {game.score}', True, game.foreground_color)
+        lines_text = game.big_font.render(f'Lines Cleared: {game.lines}', True, game.foreground_color)
+        level_text = game.big_font.render(f'Level: {game.level}', True, game.foreground_color)
+
 
     textRect = game_over_text.get_rect()
     textRect.center = (game.width // 2, 200)
@@ -257,6 +260,8 @@ def game_over(win: bool):
     def draw_stats():
 
         game.screen.blit(score_text, (game.width // 2 - score_text.get_rect().width//2, 240))
+        game.screen.blit(lines_text, (game.width // 2 - lines_text.get_rect().width//2, 290))
+        game.screen.blit(level_text, (game.width // 2 - level_text.get_rect().width//2, 340))
 
     while gameOver:
 

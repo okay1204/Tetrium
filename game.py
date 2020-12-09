@@ -78,7 +78,7 @@ class Game:
 
 
         self.running = True
-        self.multiplayer = True
+        self.multiplayer = False
 
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((self.width, self.height), flags = pygame.RESIZABLE)
@@ -813,7 +813,8 @@ class Game:
         #NOTE x and for this rect has to have 100 margin left, 350 margin right
         playing_field_rect_height = 600
         playing_field_rect_y = self.height/2 - playing_field_rect_height/2
-        playing_field_rect_x = (self.width - 350 - 200)/2
+        playing_field_rect_x = (self.width - 350 - (200 if self.multiplayer else 0))/2
+
         self.playing_field_rect = pygame.Rect(playing_field_rect_x, playing_field_rect_y, 300, 600)
         self.block_y_offset = playing_field_rect_y
         self.second_block_y_offset = self.block_y_offset + 150

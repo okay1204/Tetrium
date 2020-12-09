@@ -330,9 +330,6 @@ large_image="tetrium"
         if not opp_disconnected_after:
             draw_self_rematch_button()
 
-        draw_self_rematch_text()
-        draw_texts()
-
         if (time.time() > game_over_start + 1 and won == False) or won == True:
             pygame.display.update()
         game.clock.tick(60)

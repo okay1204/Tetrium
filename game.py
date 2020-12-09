@@ -656,9 +656,8 @@ class Game:
 
     def countdown(self, countdown):
 
-        # countdown is actually 4 seconds long, consisting of 3, 2, 1, and GO
         pygame.mixer.music.pause()
-        last_second = 100
+        last_second = int(countdown - time.time())
         while countdown > time.time():
 
             for event in pygame.event.get():

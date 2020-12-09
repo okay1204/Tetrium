@@ -1334,6 +1334,13 @@ class StartScreen(Game):
             #Game over loop
             for event in pygame.event.get():
 
+                if event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_s:
+                        game.multiplayer = False
+                        running = False
+                        self.started = True
+                        game.name = self.input_text
 
                 if event.type == pygame.QUIT:
 
@@ -1342,15 +1349,6 @@ class StartScreen(Game):
 
                     pygame.quit()
                     sys.exit()
-
-
-                if event.type == pygame.KEYDOWN:
-
-                    if event.key == pygame.K_s:
-                        game.multiplayer = False
-                        running = False
-                        self.started = True
-                        game.name = self.input_text
 
                 
                 elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
@@ -1442,6 +1440,7 @@ class StartScreen(Game):
 
         game.time_started = time.time()
         game.running = True
+        game.resize_screen_setup()
 
 
 

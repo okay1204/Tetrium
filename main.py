@@ -704,6 +704,9 @@ while True:
                 game.level = level
                 fall_speed = (0.8 - ((game.level - 1) * 0.007))**(game.level-1)
                 display_until = time.time() + 3
+                
+                if speedUp:
+                    fall_speed /= sds
             
 
 

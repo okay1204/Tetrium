@@ -138,6 +138,7 @@ def reset():
     game.level = 1
     game.score = 0
     game.lines = 0
+    bag = pieces.copy()
     random.shuffle(bag)
     next_bag = pieces.copy()
     random.shuffle(next_bag)

@@ -1269,5 +1269,3 @@ while True:
         render_texts()
 
         pygame.display.update()
-
-        game.clock.tick(60)

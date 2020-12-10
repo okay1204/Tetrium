@@ -1027,6 +1027,33 @@ while True:
 
                 if time.time() > fall:
 
+                    # Any piece spin detection
+                    if current.piece_type != "T":
+
+                        current.move(0, -1)
+
+                        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+
+                        spin_move = True
+
+                        for direction in directions:
+
+                            current.move(*direction)
+
+                            if not current.check_overlap():
+                                spin_move = False
+
+                            current.move(*tuple(-1 * i for i in direction))
+
+                            if not spin_move:
+                                break
+
+                        else:
+                            texts.append((f'{current.piece_type}-Spin', time.time() + 3, 30))
+
+                        current.move(0, 1)
+
+
                     current.flash()
                     # turn piece into resting blocks
                     for block in current.blocks:
@@ -1052,6 +1079,8 @@ while True:
                             game.rows_cleared.append(row)
 
                     tspin = None
+
+
 
                     # T-Spin detection
                     if current.piece_type == "T" and rotation_last:

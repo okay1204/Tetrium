@@ -1,5 +1,7 @@
 import time
+import random
 
+pieces = ["T", "L", "J", "S", "Z", "I", "O"]
 class OnlineGame:
 
     def __init__(self, gameId):
@@ -31,6 +33,9 @@ class OnlineGame:
 
 
         self.rematch = [False, False]
+
+        self.starting_bag = pieces.copy()
+        random.shuffle(self.starting_bag)
 
 
         self.specials = [[], []]
@@ -119,6 +124,7 @@ class OnlineGame:
         self.round += 1
         self.meters = [[], []]
         self.meter_stages = [1, 1]
+        random.shuffle(self.starting_bag)
     
     
     

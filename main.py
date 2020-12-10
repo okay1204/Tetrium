@@ -410,9 +410,10 @@ attacked = True
 can_disconnect = False
 countdown = 0
 
+first_bag = False
 def server_connection():
     
-    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked, can_disconnect, opp_rematched, countdown
+    global disconnected, current, specials, display_until, fall_speed, won, opp_disconnected_after, attacked, can_disconnect, opp_rematched, countdown, first_bag, bag
 
     specials.clear()
 
@@ -439,6 +440,11 @@ def server_connection():
             break
 
         can_disconnect = True
+
+        if first_bag:
+            first_bag = False
+
+            bag = data.starting_bag
 
         # lost connection unexpectedly
         if not data:
@@ -618,6 +624,9 @@ while True:
     else:
         countdown = time.time() + 6
 
+    if game.multiplayer:
+        first_bag = True
+
     # waiting for countdown so it doesn't flash
     # failsafe just in case the message actually took longer than 5 seconds to deliver, so the game doesn't crash
     failsafe = time.time() + 6
@@ -673,6 +682,9 @@ while True:
                 countdown = time.time() + 6
 
             game.check_random_theme()
+
+            if game.multiplayer:
+                first_bag = True
 
         
         if countdown > time.time():

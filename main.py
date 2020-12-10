@@ -220,12 +220,20 @@ def game_over(win: bool):
                 start=game.time_started,
                 large_image="tetrium"
             )
+
     else:
         game_over_text = game_over_font.render('Game over', True, game.foreground_color)
 
         score_text = game.big_font.render(f'Score: {game.score}', True, game.foreground_color)
         lines_text = game.big_font.render(f'Lines Cleared: {game.lines}', True, game.foreground_color)
         level_text = game.big_font.render(f'Level: {game.level}', True, game.foreground_color)
+
+        game.update_presence(
+            details=f"In End Screen",
+            state=f"Singleplayer; Score: {game.score}",
+            start=game.time_started,
+            large_image="tetrium"
+        )
 
 
     textRect = game_over_text.get_rect()
@@ -676,24 +684,38 @@ while True:
                 stop()
 
         # updating discord presence
-        if time.time() > presence_update and game.opp_name:
-            presence_update = time.time() + 5
+        if time.time() > presence_update:
+        
+            if game.multiplayer:
 
-            # getting y value of highest block
-            highest_y = 20
-            for block in game.resting:
-                if block.y < highest_y:
-                    highest_y = block.y
+                if game.opp_name:
+                    presence_update = time.time() + 5
 
-            highest_y = int(20 - highest_y)
+                    # getting y value of highest block
+                    highest_y = 20
+                    for block in game.resting:
+                        if block.y < highest_y:
+                            highest_y = block.y
+
+                    highest_y = int(20 - highest_y)
 
 
-            game.update_presence(
-                details=f"Dueling {game.opp_name}",
-                state=f"{highest_y} Lines High",
-                start=game.time_started,
-                large_image="tetrium"
-            )
+                    game.update_presence(
+                        details=f"Dueling {game.opp_name}",
+                        state=f"{highest_y} Lines High",
+                        start=game.time_started,
+                        large_image="tetrium"
+                    )
+            
+            else:
+                presence_update = time.time() + 5
+
+                game.update_presence(
+                    details=f"Playing Singleplayer",
+                    state=f"Score: {game.score}",
+                    start=game.time_started,
+                    large_image="tetrium"
+                )
 
 
         # increasing speed level FOR SINGLEPLAYER

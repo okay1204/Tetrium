@@ -40,7 +40,7 @@ class Game:
     def __init__(self):
         #############################
         #############################
-        self.dev = True #############
+        self.dev = False #############
         #############################
         #############################
 
@@ -1373,6 +1373,13 @@ class StartScreen(Game):
 
                         self.start()
                         game.screen.fill((0, 0, 0))
+
+                        game.update_presence(
+                            details = "In Start Menu",
+                            state = "Idling",
+                            start = game.time_opened,
+                            large_image = "tetrium"
+                        )
                       
                     
                     elif self.disconnect_button_rect.collidepoint(event.pos) and self.connected:
@@ -1380,12 +1387,8 @@ class StartScreen(Game):
                         self.start_button_rect.x = game.width/2-60
                         game.screen.fill((0, 0, 0))
                         self.connected = False
-                        game.update_presence(
-                            details="In Start Menu",
-                            state="Idling",
-                            start=game.time_opened,
-                            large_image="tetrium"
-                        )
+                        
+                        initial_presence = False
                     
                     elif self.credits_button.collidepoint(event.pos):
                         self.credits_screen()

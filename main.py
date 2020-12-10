@@ -432,7 +432,7 @@ def server_connection():
         sent_specials = specials.copy()
 
         try:
-            data = game.n.send([resting_coords, piece_block_coords, sent_specials])
+            data = game.n.send([resting_coords, piece_block_coords, game.meter, game.meter_stage, sent_specials])
         except:
             # lost connection unexpectedly
             disconnected = ("You disconnected", "Try again?")
@@ -483,18 +483,15 @@ def server_connection():
         game.opp_meter_stage = data.opp_meter_stage(game.n.p)
 
 
-        meter = data.own_meter(game.n.p)
-        if len(meter) > len(game.meter):
+        for special in data.specials[game.n.p]:
 
-            if attacked:
+            if special.startswith('junk'):
+                amount = int(special.split()[1])
+
                 start_meter_animation((game.opp_screen_junk_meter_rect.x + game.opp_screen_junk_meter_rect.width/2, game.opp_screen_junk_meter_rect.y + game.opp_screen_junk_meter_rect.height + 50), 0)
                 game.play_sound('meter recieve')
-            else:
-                attacked = True
 
-        game.meter = meter
-
-        game.meter_stage = data.own_meter_stage(game.n.p)
+                game.meter.append(amount)
 
         if game.level != data.speed_level():
             display_until = time.time() + 3
@@ -1187,7 +1184,18 @@ while True:
                         texts.append((f"Perfect Clear", time.time() + 3, 17))
 
                     if lines_cleared:
-                        send(f"clear {max(lines_cleared, lines_sent)}")
+                        
+                        # clearing junk from own meter
+                        amount = max(lines_cleared, lines_sent)
+
+                        while game.meter and amount > 0:
+                            game.meter[0] -= 1
+                            amount -= 1
+
+                            if game.meter[0] <= 0:
+                                game.meter.pop(0)
+                                game.meter_stage = 1
+
                     
                     if lines_sent:
                         send(f"junk {lines_sent}")
@@ -1213,16 +1221,15 @@ while True:
 
                         if game.meter:
                             # increasing the stage of the incoming junk
-                            meter_stage = game.meter_stage + 1
-                            send("meter increase")
+                            game.meter_stage += 1
 
-                            if meter_stage > 3:
+                            if game.meter_stage > 3:
                                 attacked = False
-                                send("meter reset")
+                                
+                                game.meter_stage = 1
+                                
+                                amount = game.meter.pop(0)
                                 game.play_sound('garbage recieve')
-
-                                amount = game.meter[0]
-                                game.meter.pop(0)
 
                                 for block in game.resting:
                                     block.y -= amount

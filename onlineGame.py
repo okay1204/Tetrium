@@ -9,6 +9,7 @@ class OnlineGame:
         self.ready = False
         self.started = False
 
+
         self.round = 0
 
         # Player names
@@ -30,6 +31,9 @@ class OnlineGame:
 
 
         self.rematch = [False, False]
+
+
+        self.specials = [[], []]
 
     
     def speed_level(self):
@@ -63,13 +67,6 @@ class OnlineGame:
         else:
             return self.meter_stages[0]
 
-    
-    def own_meter(self, p):
-        return self.meters[p]
-
-    def own_meter_stage(self, p):
-        return self.meter_stages[p]
-
     def opp_name(self, p):
 
         if not p:
@@ -87,10 +84,12 @@ class OnlineGame:
 
     def _update(self, data, p):
         
-        resting, piece = data
+        resting, piece, meter, meter_stage = data
 
         self.current_piece[p] = piece
         self.resting_blocks[p] = resting
+        self.meters[p] = meter
+        self.meter_stages[p] = meter_stage
 
     def _send_lines(self, amount, sender):
 
@@ -100,30 +99,12 @@ class OnlineGame:
         else:
             reciever = 0
         
-        self.meters[reciever].append(amount)
-
-    def _clear_junk(self, amount, p):
-
-        # clearing lines from sender
-        meter = self.meters[p]
-
-        while meter and amount > 0:
-            meter[0] -= 1
-            amount -= 1
-
-            if meter[0] <= 0:
-                meter.pop(0)
-                self.meter_stages[p] = 1
+        self.specials[reciever].append(f"junk {amount}")
 
 
     def _increase_meter(self, player):
 
         self.meter_stages[player] += 1
-
-    def _reset_meter(self, player):
-
-        self.meter_stages[player] = 1
-        self.meters[player].pop(0)
 
     def _end_game(self, loser):
 

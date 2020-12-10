@@ -76,9 +76,10 @@ def threaded_client(conn, player, game):
                     # resting, piece, meter, meter stage
 
                     if isinstance(data, list):
-                        specials = data.pop(2)
+                        specials = data.pop(-1)
                 
                         game._update(data, player)
+
 
                         for special in specials:
 
@@ -86,24 +87,6 @@ def threaded_client(conn, player, game):
                             if special.startswith("junk"):
 
                                 game._send_lines(int(special.split()[1]), player)
-
-                            # clearing own junk
-                            elif special.startswith("clear"):
-
-                                game._clear_junk(int(special.split()[1]), player)
-
-                            # increases meter stage
-                            elif special == "meter increase":
-
-                                game._increase_meter(player)
-
-                            # resets meter
-                            elif special == "meter reset":
-                                
-                                try:
-                                    game._reset_meter(player)
-                                except:
-                                    pass
 
                             elif special == "game over":
 
@@ -128,6 +111,9 @@ def threaded_client(conn, player, game):
                         name = data[5:]
                         print(f"Player {player} in game {gameId} is called {name}")
 
+
+                    sent_specials = game.specials[player].copy()
+
                     try:
                         # dumps data
                         sending = pickle.dumps(game)
@@ -139,6 +125,9 @@ def threaded_client(conn, player, game):
                     except:
                         print(f"Player {player} ({name}) in game {gameId} forcefully disconnected")
                         break
+
+                    for special in sent_specials:
+                        game.specials[player].remove(special)
 
 
             else: # game doesn't exist

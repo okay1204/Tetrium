@@ -109,7 +109,7 @@ def pick_bag():
     return value
 
 
-fall_speed = 1
+fall_speed = 0.001
 last_fall = time.time() + fall_speed
 fall = 0
 
@@ -900,7 +900,7 @@ while True:
                     current.move(0, 1)
                     if current.check_floor():
                         if avoids < 15:
-                            fall = time.time() + 1
+                            fall = time.time() + 0.5
                             avoids += 1
                     current.move(0, -1)
 
@@ -912,7 +912,7 @@ while True:
                     current.move(0, 1)
                     if current.check_floor():
                         if avoids < 15:
-                            fall = time.time() + 1
+                            fall = time.time() + 0.5
                             avoids += 1
 
                     current.move(0, -1)
@@ -1293,6 +1293,7 @@ while True:
                     avoids = 0
 
                 else:
+                    last_fall -= 10
                     current.move(0, -1)
 
         if current:

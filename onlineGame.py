@@ -2,6 +2,13 @@ import time
 import random
 
 pieces = ["T", "L", "J", "S", "Z", "I", "O"]
+
+def opp_player(number):
+    if not number:
+        return 1
+    else:
+        return 0
+
 class OnlineGame:
 
     def __init__(self, gameId):
@@ -46,43 +53,22 @@ class OnlineGame:
     
     
     def opp_piece_blocks(self, p):
-        if not p:
-            return self.current_piece[1]
-        else:
-            return self.current_piece[0]
+        return self.current_piece[opp_player(p)]
 
     def opp_resting(self, p):
-
-        if not p:
-            return self.resting_blocks[1]
-        else:
-            return self.resting_blocks[0]
+        return self.resting_blocks[opp_player(p)]
 
     def opp_meter(self, p):
-        if not p:
-            return self.meters[1]
-        else:
-            return self.meters[0]
+        return self.meters[opp_player(p)]
 
     def opp_meter_stage(self, p):
-        if not p:
-            return self.meter_stages[1]
-        else:
-            return self.meter_stages[0]
+        return self.meter_stages[opp_player(p)]
 
     def opp_name(self, p):
-
-        if not p:
-            return self.names[1]
-        else:
-            return self.names[0]
+        return self.names[opp_player(p)]
     
     def opp_has_rematched(self, p):
-
-        if not p:
-            return self.rematch[1]
-        else:
-            return self.rematch[0]
+        return self.rematch[opp_player(p)]
 
 
     def _update(self, data, p):
@@ -99,13 +85,11 @@ class OnlineGame:
 
     def _send_lines(self, amount, sender):
 
-        # adding lines to opponent
-        if not sender:
-            reciever = 1
-        else:
-            reciever = 0
-        
-        self.specials[reciever].append(f"junk {amount}")
+        self.specials[opp_player(sender)].append(f"junk {amount}")
+
+    def _send_chat(self, p, message):
+
+        self.specials[opp_player(p)].append(message)
 
 
     def _increase_meter(self, player):

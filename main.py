@@ -129,6 +129,8 @@ rotation_last = False
 
 gameOver = False
 
+chat = []
+
 
 def reset():
     global bag, next_bag, avoids, current, held, canSwitch, moving, fall_speed, speedUp, difficult_before
@@ -288,6 +290,15 @@ def game_over(win: bool):
         # Game over loop
 
         for event in pygame.event.get():
+
+            # NOTE this if statement is temporary, in order to send a chat message
+            # used the send() and chat.append() functions where text is the message to send
+            # the list, chat, is a list of messages that start with "me" or "opp"
+            # if it starts with "me", then it is by this client, if its "opp" the message is by the opponent
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+                text = "hello there"
+                send(f"chat {text}")
+                chat.append(f"me {text}")
 
             if event.type == pygame.QUIT:
                 stop()
@@ -500,6 +511,11 @@ def server_connection():
 
                 game.meter.append(amount)
 
+            elif special.startswith('chat'):
+                special = special[5:]
+
+                chat.append(f"opp {special}")
+
         if game.level != data.speed_level():
             display_until = time.time() + 3
             game.level = data.speed_level()
@@ -619,6 +635,7 @@ while True:
 
     game.check_random_theme()
     start_screen.main()
+    chat = []
 
     if game.multiplayer:
         _thread.start_new_thread(server_connection, ())

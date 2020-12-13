@@ -106,6 +106,10 @@ def threaded_client(conn, player, game):
                                 if all(game.rematch):
                                     game._reset()
 
+                            elif special.startswith("chat"):
+                                
+                                game._send_chat(player, special)
+
                     elif data.startswith('name '):
                         game.names[player] = data[5:]
                         name = data[5:]
@@ -141,6 +145,7 @@ def threaded_client(conn, player, game):
                 # means end packets
                 conn.send(sentinel)
                 break
+
         except Exception:
             traceback.print_exc()
             break

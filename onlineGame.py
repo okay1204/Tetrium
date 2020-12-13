@@ -42,9 +42,7 @@ class OnlineGame:
 
     
     def speed_level(self):
-        level = int(((time.time() - self.time_started) // 30) + 1)
-        if level > 15: level = 15
-        return level
+        return self.level
     
     
     def opp_piece_blocks(self, p):
@@ -95,6 +93,9 @@ class OnlineGame:
         self.resting_blocks[p] = resting
         self.meters[p] = meter
         self.meter_stages[p] = meter_stage
+
+
+        self.level = min(int(((time.time() - self.time_started) // 30) + 1), 15)
 
     def _send_lines(self, amount, sender):
 

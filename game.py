@@ -930,9 +930,15 @@ class Game:
         running = True
 
         pause_text = self.very_big_font.render('PAUSED', True, self.background_color)
-
+        transparent_bg = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        alpha_surface = pygame.Surface(transparent_bg.get_size(), pygame.SRCALPHA)
+        alpha_surface.set_alpha(128)
+        # alpha_surface.fill((128, 128, 128, 90))
+        # transparent_bg.blit(alpha_surface, (0, 0), special_flags = pygame.BLEND_RGBA_MULT)
 
         while running:
+
+            alpha_surface.fill((128, 128, 128, 10))
 
             for event in pygame.event.get():
 
@@ -956,7 +962,8 @@ class Game:
                         running = False
 
             render_board()
-            self.screen.blit(pause_text, pause_text.get_rect(center = (self.width/2 - 25, self.height/2)))
+            alpha_surface.blit(pause_text, pause_text.get_rect(center = (self.width/2 - 25, self.height/2)))
+            self.screen.blit(alpha_surface, (0, 0), special_flags = pygame.BLEND_RGBA_MULT)
 
             pygame.display.update()
             

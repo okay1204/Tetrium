@@ -1490,10 +1490,9 @@ class StartScreen(Game):
                     self.get_input(held_key)
                 
 
-            game.screen.blit(self.s, (0, 0))
-
             if time.time() >= last_cycle:
                 last_cycle = time.time() + 1/60
+                game.screen.blit(self.s, (0, 0))
                 self.r, self.g, self.b = self.cycle_colors((self.r, self.g, self.b))
 
 

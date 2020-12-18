@@ -987,8 +987,8 @@ while True:
 
                 elif key_name == controls['Pause']:
                     def pause_render():
-                        current and current.render()
                         game.render(bag[:3], held, paused = True)
+                        current and current.render()
 
                     game.pause(pygame.key.key_code(controls['Pause']), pause_render)
 

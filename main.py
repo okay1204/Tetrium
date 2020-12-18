@@ -965,7 +965,7 @@ while True:
                 elif key_name == controls['Hard Drop']:
 
                     downCount = 0
-                    while not current.check_floor():
+                    while not current and current.check_floor():
                         current.move(0, 1)
                         downCount += 1
 
@@ -986,7 +986,11 @@ while True:
                     moving = 0
 
                 elif key_name == controls['Pause']:
-                    game.pause()
+                    def pause_render():
+                        current and current.render()
+                        game.render(bag[:3], held, paused = True)
+
+                    game.pause(pygame.key.key_code(controls['Pause']), pause_render)
 
             elif event.type == pygame.VIDEORESIZE:
                 try:

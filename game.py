@@ -296,7 +296,7 @@ class Game:
         self.text_color = color
         self.preview_color = contrast
         
-    def render(self, pieces=None, held=None):
+    def render(self, pieces=None, held=None, paused = False):
         
         self.screen.fill(self.background_color)
         pygame.draw.rect(self.screen, self.foreground_color, self.playing_field_rect)
@@ -361,6 +361,7 @@ class Game:
 
         font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 20)
 
+  
         time_elapsed = math.floor(time.time() - self.time_started)
 
         minutes = time_elapsed // 60
@@ -925,8 +926,41 @@ class Game:
         settings_screen.resize_screen()
         pygame.display.flip()
 
-    def pause(self):
-        print('paused')
+    def pause(self, control, render_board):
+        running = True
+
+        pause_text = self.very_big_font.render('PAUSED', True, self.background_color)
+
+
+        while running:
+
+            # self.screen.fill(self.background_color)
+
+            for event in pygame.event.get():
+
+
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                
+                elif event.type == pygame.VIDEORESIZE or self.check_fullscreen(event):
+                    try: 
+                        self.width, self.height = event.w, event.h
+
+                    except:
+                        pass
+
+                    self.resize_all_screens()
+
+                elif event.type == pygame.KEYDOWN:
+
+                    if event.key == control:
+                        running = False
+
+            render_board()
+            self.screen.blit(pause_text, pause_text.get_rect(center = (self.width/2 - 25, self.height/2)))
+
+            pygame.display.update()
             
 game = Game()
 

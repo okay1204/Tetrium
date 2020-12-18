@@ -985,6 +985,8 @@ while True:
                     game.continuous = not game.continuous
                     moving = 0
 
+                elif key_name == controls['Pause']:
+                    game.pause()
 
             elif event.type == pygame.VIDEORESIZE:
                 try:

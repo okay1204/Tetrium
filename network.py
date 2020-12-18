@@ -12,7 +12,6 @@ class Network:
         self.port = 6969
         self.addr = (self.server, self.port)
         self.p = self.connect()
-
         self.blocksize = 16
         # marks the end of packet sending
         self.sentinel = b'\x00\x00END_MESSAGE!\x00\x00'

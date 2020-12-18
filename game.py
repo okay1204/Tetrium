@@ -140,7 +140,8 @@ class Game:
             "Rotate Counter-Clockwise": "left",
             "Toggle Movement": "g",
             "Toggle Music": "m",
-            "Toggle Fullscreen": "f11"
+            "Toggle Fullscreen": "f11",
+            "Pause": "p"
         }
 
         with open(get_path('settings.json')) as f:
@@ -199,6 +200,7 @@ class Game:
             "Hold Piece": settings["controls"]["Hold Piece"],
             "Hard Drop": settings["controls"]["Hard Drop"],
             "Toggle Fullscreen": settings["controls"]["Toggle Fullscreen"],
+            "Pause": settings["controls"]["Pause"],
         }
 
         self.fullscreen_key = settings["controls"]["Toggle Fullscreen"]
@@ -793,10 +795,7 @@ class Game:
                         #bottom right of trapezoid
                     (block_rect.x + block_rect.width, block_rect.y)
                 ]
-
             )
-
-
 
 
     def resize_screen_setup(self):
@@ -814,7 +813,7 @@ class Game:
         playing_field_rect_y = self.height/2 - playing_field_rect_height/2
         playing_field_rect_x = (self.width - 350 - (200 if self.multiplayer else 0))/2
 
-        self.playing_field_rect = pygame.Rect(playing_field_rect_x, playing_field_rect_y, 300, 600)
+        self.playing_field_rect = pygame.Rect(playing_field_rect_x, playing_field_rect_y, 300, playing_field_rect_height)
         self.block_y_offset = playing_field_rect_y
         self.second_block_y_offset = self.block_y_offset + 150
         self.block_x_offset = playing_field_rect_x - 100
@@ -834,7 +833,6 @@ class Game:
             self.playing_field_junk_meter_rect.y - offset/2,
             self.playing_field_junk_meter_rect.width + offset,
             self.playing_field_junk_meter_rect.height + offset,
-            
             )
 
 
@@ -854,7 +852,6 @@ class Game:
             self.second_screen_rect.y + self.second_screen_rect.height - opp_screen_junk_meter_height,
             15, 
             opp_screen_junk_meter_height
-
             )
 
         offset = 3
@@ -922,12 +919,14 @@ class Game:
         self.resize_all_screens()
 
 
-
     def resize_all_screens(self):
         self.resize_screen_setup()
         start_screen.resize_screen()
         settings_screen.resize_screen()
         pygame.display.flip()
+
+    def pause(self):
+        print('paused')
             
 game = Game()
 
@@ -939,7 +938,6 @@ class StartScreen(Game):
         self.ready = False
 
         self.rgb_stage = 0
-
         self.version_text = game.small_font.render(f"v {network.version}", True, (255, 255, 255))
         self.input_box_width = 300
         self.input_box_height = 50
@@ -2491,7 +2489,8 @@ class SettingsScreen(StartScreen):
                     "Rotate Counter-Clockwise": game.default_controls["Rotate Counter-Clockwise"],
                     "Hold Piece": game.default_controls["Hold Piece"],
                     "Hard Drop": game.default_controls["Hard Drop"],
-                    "Toggle Fullscreen": game.default_controls["Toggle Fullscreen"]
+                    "Toggle Fullscreen": game.default_controls["Toggle Fullscreen"],
+                    "Pause": game.default_controls["Pause"]
             }
 
             game.fullscreen_key = full_dict["controls"]["Toggle Fullscreen"]

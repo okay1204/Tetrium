@@ -831,6 +831,7 @@ while True:
                                 avoids += 1
                         current.move(0, -1)
 
+
             elif moving == 1:
                 if time.time() > arr_start and time.time() > das_start:
                     if not current.check_right():
@@ -844,6 +845,7 @@ while True:
                                 fall = time.time() + 0.3
                                 avoids += 1
                         current.move(0, -1)
+
 
         backToTop = False
 
@@ -982,8 +984,7 @@ while True:
                     if downCount:
                         rotation_last = False
 
-            
-                    game.vfx(VFX.hard_drop)
+                    game.vfx(VFX.hard_drop, current)
 
                 elif key_name == controls['Toggle Movement']:
                     game.continuous = not game.continuous

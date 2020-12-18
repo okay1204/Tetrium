@@ -1340,6 +1340,11 @@ class StartScreen(Game):
 
         running = True
         initial_presence = False
+        held_time = 0
+        held_key = ""
+
+        last_cycle = 0
+
         while running:
 
             #NOTE make sure this is at the top
@@ -1454,9 +1459,39 @@ class StartScreen(Game):
                         else:
                             self.get_input(event.unicode)
 
-                        
+                        if held_key != pygame.key:
+                            held_time = time.time() + 0.5
+
+                            if event.key == pygame.K_BACKSPACE:
+                                held_key = "backspace"
+
+                            else:
+                                held_key = event.unicode
+                
+                elif event.type == pygame.KEYUP:
+
+                    if event.key == held_key:
+                        held_key = ""
+                        held_time = time.time()
+
+
+            if held_key and time.time() >= held_time:
+
+                held_time = time.time() + 0.05
+
+                if held_key == "backspace":
+                    self.input_text = self.input_text[:-1]
+                else:
+                    self.get_input(held_key)
+                
+
             game.screen.blit(self.s, (0, 0))
-            self.r, self.g, self.b = self.cycle_colors((self.r, self.g, self.b))
+
+            if time.time() >= last_cycle:
+                last_cycle = time.time() + 1/60
+                self.r, self.g, self.b = self.cycle_colors((self.r, self.g, self.b))
+
+
             self.draw_tetris_pieces(self.pieces)
             self.draw_credits_button(self.mouse)
             self.draw_settings_button(self.mouse)
@@ -1478,8 +1513,6 @@ class StartScreen(Game):
             
                 
             pygame.display.update()
-
-            game.clock.tick(60)
 
         game.time_started = time.time()
         game.running = True

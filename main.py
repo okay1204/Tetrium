@@ -109,7 +109,7 @@ def pick_bag():
     return value
 
 
-fall_speed = 0.001
+fall_speed = 1
 last_fall = time.time() + fall_speed
 fall = 0
 

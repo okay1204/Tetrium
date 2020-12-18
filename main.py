@@ -985,10 +985,11 @@ while True:
                     game.continuous = not game.continuous
                     moving = 0
 
-                elif key_name == controls['Pause']:
+                elif key_name == controls['Pause'] and not game.multiplayer:
+                    
                     def pause_render():
-                        current and current.render()
                         game.render(bag[:3], held, paused = True)
+                        current and current.render()
 
                     game.pause(pygame.key.key_code(controls['Pause']), pause_render)
 

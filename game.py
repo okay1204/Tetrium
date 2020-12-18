@@ -432,8 +432,8 @@ class Game:
                 
                     meter_block += 1
 
-        if game.multiplayer:
             self.render_second_screen()
+
 
 
     def render_second_screen(self):
@@ -815,8 +815,7 @@ class Game:
         playing_field_rect_x = (self.width - 350 - (200 if self.multiplayer else 0))/2
 
         self.playing_field_rect = pygame.Rect(playing_field_rect_x, playing_field_rect_y, 300, playing_field_rect_height)
-        self.block_y_offset = playing_field_rect_y
-        self.second_block_y_offset = self.block_y_offset + 150
+        self.second_block_y_offset = self.playing_field_rect.y + 150
         self.block_x_offset = playing_field_rect_x - 100
         
         playing_field_junk_meter_width = 30
@@ -966,8 +965,38 @@ class Game:
             self.screen.blit(alpha_surface, (0, 0), special_flags = pygame.BLEND_RGBA_MULT)
 
             pygame.display.update()
+
+
+    def vfx(self, fx_type, intensity = 5):
+        if fx_type == VFX.hard_drop:
+            def hard_drop(intensity, _):
+                for _ in range(intensity):
+                    self.playing_field_rect.y += 1
+                    time.sleep(5/2500)
+
+                time.sleep(5/62.5)
+
+                for _ in range(intensity * 2):
+                    self.playing_field_rect.y -= 1
+                    time.sleep(5/2500)
+
+                time.sleep(5/62.5)
+
+                for _ in range(intensity):
+                    self.playing_field_rect.y += 1
+                    time.sleep(5/2500)
+
+
+            _thread.start_new_thread(hard_drop, (intensity, 0))
+
+
             
 game = Game()
+
+
+class VFX:
+    hard_drop = 0
+
 
 
 class StartScreen(Game):
@@ -1310,9 +1339,8 @@ class StartScreen(Game):
                     raise e
                 break
 
-
-        
-    def no_connection_screen(self):
+    @staticmethod
+    def no_connection_screen():
 
         display_time = time.time() + 3
 
@@ -1521,6 +1549,11 @@ class StartScreen(Game):
         game.time_started = time.time()
         game.running = True
         game.resize_screen_setup()
+
+
+
+
+
 
 
 
@@ -2791,12 +2824,13 @@ class Block(Game):
         
         
         x_offset_val = game.playing_field_rect.x if offset else 100
+        y_offset_val = game.playing_field_rect.y
         
         # normal
         if time.time() > self.flash_start + 0.2 and not self.fade_start:
 
             darker = tuple(darken(i) for i in self.color)
-            block_rect = pygame.Rect((self.x-1) * self.size + x_offset_val, (self.y-1)* self.size + game.block_y_offset, self.size, self.size)
+            block_rect = pygame.Rect((self.x-1) * self.size + x_offset_val, (self.y-1)* self.size + y_offset_val, self.size, self.size)
             pygame.draw.rect(game.screen, self.color, block_rect)
             game.draw_block_borders(block_rect, darker)
 
@@ -2827,10 +2861,10 @@ class Block(Game):
             flash_color = tuple(flash_color)
 
             darker = tuple(darken(i) for i in flash_color)
-            block_rect = pygame.Rect((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30)
+            block_rect = pygame.Rect((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + y_offset_val, 30, 30)
             game.draw_block_borders(block_rect, darker)
             pygame.draw.rect(game.screen, flash_color, block_rect)
-            pygame.draw.rect(game.screen, flash_color, ((self.x-1) * self.size + game.playing_field_rect.x + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
+            pygame.draw.rect(game.screen, flash_color, ((self.x-1) * self.size + game.playing_field_rect.x + 5, (self.y-1)* self.size + y_offset_val + 5, 20, 20))
 
 
         # fading
@@ -2850,9 +2884,9 @@ class Block(Game):
 
             
             darker = tuple(darken(i) for i in fade_color)
-            block_rect = pygame.Rect((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30)
+            block_rect = pygame.Rect((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + y_offset_val, 30, 30)
             game.draw_block_borders(block_rect, darker)
-            pygame.draw.rect(game.screen, fade_color, ((self.x-1) * self.size + game.playing_field_rect.x + 5, (self.y-1)* self.size + game.block_y_offset + 5, 20, 20))
+            pygame.draw.rect(game.screen, fade_color, ((self.x-1) * self.size + game.playing_field_rect.x + 5, (self.y-1)* self.size + y_offset_val + 5, 20, 20))
 
 
     # for putting blocks on second screen
@@ -2864,8 +2898,8 @@ class Block(Game):
 
 
     def render_preview(self):
-        pygame.draw.rect(game.screen, game.preview_color, ((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.block_y_offset, 30, 30))
-        pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + game.playing_field_rect.x + 3, (self.y-1)* self.size + game.block_y_offset + 3, 24, 24))
+        pygame.draw.rect(game.screen, game.preview_color, ((self.x-1) * self.size + game.playing_field_rect.x, (self.y-1)* self.size + game.playing_field_rect.y, 30, 30))
+        pygame.draw.rect(game.screen, game.foreground_color, ((self.x-1) * self.size + game.playing_field_rect.x + 3, (self.y-1)* self.size + game.playing_field_rect.y + 3, 24, 24))
 
 
         

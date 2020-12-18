@@ -982,6 +982,9 @@ while True:
                     if downCount:
                         rotation_last = False
 
+            
+                    game.vfx(VFX.hard_drop)
+
                 elif key_name == controls['Toggle Movement']:
                     game.continuous = not game.continuous
                     moving = 0
@@ -1278,7 +1281,7 @@ while True:
                                 highest_y = block.y
                                 chosen_block = block
 
-                        pos = (chosen_block.x-1) * chosen_block.size + game.playing_field_rect.x, (chosen_block.y-1) * chosen_block.size + game.block_y_offset
+                        pos = (chosen_block.x-1) * chosen_block.size + game.playing_field_rect.x, (chosen_block.y-1) * chosen_block.size + game.playing_field_rect.y
 
                         start_meter_animation(pos, 1)
                         start_number_animation(pos, lines_sent)

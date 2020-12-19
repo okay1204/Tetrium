@@ -1539,9 +1539,8 @@ class StartScreen(Game):
                 
                 elif event.type == pygame.KEYUP:
 
-                    if event.key == held_key:
-                        held_key = ""
-                        held_time = time.time()
+                    held_key = ""
+                    held_time = time.time()
 
 
             if held_key and time.time() >= held_time:

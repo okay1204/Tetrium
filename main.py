@@ -993,7 +993,7 @@ while True:
                 elif key_name == controls['Pause'] and not game.multiplayer:
                     
                     def pause_render():
-                        game.render(bag[:3], held, paused = True)
+                        game.render(bag[:3], held)
                         current and current.render()
 
                     game.pause(pygame.key.key_code(key_name), pause_render)

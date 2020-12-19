@@ -297,7 +297,7 @@ class Game:
         self.text_color = color
         self.preview_color = contrast
         
-    def render(self, pieces=None, held=None, paused = False):
+    def render(self, pieces=None, held=None):
         
         self.screen.fill(self.background_color)
         pygame.draw.rect(self.screen, self.foreground_color, self.playing_field_rect)
@@ -933,10 +933,13 @@ class Game:
         transparent_bg = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         alpha_surface = pygame.Surface(transparent_bg.get_size(), pygame.SRCALPHA)
         alpha_surface.set_alpha(128)
-        # alpha_surface.fill((128, 128, 128, 90))
-        # transparent_bg.blit(alpha_surface, (0, 0), special_flags = pygame.BLEND_RGBA_MULT)
+
+
+        time_started_difference = time.time() - game.time_started
 
         while running:
+
+            game.time_started = time.time() - time_started_difference
 
             alpha_surface.fill((128, 128, 128, 10))
 
@@ -1021,7 +1024,7 @@ class Game:
                     if time.time() - start >= 1:
                         break
 
-            _thread.start_new_thread(draw_gradient_effect, ())
+            # _thread.start_new_thread(draw_gradient_effect, ())
  
             
 game = Game()

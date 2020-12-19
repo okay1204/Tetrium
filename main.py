@@ -125,7 +125,6 @@ held = ''
 display_until = 0
 
 canSwitch = True
-rotation_last = False
 
 gameOver = False
 
@@ -384,8 +383,6 @@ def game_over(win: bool):
 
 moving = 0
 
-
-last_rotation_fall = 0
 
 combo = -1
 score_key = [100, 300, 500, 800]
@@ -815,14 +812,11 @@ while True:
 
         if moving:
 
-            rotation_last = False
-
             if moving == -1:
                 if time.time() > arr_start and time.time() > das_start:
                     if not current.check_left():
                         current.move(-1, 0)
                         arr_start = time.time() + arr
-                        rotation_last = False
 
                         current.move(0, 1)
                         if current.check_floor():
@@ -837,7 +831,6 @@ while True:
                     if not current.check_right():
                         current.move(1, 0)
                         arr_start = time.time() + arr
-                        rotation_last = False
 
                         current.move(0, 1)
                         if current.check_floor():
@@ -875,8 +868,6 @@ while True:
                             current.move(-1, 0)
                             das_start = max(time.time() + das, time.time() + arr)
 
-                        rotation_last = False
-
 
                         current.move(0, 1)
                         if current.check_floor():
@@ -899,7 +890,6 @@ while True:
                             current.move(1, 0)
                             das_start = max(time.time() + das, time.time() + arr)
 
-                        rotation_last = False
 
 
                         current.move(0, 1)
@@ -923,7 +913,6 @@ while True:
                             avoids += 1
                     current.move(0, -1)
 
-                    rotation_last = True
 
                 elif key_name == controls['Rotate Counter-Clockwise']:
                     current.rotate(1)
@@ -936,7 +925,6 @@ while True:
 
                     current.move(0, -1)
 
-                    rotation_last = True
 
                 elif key_name == controls['Hold Piece']:
 
@@ -954,7 +942,6 @@ while True:
 
                         avoids = 0
                         canSwitch = False
-                        rotation_last = False
 
                         backToTop = True
 
@@ -981,8 +968,6 @@ while True:
                     last_touched -= 5
 
                     game.score += downCount*2
-                    if downCount:
-                        rotation_last = False
 
                     game.vfx(VFX.hard_drop, current)
 
@@ -1047,7 +1032,7 @@ while True:
         game.render(bag[:3], held)
 
         current.move(0, 1)
-        if current.check_floor() and not touched_floor and not rotation_last:
+        if current.check_floor() and not touched_floor:
             fall = time.time() + 0.5
             touched_floor = True
         elif not current.check_floor():
@@ -1062,38 +1047,36 @@ while True:
             if speedUp and not current.check_floor():
                 game.score += 1
 
-            if not current.check_floor():
-                rotation_last = False
-
             if current.check_floor():
 
                 if time.time() > fall:
 
                     # Any piece spin detection
-                    if current.piece_type != "T":
 
-                        current.move(0, -1)
+                    current.move(0, -1)
 
-                        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+                    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 
-                        spin_move = True
+                    spin_move = True
 
-                        for direction in directions:
+                    for direction in directions:
 
-                            current.move(*direction)
+                        current.move(*direction)
 
-                            if not current.check_overlap():
-                                spin_move = False
+                        if not current.check_overlap():
+                            spin_move = False
 
-                            current.move(*tuple(-1 * i for i in direction))
+                        current.move(*tuple(-1 * i for i in direction))
 
-                            if not spin_move:
-                                break
+                        if not spin_move:
+                            break
 
-                        else:
+                    else:
+
+                        if current.piece_type != "T":
                             texts.append((f'{current.piece_type}-Spin', time.time() + 3, 30))
 
-                        current.move(0, 1)
+                    current.move(0, 1)
 
 
                     current.flash()
@@ -1125,7 +1108,7 @@ while True:
 
 
                     # T-Spin detection
-                    if current.piece_type == "T" and rotation_last:
+                    if current.piece_type == "T" and spin_move:
 
                         filled_corners = {}
 

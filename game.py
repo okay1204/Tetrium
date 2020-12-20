@@ -22,7 +22,7 @@ nest_asyncio.apply()
 
 if __name__ == "__main__":
     import main
-
+ 
 
 color_key = {
     'green': (13, 252, 65),
@@ -1539,8 +1539,7 @@ class StartScreen(Game):
                 
                 elif event.type == pygame.KEYUP:
 
-                    held_key = ""
-                    held_time = time.time()
+                    held_time = time.time() + 0.5
 
 
             if held_key and time.time() >= held_time:

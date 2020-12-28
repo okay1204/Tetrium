@@ -290,6 +290,7 @@ def game_over(win: bool):
 
         for event in pygame.event.get():
 
+
             # NOTE this if statement is temporary, in order to send a chat message
             # used the send() and chat.append() functions where text is the message to send
             # the list, chat, is a list of messages that start with "me" or "opp"

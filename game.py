@@ -1046,7 +1046,7 @@ class StartScreen(Game):
         self.input_box_width = 300
         self.input_box_height = 50
         self.mute_button_radius = 35
-        self.start_button_text_color = (255, 255, 255)
+        self.multiplayer_button_text_color = (255, 255, 255)
         self.credits_button_height = 30
         self.input_text_width = 0
         self.back_button = pygame.Rect(10, 10, 75, 65)
@@ -1088,8 +1088,9 @@ class StartScreen(Game):
     
         self.r, self.g, self.b = 255, 0, 0
         self.last_falls = [time.time() for _ in self.pieces]
-        self.start_button_text_color = (255, 255, 255)
-        self.start_button_rect = pygame.Rect(game.width/2-60, game.height/2, 120, 40)
+        self.multiplayer_button_text_color = (255, 255, 255)
+        self.multiplayer_button_text = game.font.render('MULTIPLAYER', True, self.multiplayer_button_text_color)
+        self.multiplayer_button_rect = pygame.Rect(game.width/2-self.multiplayer_button_text.get_width()/2, game.height/2, 230, 40)
         self.disconnect_button_rect = pygame.Rect(game.width/2-90, game.height/2+200, 175, 40)
 
         self.s = pygame.Surface((game.width, game.height), pygame.SRCALPHA) # noqa pylint: disable=too-many-function-args
@@ -1109,6 +1110,12 @@ class StartScreen(Game):
         self.disconnect_button_text = game.font.render('Disconnect', True, (self.r, self.g, self.b))
 
 
+
+        self.singleplayer_button_text_color = (255, 255, 255)
+        self.singleplayer_button_text = game.font.render('SINGLEPLAYER', True, self.singleplayer_button_text_color)
+        self.singleplayer_button_rect = pygame.Rect(game.width/2-self.singleplayer_button_text.get_width()/2, game.height/2+60, 250, 40)
+
+
     def check_started(self):
         return not self.started
 
@@ -1119,18 +1126,31 @@ class StartScreen(Game):
         game.screen.blit(start_screen.back_icon, (-3, -7))
 
     
-    def draw_start_button(self):
+    def draw_buttons(self):
        
         #if mouse hovering make it lighter
-        if self.start_button_rect.collidepoint(self.mouse): 
+        if self.multiplayer_button_rect.collidepoint(self.mouse): 
             colooooooooor = (255,255,255)
-            self.start_button_text_color = (self.r, self.g, self.b)
+            self.multiplayer_button_text_color = (self.r, self.g, self.b)
         
         else: 
             colooooooooor = (0, 0, 0)
-            self.start_button_text_color = (255, 255, 255)
+            self.multiplayer_button_text_color = (255, 255, 255)
 
-        pygame.draw.rect(game.screen, colooooooooor, self.start_button_rect)
+        pygame.draw.rect(game.screen, colooooooooor, self.multiplayer_button_rect)
+
+
+        if self.singleplayer_button_rect.collidepoint(self.mouse):
+            colooooooooor = (255,255,255)
+            self.singleplayer_button_text_color = (self.r, self.g, self.b)
+        
+        else: 
+            colooooooooor = (0, 0, 0)
+            self.singleplayer_button_text_color = (255, 255, 255)
+
+        self.singleplayer_button_text = game.font.render('SINGLEPLAYER', True, self.singleplayer_button_text_color)
+
+        pygame.draw.rect(game.screen, colooooooooor, self.singleplayer_button_rect)
 
     
     def credits_screen(self):
@@ -1172,6 +1192,7 @@ class StartScreen(Game):
                     game.resize_all_screens()
 
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+
                     if self.back_button.collidepoint(event.pos):
                         running = False
                         break
@@ -1189,11 +1210,14 @@ class StartScreen(Game):
 
 
         if not self.connected:
-            self.start_button_text = game.font.render('START', True, self.start_button_text_color)
+            self.multiplayer_button_text = game.font.render('MULTIPLAYER', True, self.multiplayer_button_text_color)
+
+            game.screen.blit(self.singleplayer_button_text, (self.singleplayer_button_rect.x + 7, self.singleplayer_button_rect.y + 3))
         
         else:
-            self.start_button_text = game.font.render('Waiting for opponent...', True, (self.r, self.g, self.b))
-            self.start_button_rect.x = game.width/2-60 - 100
+            self.multiplayer_button_text = game.font.render('Waiting for opponent...', True, (self.r, self.g, self.b))
+
+
             if self.disconnect_button_rect.collidepoint(mouse):
                 color = tuple(darken(i) for i in (255, 255, 255))
             else:
@@ -1201,10 +1225,12 @@ class StartScreen(Game):
                 
             pygame.draw.rect(game.screen, color, self.disconnect_button_rect)
             game.screen.blit(self.disconnect_button_text, (self.disconnect_button_rect.x + 7, self.disconnect_button_rect.y + 1))
+
+        self.multiplayer_button_rect.x = game.width/2-self.multiplayer_button_text.get_width()/2
             
 
         title_text = game.very_big_font.render('TETRIUM', True, (self.r, self.g, self.b)) 
-        game.screen.blit(self.start_button_text, (self.start_button_rect.x + 7, self.start_button_rect.y + 3))
+        game.screen.blit(self.multiplayer_button_text, (self.multiplayer_button_rect.x + 7, self.multiplayer_button_rect.y + 3))
         game.screen.blit(title_text, (game.width/2 - 165, game.height/2 - 200)) 
 
 
@@ -1278,7 +1304,7 @@ class StartScreen(Game):
             large_image="tetrium"
         )
 
-        self.start_button_rect.x -=  100
+        self.multiplayer_button_rect.x -=  100
         self.connected = True
         game.name = self.input_text
         game.n.send("name " + self.input_text)
@@ -1438,23 +1464,7 @@ class StartScreen(Game):
             
             #Game over loop
             for event in pygame.event.get():
-
-                if event.type == pygame.KEYDOWN:
-
-                    if event.key == pygame.K_s:
-                        game.multiplayer = False
-                        running = False
-                        self.started = True
-                        game.name = self.input_text
-
-                        # saving nickname
-                        with open(get_path('settings.json')) as f:
-                            settings = json.load(f)
-
-                        settings['name'] = self.input_text
-
-                        with open(get_path('settings.json'), 'w') as f:
-                            json.dump(settings, f, indent=2)
+                        
 
                 if event.type == pygame.QUIT:
 
@@ -1475,7 +1485,7 @@ class StartScreen(Game):
                     
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     
-                    if self.start_button_rect.collidepoint(event.pos) and not self.connected:  
+                    if self.multiplayer_button_rect.collidepoint(event.pos) and not self.connected:  
 
                         self.start()
                         game.screen.fill((0, 0, 0))
@@ -1486,11 +1496,26 @@ class StartScreen(Game):
                             start = game.time_opened,
                             large_image = "tetrium"
                         )
+
+                    elif self.singleplayer_button_rect.collidepoint(event.pos) and not self.connected:
+
+                        game.multiplayer = False
+                        running = False
+                        self.started = True
+                        game.name = self.input_text
+
+                        # saving nickname
+                        with open(get_path('settings.json')) as f:
+                            settings = json.load(f)
+
+                        settings['name'] = self.input_text
+
+                        with open(get_path('settings.json'), 'w') as f:
+                            json.dump(settings, f, indent=2)
                       
                     
                     elif self.disconnect_button_rect.collidepoint(event.pos) and self.connected:
                         self.status = 'disconnect'
-                        self.start_button_rect.x = game.width/2-60
                         game.screen.fill((0, 0, 0))
                         self.connected = False
                         
@@ -1498,12 +1523,10 @@ class StartScreen(Game):
                     
                     elif self.credits_button.collidepoint(event.pos):
                         self.credits_screen()
-                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
                         self.s.fill((0, 0, 0))
 
                     elif self.settings_button.collidepoint(event.pos):
                         settings_screen.main()
-                        #NOTE after we go back from the credits screen, we have to refresh the screen with black so the text doesnt linger over, because our background is opaque
                         self.s.fill((0, 0, 0))
 
 
@@ -1563,7 +1586,7 @@ class StartScreen(Game):
             self.draw_settings_button(self.mouse)
 
             if not self.connected:
-                self.draw_start_button()
+                self.draw_buttons()
                 
             self.draw_text(self.mouse)
             self.draw_input_box()
@@ -1572,7 +1595,7 @@ class StartScreen(Game):
             if self.connected and self.ready:
                 game.multiplayer = True
                 self.connected = False
-                self.start_button_rect = pygame.Rect(game.width/2-60, game.height/2, 120, 40)
+                self.multiplayer_button_rect = pygame.Rect(game.width/2-60, game.height/2, 200, 40)
                 self.started = True
                 running = False
                 break

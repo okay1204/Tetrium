@@ -93,8 +93,6 @@ def render_texts():
     removed_texts.clear()
 
 
-
-
 def pick_bag():
     global bag, next_bag
 
@@ -104,7 +102,7 @@ def pick_bag():
         next_bag = pieces.copy()
         random.shuffle(next_bag)
 
-    bag.append(next_bag.pop(0))
+    bag.append(next_bag.pop(0)) 
 
     return value
 
@@ -200,6 +198,13 @@ def game_over(win: bool):
     you_text = text_font.render("You", True, game.foreground_color)
     opponent_text = text_font.render(game.opp_name, True, game.foreground_color)
     opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
+    input_box_y =  game.height/2 - 85
+    
+    input_box_width = 300
+    input_box_height = 50
+    input_box_x = (game.width - input_box_width)/2
+    input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
+    input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , game.height/2 - 85, input_box_width, input_box_height)
 
     if game.multiplayer:
         if not win:
@@ -273,6 +278,38 @@ def game_over(win: bool):
         game.screen.blit(lines_text, (game.width // 2 - lines_text.get_rect().width//2, 290))
         game.screen.blit(level_text, (game.width // 2 - level_text.get_rect().width//2, 340))
 
+
+    def draw_chat():
+        for idx, msg in enumerate(chat):
+            text_render = game.small_font.render(msg, True, game.foreground_color)
+            game.screen.blit(text_render, (game.width/2 - 100, 100 + 50 * (idx + 1)))
+
+    def send_text(text):
+        send(f"chat {text}")
+        chat.append(f"me {text}")
+        return ''
+
+    def draw_chat_box(message, active):
+        if active:
+            input_bkg_color = (0, 0, 255)
+
+        else:
+            input_bkg_color = (0, 0, 0)
+
+        pygame.draw.rect(game.screen, input_bkg_color, input_box, 10)
+        pygame.draw.rect(game.screen, (255,255,255), input_box_bkg)
+
+        message_render = game.small_font.render(message, True, game.foreground_color) if message else game.small_font.render("send a message", True, (96, 93, 93))
+        game.screen.blit(message_render, (game.width/2 - 100, game.height/2))
+        return message_render.get_rect().width
+
+    def get_input(text, text_width):
+        return text
+
+    message_text = ''
+    input_text_width = 0
+    input_active = False
+
     while gameOver:
 
         game.screen.fill(game.background_color)
@@ -280,6 +317,7 @@ def game_over(win: bool):
 
         if opp_disconnected_after:
             opp_rematch_text = "Disconnected"
+
         elif opp_rematched:
             opp_rematch_text = "Rematching..."
 
@@ -294,10 +332,26 @@ def game_over(win: bool):
             # used the send() and chat.append() functions where text is the message to send
             # the list, chat, is a list of messages that start with "me" or "opp"
             # if it starts with "me", then it is by this client, if its "opp" the message is by the opponent
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-                text = "hello there"
-                send(f"chat {text}")
-                chat.append(f"me {text}")
+            if event.type == pygame.KEYDOWN:
+   
+
+                if event.key == pygame.K_RETURN:
+                    message_text = send_text(message_text)
+                    
+
+                elif event.key == pygame.K_BACKSPACE:
+                    message_text = message_text[:-1]
+
+                else:
+                    message_text += get_input(event.unicode, input_text_width)
+
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if input_box.collidepoint(event.pos):
+                    input_active = True
+                    
+                else: 
+                    input_active = False
+
 
             if event.type == pygame.QUIT:
                 stop()
@@ -370,8 +424,9 @@ def game_over(win: bool):
             return True
 
         game.screen.blit(game_over_text, textRect)
-
+        input_text_width = draw_chat_box(message_text, input_active)
         draw_menu_button()
+        draw_chat()
 
         if not opp_disconnected_after:
             draw_rematch_button()

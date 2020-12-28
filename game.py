@@ -12,7 +12,6 @@ import _thread
 import asyncio
 import ntpath
 from webbrowser import open_new
-from colour import Color
 
 
 # these two lines saved my life
@@ -992,48 +991,11 @@ class Game:
 
             _thread.start_new_thread(hard_drop_shake, (intensity, 0))
 
-
-
-            def draw_gradient_effect():
-                def get_piece_dimensions(blocks):
-                    x_s = []
-                    y_s = []
-                    for block in blocks:
-                        x_s.append((block.x -1) * block.size + self.playing_field_rect.x)
-                        y_s.append((block.y - 1) * block.size + self.playing_field_rect.y)
-
-                    return [min(x_s), max(x_s) + 30], int(max(y_s))
-
-                rgb_to_frac = lambda x: x/255
-                frac_to_rgb = lambda x: int(x * 255)
-
-                end = Color(rgb = tuple(rgb_to_frac(i) for i in piece.blocks[0].color))
-                start = Color(rgb = tuple(rgb_to_frac(i) for i in self.foreground_color))
-
-                gradient = [tuple(map(frac_to_rgb, i.rgb)) for i in list(start.range_to(end, 91))]
-
-                #hard drop gradient
-                x_range, y_start = get_piece_dimensions(piece.blocks)
-                start = time.time()
-                while True:
-                    i = 0
-                    for y in range(y_start - 90, y_start + 1):
-                        pygame.draw.line(self.screen, gradient[i], (x_range[0], y), (x_range[1], y))
-                        i += 1
-                    
-                    if time.time() - start >= 1:
-                        break
-
-            # _thread.start_new_thread(draw_gradient_effect, ())
- 
             
 game = Game()
 
-
 class VFX:
     hard_drop = 0
-
-
 
 class StartScreen(Game):
 
@@ -1430,9 +1392,7 @@ class StartScreen(Game):
                     start = game.time_opened,
                     large_image = "tetrium"
                 )
-
                 initial_presence = True
-
 
             self.mouse = pygame.mouse.get_pos() 
             
@@ -1456,7 +1416,7 @@ class StartScreen(Game):
                         with open(get_path('settings.json'), 'w') as f:
                             json.dump(settings, f, indent=2)
 
-                if event.type == pygame.QUIT:
+                elif event.type == pygame.QUIT:
 
                     if self.connected:
                         game.n.disconnect()

@@ -198,11 +198,11 @@ def game_over(win: bool):
     you_text = text_font.render("You", True, game.foreground_color)
     opponent_text = text_font.render(game.opp_name, True, game.foreground_color)
     opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
-    input_box_y =  game.height/2 - 85
     
     input_box_width = 300
     input_box_height = 50
     input_box_x = (game.width - input_box_width)/2
+    input_box_y =  game.height/2 - 85
     input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
     input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , game.height/2 - 85, input_box_width, input_box_height)
 
@@ -299,8 +299,8 @@ def game_over(win: bool):
         pygame.draw.rect(game.screen, input_bkg_color, input_box, 10)
         pygame.draw.rect(game.screen, (255,255,255), input_box_bkg)
 
-        message_render = game.small_font.render(message, True, game.foreground_color) if message else game.small_font.render("send a message", True, (96, 93, 93))
-        game.screen.blit(message_render, (game.width/2 - 100, game.height/2))
+        message_render = game.medium_font.render(message, True, game.background_color) if message else game.small_font.render("send a message", True, game.foreground_color)
+        game.screen.blit(message_render, (input_box.x + 5, input_box.y + 6))
         return message_render.get_rect().width
 
     def get_input(text, text_width):
@@ -328,22 +328,22 @@ def game_over(win: bool):
 
         for event in pygame.event.get():
 
-            # NOTE this if statement is temporary, in order to send a chat message
+            # NOTE in order to send a chat message
             # used the send() and chat.append() functions where text is the message to send
             # the list, chat, is a list of messages that start with "me" or "opp"
             # if it starts with "me", then it is by this client, if its "opp" the message is by the opponent
             if event.type == pygame.KEYDOWN:
    
 
-                if event.key == pygame.K_RETURN:
+                if message_text and event.key == pygame.K_RETURN:
                     message_text = send_text(message_text)
                     
+                if input_active:
+                    if event.key == pygame.K_BACKSPACE:
+                        message_text = message_text[:-1]
 
-                elif event.key == pygame.K_BACKSPACE:
-                    message_text = message_text[:-1]
-
-                else:
-                    message_text += get_input(event.unicode, input_text_width)
+                    else:
+                        message_text += get_input(event.unicode, input_text_width)
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if input_box.collidepoint(event.pos):
@@ -351,7 +351,6 @@ def game_over(win: bool):
                     
                 else: 
                     input_active = False
-
 
             if event.type == pygame.QUIT:
                 stop()
@@ -371,7 +370,11 @@ def game_over(win: bool):
                 rematch_button_rect = pygame.Rect(rematch_button_pos, rematch_button_dimensions)
                 opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
                 textRect.center = (game.width // 2, 200)
-            
+                input_box_x = (game.width - input_box_width)/2
+                input_box_y =  game.height/2 - 85
+                input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
+                input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , game.height/2 - 85, input_box_width, input_box_height)
+                        
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 

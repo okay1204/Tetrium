@@ -1520,7 +1520,7 @@ class StartScreen(Game):
                         self.connected = False
                         
                         initial_presence = False
-                    
+
                     elif self.credits_button.collidepoint(event.pos):
                         self.credits_screen()
                         self.s.fill((0, 0, 0))
@@ -1553,26 +1553,31 @@ class StartScreen(Game):
 
                         if held_key != pygame.key:
                             held_time = time.time() + 0.5
-
+                        
+                            held_key = event.key
+                            
                             if event.key == pygame.K_BACKSPACE:
-                                held_key = "backspace"
-
+                                held_unicode = "backspace"
                             else:
-                                held_key = event.unicode
+                                held_unicode = event.unicode
                 
                 elif event.type == pygame.KEYUP:
 
                     held_time = time.time() + 0.5
+
+                    if event.key == held_key:
+                        held_key = ""
+                        held_unicode = ""
 
 
             if held_key and time.time() >= held_time:
 
                 held_time = time.time() + 0.05
 
-                if held_key == "backspace":
+                if held_unicode == "backspace":
                     self.input_text = self.input_text[:-1]
                 else:
-                    self.get_input(held_key)
+                    self.get_input(held_unicode)
                 
 
             if time.time() >= last_cycle:

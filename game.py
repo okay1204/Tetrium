@@ -1396,24 +1396,7 @@ class StartScreen(Game):
             #Game over loop
             for event in pygame.event.get():
 
-                if event.type == pygame.KEYDOWN:
-
-                    if event.key == pygame.K_s:
-                        game.multiplayer = False
-                        running = False
-                        self.started = True
-                        game.name = self.input_text
-
-                        # saving nickname
-                        with open(get_path('settings.json')) as f:
-                            settings = json.load(f)
-
-                        settings['name'] = self.input_text
-
-                        with open(get_path('settings.json'), 'w') as f:
-                            json.dump(settings, f, indent=2)
-
-                elif event.type == pygame.QUIT:
+                if event.type == pygame.QUIT:
 
                     if self.connected:
                         game.n.disconnect()
@@ -1447,7 +1430,7 @@ class StartScreen(Game):
                     
                     elif self.disconnect_button_rect.collidepoint(event.pos) and self.connected:
                         self.status = 'disconnect'
-                        self.start_button_rect.x = game.width/2-60
+                        self.start_button_rect.x = game.width/2 - 60
                         game.screen.fill((0, 0, 0))
                         self.connected = False
                         
@@ -1471,6 +1454,20 @@ class StartScreen(Game):
                         self.input_active = False
 
                 elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        game.multiplayer = False
+                        running = False
+                        self.started = True
+                        game.name = self.input_text
+
+                        # saving nickname
+                        with open(get_path('settings.json')) as f:
+                            settings = json.load(f)
+
+                        settings['name'] = self.input_text
+
+                        with open(get_path('settings.json'), 'w') as f:
+                            json.dump(settings, f, indent=2)
                     
                     if self.input_active:
                         
@@ -1505,6 +1502,7 @@ class StartScreen(Game):
 
                 if held_key == "backspace":
                     self.input_text = self.input_text[:-1]
+
                 else:
                     self.get_input(held_key)
                 
@@ -1540,10 +1538,6 @@ class StartScreen(Game):
         game.time_started = time.time()
         game.running = True
         game.resize_screen_setup()
-
-
-
-
 
 
 

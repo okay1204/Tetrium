@@ -409,7 +409,6 @@ def game_over(win: bool):
             menu_button_color = tuple(darken(i, 15) for i in game.foreground_color)
         else:
             menu_button_color = game.foreground_color
-        
 
         if rematch_button_rect.collidepoint(mouse):
             rematch_button_color = tuple(darken(i, 15) for i in game.foreground_color)

@@ -1220,8 +1220,7 @@ class StartScreen(Game):
         if game.n.p == "no connection":
             self.no_connection_screen()
             return            
-
-
+            
 
         self.input_text = self.input_text.strip()
         if not self.input_text:
@@ -1248,7 +1247,6 @@ class StartScreen(Game):
 
     def cycle_colors(self, rgb):
         r, g, b = rgb
-    
 
         if self.rgb_stage == 0:
             if g < 255 and r > 0:
@@ -1281,7 +1279,6 @@ class StartScreen(Game):
             if piece.y >= 28:
                 #Moves it back up
                 piece.move(0, -30)
-
 
             piece.render(False)
 

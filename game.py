@@ -1,5 +1,6 @@
 # pylint: disable=no-member, unused-wildcard-import, no-name-in-module
 import pygame
+from pygame import mouse
 import pieces as pieces_lib
 import math
 import time
@@ -103,7 +104,7 @@ class Game:
 
 
         self.time_started = 0
-
+        self.game_over_rematched_bool = False
 
         self.fullscreen = False
 
@@ -709,6 +710,55 @@ class Game:
         game.time_started = time.time()
 
         return True
+
+    def game_over_rematched(self):
+        return not self.game_over_rematched_bool
+
+    def chat_screen(self):
+        running = True
+        while running:
+
+            #Makes sure that if game starts while were in this screen it goes back to game
+            running = self.game_over_rematched()
+            
+
+            game.update_presence(
+                details = "In chat screen",
+                state = "Chatting",
+                start = game.time_opened,
+                large_image = "tetrium"
+            )
+
+            mouse = pygame.mouse.get_pos() 
+            
+            self.screen.fill(self.background_color)
+
+            #Game over loop
+            for event in pygame.event.get():
+                        
+
+                if event.type == pygame.QUIT:
+
+                    if self.connected:
+                        game.n.disconnect()
+
+                    pygame.quit()
+                    sys.exit()
+
+                
+                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                    try: 
+                        game.width, game.height = event.w, event.h
+                    except:
+                        pass
+                    game.resize_all_screens()
+
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if start_screen.back_button.collidepoint(mouse):
+                        running = False
+
+            start_screen.draw_back_button(mouse)
+            pygame.display.update()
 
 
     async def connect_presence(self):
@@ -1571,6 +1621,7 @@ class StartScreen(Game):
         game.time_started = time.time()
         game.running = True
         game.resize_screen_setup()
+    
 
 
 
@@ -2253,7 +2304,6 @@ class SettingsScreen(StartScreen):
                     new_right_arrow = right_arrow
                     new_right_arrow_rect = new_right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
                     new_right_arrow_rect_color = tuple(darken(i, 15) for i in game.foreground_color)
-                
                 
                 
                 else:

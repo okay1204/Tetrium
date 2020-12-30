@@ -1396,6 +1396,7 @@ class StartScreen(Game):
         initial_presence = False
         held_time = 0
         held_key = ""
+        held_unicode = ""
 
         last_cycle = 0
 
@@ -1494,20 +1495,6 @@ class StartScreen(Game):
                         self.input_active = False
 
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_s:
-                        game.multiplayer = False
-                        running = False
-                        self.started = True
-                        game.name = self.input_text
-
-                        # saving nickname
-                        with open(get_path('settings.json')) as f:
-                            settings = json.load(f)
-
-                        settings['name'] = self.input_text
-
-                        with open(get_path('settings.json'), 'w') as f:
-                            json.dump(settings, f, indent=2)
                     
                     if self.input_active:
                         
@@ -1529,6 +1516,7 @@ class StartScreen(Game):
                             
                             if event.key == pygame.K_BACKSPACE:
                                 held_unicode = "backspace"
+
                             else:
                                 held_unicode = event.unicode
                 

@@ -307,7 +307,7 @@ def game_over(win: bool):
         return text
 
     message_text = ''
-    input_text_width = 0
+    mressage_text_width = 0
     input_active = False
 
     while gameOver:
@@ -323,6 +323,10 @@ def game_over(win: bool):
 
 
         mouse = pygame.mouse.get_pos()
+        held_key = ""
+        held_unicode = ""
+        held_time = 0
+
 
         # Game over loop
 
@@ -335,7 +339,7 @@ def game_over(win: bool):
             # if it starts with "me", then it is by this client, if its "opp" the message is by the opponent
             if event.type == pygame.KEYDOWN:
    
-
+                #sending message
                 if message_text and event.key == pygame.K_RETURN:
                     message_text = send_text(message_text)
                     
@@ -344,16 +348,29 @@ def game_over(win: bool):
                         message_text = message_text[:-1]
 
                     else:
-                        message_text += get_input(event.unicode, input_text_width)
-
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if input_box.collidepoint(event.pos):
-                    input_active = True
+                        message_text += get_input(event.unicode, mressage_text_width)
                     
-                else: 
-                    input_active = False
+                    if held_key != pygame.key:
+                        held_time = time.time() + 0.5
+                    
+                        held_key = event.key
+                        
+                        if event.key == pygame.K_BACKSPACE:
+                            held_unicode = "backspace"
 
-            if event.type == pygame.QUIT:
+                        else:
+                            held_unicode = event.unicode
+
+            elif event.type == pygame.KEYUP:
+
+                held_time = time.time() + 0.5
+
+                if event.key == held_key:
+                    held_key = ""
+                    held_unicode = ""
+                
+
+            elif event.type == pygame.QUIT:
                 stop()
 
             elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
@@ -378,6 +395,11 @@ def game_over(win: bool):
                         
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if input_box.collidepoint(event.pos):
+                    input_active = True
+                    
+                else: 
+                    input_active = False
 
                 # find new match
                 if menu_button_rect.collidepoint(event.pos):
@@ -401,24 +423,31 @@ def game_over(win: bool):
                         rematch_active = False
                         self_rematch_text = "Rematching..."
                         send("rematch")
+                        
                     else:
                         gameOver = False
                         return True
 
-        # for hover effects
-        if menu_button_rect.collidepoint(mouse):
-            menu_button_color = tuple(darken(i, 15) for i in game.foreground_color)
-        else:
-            menu_button_color = game.foreground_color
+        if held_key and time.time() >= held_time:
 
-        if rematch_button_rect.collidepoint(mouse):
-            rematch_button_color = tuple(darken(i, 15) for i in game.foreground_color)
-        else:
-            rematch_button_color = game.foreground_color
+            held_time = time.time() + 0.05
+
+            if held_unicode == "backspace":
+                message_text = message_text[:-1]
+
+            else:
+                message_text += get_input(held_unicode)
+
+            
+
+        menu_button_color = tuple(darken(i, 15) for i in game.foreground_color) if menu_button_rect.collidepoint(mouse) else game.foreground_color
+
+        rematch_button_color = tuple(darken(i, 15) for i in game.foreground_color) if rematch_button_rect.collidepoint(mouse) else game.foreground_color
 
         if game.multiplayer:
             draw_self_rematch_text()
             draw_texts()
+
         else:
             draw_stats()
 
@@ -427,15 +456,16 @@ def game_over(win: bool):
             return True
 
         game.screen.blit(game_over_text, textRect)
-        input_text_width = draw_chat_box(message_text, input_active)
+        mressage_text_width = draw_chat_box(message_text, input_active)
         draw_menu_button()
         draw_chat()
 
         if not opp_disconnected_after:
             draw_rematch_button()
 
-        if (time.time() > game_over_start + 1 and won == False) or won == True:
+        if (time.time() > game_over_start + 1 and not won == False) or won == True:
             pygame.display.update()
+
         game.clock.tick(60)
 
 
@@ -1093,6 +1123,7 @@ while True:
         if current.check_floor() and not touched_floor:
             fall = time.time() + 0.5
             touched_floor = True
+
         elif not current.check_floor():
             touched_floor = False
         current.move(0, -1)

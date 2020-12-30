@@ -304,11 +304,18 @@ def game_over(win: bool):
         return message_render.get_rect().width
 
     def get_input(text, text_width):
-        return text
+        if text_width < input_box.width - 15:
+            return text
+        
+        return ''
 
     message_text = ''
-    mressage_text_width = 0
+    message_text_width = 0
     input_active = False
+
+    held_key = ""
+    held_unicode = ""
+    held_time = 0
 
     while gameOver:
 
@@ -323,10 +330,6 @@ def game_over(win: bool):
 
 
         mouse = pygame.mouse.get_pos()
-        held_key = ""
-        held_unicode = ""
-        held_time = 0
-
 
         # Game over loop
 
@@ -348,7 +351,7 @@ def game_over(win: bool):
                         message_text = message_text[:-1]
 
                     else:
-                        message_text += get_input(event.unicode, mressage_text_width)
+                        message_text += get_input(event.unicode, message_text_width)
                     
                     if held_key != pygame.key:
                         held_time = time.time() + 0.5
@@ -436,8 +439,7 @@ def game_over(win: bool):
                 message_text = message_text[:-1]
 
             else:
-                message_text += get_input(held_unicode)
-            
+                message_text += get_input(held_unicode, message_text_width)
 
         menu_button_color = tuple(darken(i, 15) for i in game.foreground_color) if menu_button_rect.collidepoint(mouse) else game.foreground_color
 
@@ -455,14 +457,14 @@ def game_over(win: bool):
             return True
 
         game.screen.blit(game_over_text, textRect)
-        mressage_text_width = draw_chat_box(message_text, input_active)
+        message_text_width = draw_chat_box(message_text, input_active)
         draw_menu_button()
         draw_chat()
 
         if not opp_disconnected_after:
             draw_rematch_button()
 
-        if (time.time() > game_over_start + 1 and not won == False) or won == True:
+        if (time.time() > game_over_start + 1 and won == False) or won == True:
             pygame.display.update()
 
         game.clock.tick(60)

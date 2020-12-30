@@ -126,7 +126,6 @@ canSwitch = True
 
 gameOver = False
 
-chat = []
 
 
 def reset():
@@ -202,12 +201,6 @@ def game_over(win: bool):
     opponent_text = text_font.render(game.opp_name, True, game.foreground_color)
     opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2) + 100 + opponent_text.get_rect().height/2))
     
-    input_box_width = 300
-    input_box_height = 50
-    input_box_x = (game.width - input_box_width)/2
-    input_box_y =  game.height/2 - 85
-    input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
-    input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , game.height/2 - 85, input_box_width, input_box_height)
     chat_icon = pygame.image.load(get_path('./assets/images/chat_icon.png'))
     offset = game.width/15
     chat_icon_height = chat_icon.get_height()
@@ -288,48 +281,9 @@ def game_over(win: bool):
         game.screen.blit(level_text, (game.width // 2 - level_text.get_rect().width//2, 340))
 
 
-    def draw_chat():
-        for idx, msg in enumerate(chat):
-            text_render = game.small_font.render(msg, True, game.foreground_color)
-            game.screen.blit(text_render, (game.width/2 - 100, 100 + 50 * (idx + 1)))
-
-    def send_text(text):
-        send(f"chat {text}")
-        chat.append(f"me {text}")
-        return ''
-
-    def draw_chat_box(message, active):
-        if active:
-            input_bkg_color = (0, 0, 255)
-
-        else:
-            input_bkg_color = (0, 0, 0)
-
-        pygame.draw.rect(game.screen, input_bkg_color, input_box, 10)
-        pygame.draw.rect(game.screen, (255,255,255), input_box_bkg)
-
-        message_render = game.medium_font.render(message, True, game.background_color) if message else game.small_font.render("send a message", True, game.foreground_color)
-        game.screen.blit(message_render, (input_box.x + 5, input_box.y + 6))
-        return message_render.get_rect().width
-
-
     def draw_chat_icon():
         game.screen.blit(chat_icon, chat_icon_pos)
 
-
-    def get_input(text, text_width):
-        if text_width < input_box.width - 15:
-            return text
-        
-        return ''
-
-    message_text = ''
-    message_text_width = 0
-    input_active = False
-
-    held_key = ""
-    held_unicode = ""
-    held_time = 0
 
     while gameOver:
 
@@ -348,45 +302,7 @@ def game_over(win: bool):
 
         for event in pygame.event.get():
 
-
-            # NOTE this if statement is temporary, in order to send a chat message
-            # used the send() and chat.append() functions where text is the message to send
-            # the list, chat, is a list of messages that start with "me" or "opp"
-            # if it starts with "me", then it is by this client, if its "opp" the message is by the opponent
-            if event.type == pygame.KEYDOWN:
-   
-                #sending message
-                if message_text and event.key == pygame.K_RETURN:
-                    message_text = send_text(message_text)
-                    
-                if input_active:
-                    if event.key == pygame.K_BACKSPACE:
-                        message_text = message_text[:-1]
-
-                    else:
-                        message_text += get_input(event.unicode, message_text_width)
-                    
-                    if held_key != pygame.key:
-                        held_time = time.time() + 0.5
-                    
-                        held_key = event.key
-                        
-                        if event.key == pygame.K_BACKSPACE:
-                            held_unicode = "backspace"
-
-                        else:
-                            held_unicode = event.unicode
-
-            elif event.type == pygame.KEYUP:
-
-                held_time = time.time() + 0.5
-
-                if event.key == held_key:
-                    held_key = ""
-                    held_unicode = ""
-                
-
-            elif event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:
                 stop()
 
             elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
@@ -404,10 +320,6 @@ def game_over(win: bool):
                 rematch_button_rect = pygame.Rect(rematch_button_pos, rematch_button_dimensions)
                 opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
                 textRect.center = (game.width // 2, 200)
-                input_box_x = (game.width - input_box_width)/2
-                input_box_y =  game.height/2 - 85
-                input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
-                input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , game.height/2 - 85, input_box_width, input_box_height)
                 offset = game.width/15
                 chat_icon_height = chat_icon.get_height()
                 chat_icon_width = chat_icon.get_width()
@@ -416,12 +328,6 @@ def game_over(win: bool):
                         
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if input_box.collidepoint(event.pos):
-                    input_active = True
-                    
-                else: 
-                    input_active = False
-
                 # find new match
                 if menu_button_rect.collidepoint(event.pos):
                     game.running = False
@@ -437,11 +343,11 @@ def game_over(win: bool):
                     gameOver = False
                     return False
 
-                if chat_icon_rect.collidepoint(event.pos):
-                    game.chat_screen()
+                elif chat_icon_rect.collidepoint(event.pos):
+                    game.chat_screen(send)
 
                 
-                if rematch_button_rect.collidepoint(event.pos) and rematch_active and not opp_disconnected_after:
+                elif rematch_button_rect.collidepoint(event.pos) and rematch_active and not opp_disconnected_after:
 
                     if game.multiplayer:
                         rematch_active = False
@@ -452,15 +358,6 @@ def game_over(win: bool):
                         gameOver = False
                         return True
 
-        if held_key and time.time() >= held_time:
-
-            held_time = time.time() + 0.05
-
-            if held_unicode == "backspace":
-                message_text = message_text[:-1]
-
-            else:
-                message_text += get_input(held_unicode, message_text_width)
 
         menu_button_color = tuple(darken(i, 15) for i in game.foreground_color) if menu_button_rect.collidepoint(mouse) else game.foreground_color
 
@@ -478,9 +375,7 @@ def game_over(win: bool):
             return True
 
         game.screen.blit(game_over_text, textRect)
-        message_text_width = draw_chat_box(message_text, input_active)
         draw_menu_button()
-        draw_chat()
         draw_chat_icon()
 
         if not opp_disconnected_after:
@@ -623,7 +518,7 @@ def server_connection():
             elif special.startswith('chat'):
                 special = special[5:]
 
-                chat.append(f"opp {special}")
+                game.chat.append(f"opp {special}")
 
         if game.level != data.speed_level():
             display_until = time.time() + 3
@@ -744,7 +639,7 @@ while True:
 
     game.check_random_theme()
     start_screen.main()
-    chat = []
+    game.chat = []
 
     if game.multiplayer:
         _thread.start_new_thread(server_connection, ())

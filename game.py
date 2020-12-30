@@ -121,6 +121,9 @@ class Game:
 
         self.rows_cleared = []
 
+        self.chat = []
+
+        
         self.small_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 15)
         self.medium_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 20)
         self.big_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 30)
@@ -714,9 +717,63 @@ class Game:
     def game_over_rematched(self):
         return not self.game_over_rematched_bool
 
-    def chat_screen(self):
+    def chat_screen(self, send_chat):
+
+        message_text = ''
+        message_text_width = 0
+        input_active = False
+
+        held_key = ""
+        held_unicode = ""
+        held_time = 0
+
+        input_box_width = 300
+        input_box_height = 50
+        input_box_x = (game.width - input_box_width)/2
+        input_box_y =  game.height/2 - 85
+        input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
+        input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , game.height/2 - 85, input_box_width, input_box_height)
+
+        def draw_chat():
+            for idx, msg in enumerate(game.chat):
+                text_render = game.small_font.render(msg, True, game.foreground_color)
+                game.screen.blit(text_render, (game.width/2 - 100, 100 + 50 * (idx + 1)))
+
+        def send_text(text):
+            send_chat(f"chat {text}")
+            game.chat.append(f"me {text}")
+            return ''
+
+        def draw_chat_box(message, active):
+            if active:
+                input_bkg_color = (0, 0, 255)
+
+            else:
+                input_bkg_color = (0, 0, 0)
+
+            pygame.draw.rect(game.screen, input_bkg_color, input_box, 10)
+            pygame.draw.rect(game.screen, (255,255,255), input_box_bkg)
+
+            message_render = game.medium_font.render(message, True, game.background_color) if message else game.small_font.render("send a message", True, game.foreground_color)
+            game.screen.blit(message_render, (input_box.x + 5, input_box.y + 6))
+            return message_render.get_rect().width
+
+
+        def get_input(text, text_width):
+            if text_width < input_box.width - 15:
+                return text
+            
+            return ''
+
+
         running = True
         while running:
+
+            # NOTE in order to send a chat message
+            # used the send() and chat.append() functions where text is the message to send
+            # the list, chat, is a list of messages that start with "me" or "opp"
+            # if it starts with "me", then it is by this client, if its "opp" the message is by the opponent
+
 
             #Makes sure that if game starts while were in this screen it goes back to game
             running = self.game_over_rematched()
@@ -745,19 +802,74 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-                
-                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
-                    try: 
-                        game.width, game.height = event.w, event.h
-                    except:
-                        pass
-                    game.resize_all_screens()
-
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if input_box.collidepoint(event.pos):
+                        input_active = True
+                        
+                    else: 
+                        input_active = False
+
                     if start_screen.back_button.collidepoint(mouse):
                         running = False
 
+                elif event.type == pygame.KEYDOWN:
+   
+                    #sending message
+                    if message_text and event.key == pygame.K_RETURN:
+                        message_text = send_text(message_text)
+                        
+                    if input_active:
+                        if event.key == pygame.K_BACKSPACE:
+                            message_text = message_text[:-1]
+
+                        else:
+                            message_text += get_input(event.unicode, message_text_width)
+                        
+                        if held_key != pygame.key:
+                            held_time = time.time() + 0.5
+                        
+                            held_key = event.key
+                            
+                            if event.key == pygame.K_BACKSPACE:
+                                held_unicode = "backspace"
+
+                            else:
+                                held_unicode = event.unicode
+
+                elif event.type == pygame.KEYUP:
+
+                    held_time = time.time() + 0.5
+
+                    if event.key == held_key:
+                        held_key = ""
+                        held_unicode = ""
+
+                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                    try:
+                        game.width, game.height = event.w, event.h
+                    except: pass
+                    game.resize_all_screens()
+                    input_box_x = (game.width - input_box_width)/2
+                    input_box_y =  game.height/2 - 85
+                    input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
+                    input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , game.height/2 - 85, input_box_width, input_box_height)
+
+
+            if held_key and time.time() >= held_time:
+
+                held_time = time.time() + 0.05
+
+                if held_unicode == "backspace":
+                    message_text = message_text[:-1]
+
+                else:
+                    message_text += get_input(held_unicode, message_text_width)
+
             start_screen.draw_back_button(mouse)
+            message_text_width = draw_chat_box(message_text, input_active)
+            draw_chat()
+
+
             pygame.display.update()
 
 
@@ -1545,15 +1657,14 @@ class StartScreen(Game):
                         self.input_active = False
 
                 elif event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_RETURN:
+                        self.start()
+                        game.screen.fill((0, 0, 0))
                     
                     if self.input_active:
-                        
-                        if event.key == pygame.K_RETURN:
-                            self.start()
-                            game.screen.fill((0, 0, 0))
-                                
 
-                        elif event.key == pygame.K_BACKSPACE:
+                        if event.key == pygame.K_BACKSPACE:
                             self.input_text = self.input_text[:-1]
 
                         else:

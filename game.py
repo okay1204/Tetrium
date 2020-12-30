@@ -730,14 +730,15 @@ class Game:
         input_box_width = 300
         input_box_height = 50
         input_box_x = (game.width - input_box_width)/2
-        input_box_y =  game.height/2 - 85
+        input_box_y =  game.height - 100
         input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
-        input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , game.height/2 - 85, input_box_width, input_box_height)
+        input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , input_box_y, input_box_width, input_box_height)
 
-        def draw_chat():
-            for idx, msg in enumerate(game.chat):
+        def draw_messages(start):
+            #it starts drawing from the start up 
+            for idx, msg in enumerate(reversed(game.chat)):
                 text_render = game.small_font.render(msg, True, game.foreground_color)
-                game.screen.blit(text_render, (game.width/2 - 100, 100 + 50 * (idx + 1)))
+                game.screen.blit(text_render, (game.width/2 - 100, start - 50 * (idx + 1)))
 
         def send_text(text):
             send_chat(f"chat {text}")
@@ -755,8 +756,9 @@ class Game:
             pygame.draw.rect(game.screen, (255,255,255), input_box_bkg)
 
             message_render = game.medium_font.render(message, True, game.background_color) if message else game.small_font.render("send a message", True, game.foreground_color)
-            game.screen.blit(message_render, (input_box.x + 5, input_box.y + 6))
-            return message_render.get_rect().width
+            message_render_rect = message_render.get_rect()
+            game.screen.blit(message_render, (input_box.x + 5, input_box.y + message_render_rect.height/2))
+            return message_render_rect.width
 
 
         def get_input(text, text_width):
@@ -850,9 +852,9 @@ class Game:
                     except: pass
                     game.resize_all_screens()
                     input_box_x = (game.width - input_box_width)/2
-                    input_box_y =  game.height/2 - 85
+                    input_box_y =  game.height - 100
                     input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
-                    input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , game.height/2 - 85, input_box_width, input_box_height)
+                    input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , input_box_y, input_box_width, input_box_height)
 
 
             if held_key and time.time() >= held_time:
@@ -867,7 +869,7 @@ class Game:
 
             start_screen.draw_back_button(mouse)
             message_text_width = draw_chat_box(message_text, input_active)
-            draw_chat()
+            draw_messages(input_box_y)
 
 
             pygame.display.update()

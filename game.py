@@ -742,7 +742,7 @@ class Game:
 
         def send_text(text):
             send_chat(f"chat {text}")
-            game.chat.append(f"me {text}")
+            game.chat.append(f"You: {text}")
             return ''
 
         def draw_chat_box(message, active):

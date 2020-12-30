@@ -518,7 +518,7 @@ def server_connection():
             elif special.startswith('chat'):
                 special = special[5:]
 
-                game.chat.append(f"opp {special}")
+                game.chat.append(f"{game.opp_name}: {special}")
 
         if game.level != data.speed_level():
             display_until = time.time() + 3

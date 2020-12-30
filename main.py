@@ -437,7 +437,6 @@ def game_over(win: bool):
 
             else:
                 message_text += get_input(held_unicode)
-
             
 
         menu_button_color = tuple(darken(i, 15) for i in game.foreground_color) if menu_button_rect.collidepoint(mouse) else game.foreground_color

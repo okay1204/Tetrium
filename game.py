@@ -735,10 +735,18 @@ class Game:
         input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , input_box_y, input_box_width, input_box_height)
 
         def draw_messages(start):
+            last_y = 0
+
             #it starts drawing from the start up 
             for idx, msg in enumerate(reversed(game.chat)):
                 text_render = game.small_font.render(msg, True, game.foreground_color)
                 game.screen.blit(text_render, (game.width/2 - 100, start - 50 * (idx + 1)))
+                #returning top most y to know where to stop scrolling
+                if idx == len(game.chat) - 1:
+                    last_y = start - 50 * (idx + 1)
+
+            return last_y
+
 
         def send_text(text):
             send_chat(f"chat {text}")
@@ -761,12 +769,30 @@ class Game:
             return message_render_rect.width
 
 
-        def get_input(text, text_width):
+        def get_input(text: str, text_width: int):
             if text_width < input_box.width - 15:
                 return text
             
             return ''
 
+
+        def scroll(bottom, top, dr: int) -> int:
+            """
+            -1 = up -> text comes down
+            1 = down -> text comes up
+            """
+            print(bottom, top)
+
+
+            #making sure its not off screen
+            if (dr == -1 and top < 30) or (dr == 1 and bottom < input_box_y + 50):
+                return bottom + 30 * dr
+
+            return bottom
+
+
+        message_bottom = input_box_y
+        message_top = 0
 
         running = True
         while running:
@@ -804,15 +830,23 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if input_box.collidepoint(event.pos):
-                        input_active = True
-                        
-                    else: 
-                        input_active = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        if input_box.collidepoint(event.pos):
+                            input_active = True
+                            
+                        else: 
+                            input_active = False
 
-                    if start_screen.back_button.collidepoint(mouse):
-                        running = False
+                        if start_screen.back_button.collidepoint(mouse):
+                            running = False
+                    
+                    elif event.button == 4:
+                        message_bottom = scroll(message_bottom, message_top, -1)
+
+                    elif event.button == 5:
+                        message_bottom = scroll(message_bottom, message_top, 1)
+
 
                 elif event.type == pygame.KEYDOWN:
    
@@ -869,7 +903,7 @@ class Game:
 
             start_screen.draw_back_button(mouse)
             message_text_width = draw_chat_box(message_text, input_active)
-            draw_messages(input_box_y)
+            message_top = draw_messages(message_bottom)
 
 
             pygame.display.update()

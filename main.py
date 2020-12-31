@@ -639,7 +639,7 @@ while True:
 
     game.check_random_theme()
     start_screen.main()
-    game.chat = []
+    # game.chat = []
 
     if game.multiplayer:
         _thread.start_new_thread(server_connection, ())

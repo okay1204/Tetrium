@@ -729,28 +729,32 @@ class Game:
 
         input_box_width = 300
         input_box_height = 50
-        input_box_x = (game.width - input_box_width)/2
-        input_box_y =  game.height - 100
+        input_box_x = (self.width - input_box_width)/2
+        input_box_y =  self.height - 100
         input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
-        input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , input_box_y, input_box_width, input_box_height)
+        input_box_bkg = pygame.Rect((self.width - input_box_width)/2 , input_box_y, input_box_width, input_box_height)
 
         def draw_messages(start):
             last_y = 0
 
             #it starts drawing from the start up 
-            for idx, msg in enumerate(reversed(game.chat)):
-                text_render = game.small_font.render(msg, True, game.foreground_color)
-                game.screen.blit(text_render, (game.width/2 - 100, start - 50 * (idx + 1)))
+            for idx, msg in enumerate(reversed(self.chat)):
+                text_render = game.small_font.render(msg, True, self.foreground_color)
+                game.screen.blit(text_render, (self.width/2 - 100, start - 50 * (idx + 1)))
                 #returning top most y to know where to stop scrolling
-                if idx == len(game.chat) - 1:
+                if idx == len(self.chat) - 1:
                     last_y = start - 50 * (idx + 1)
+
+
+            #draw a rectangle to cover the messages behind the message box if the user scrolls down
+            pygame.draw.rect(self.screen, self.background_color, (0, input_box_y - 15, self.width, self.height - input_box_y + 15))
 
             return last_y
 
 
         def send_text(text):
             send_chat(f"chat {text}")
-            game.chat.append(f"You: {text}")
+            self.chat.append(f"You: {text}")
             return ''
 
         def draw_chat_box(message, active):
@@ -776,7 +780,7 @@ class Game:
             return ''
 
 
-        def scroll(bottom, top, dr: int) -> int:
+        def scroll(bottom: int, top: int, dr: int) -> int:
             """
             -1 = up -> text comes down
             1 = down -> text comes up
@@ -785,8 +789,8 @@ class Game:
 
 
             #making sure its not off screen
-            if (dr == -1 and top < 30) or (dr == 1 and bottom < input_box_y + 50):
-                return bottom + 30 * dr
+            if (dr == -1 and top < 30) or (dr == 1 and bottom > input_box_y):
+                return bottom + 30 * dr * -1
 
             return bottom
 
@@ -880,15 +884,15 @@ class Game:
                         held_key = ""
                         held_unicode = ""
 
-                elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                elif event.type == pygame.VIDEORESIZE or self.check_fullscreen(event):
                     try:
                         game.width, game.height = event.w, event.h
                     except: pass
-                    game.resize_all_screens()
-                    input_box_x = (game.width - input_box_width)/2
-                    input_box_y =  game.height - 100
+                    self.resize_all_screens()
+                    input_box_x = (self.width - input_box_width)/2
+                    input_box_y =  self.height - 100
                     input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
-                    input_box_bkg = pygame.Rect((game.width - input_box_width)/2 , input_box_y, input_box_width, input_box_height)
+                    input_box_bkg = pygame.Rect((self.width - input_box_width)/2 , input_box_y, input_box_width, input_box_height)
 
 
             if held_key and time.time() >= held_time:
@@ -902,8 +906,8 @@ class Game:
                     message_text += get_input(held_unicode, message_text_width)
 
             start_screen.draw_back_button(mouse)
-            message_text_width = draw_chat_box(message_text, input_active)
             message_top = draw_messages(message_bottom)
+            message_text_width = draw_chat_box(message_text, input_active)
 
 
             pygame.display.update()

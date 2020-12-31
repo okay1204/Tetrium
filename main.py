@@ -320,7 +320,7 @@ def game_over(win: bool):
                 rematch_button_rect = pygame.Rect(rematch_button_pos, rematch_button_dimensions)
                 opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
                 textRect.center = (game.width // 2, 200)
-                offset = game.width/15
+                offset = 20
                 chat_icon_height = chat_icon.get_height()
                 chat_icon_width = chat_icon.get_width()
                 chat_icon_pos = (game.width - chat_icon_width - offset, game.height - chat_icon_height - offset)

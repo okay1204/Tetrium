@@ -201,8 +201,8 @@ def game_over(win: bool):
     opponent_text = text_font.render(game.opp_name, True, game.foreground_color)
     opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2) + 100 + opponent_text.get_rect().height/2))
     
-    chat_icon = pygame.image.load(get_path('./assets/images/chat_icon.png'))
-    offset = game.width/15
+    chat_icon = pygame.transform.scale(pygame.image.load(get_path('./assets/images/chat_icon.png')), (75, 68))
+    offset = 20
     chat_icon_height = chat_icon.get_height()
     chat_icon_width = chat_icon.get_width()
     chat_icon_pos = (game.width - chat_icon_width - offset, game.height - chat_icon_height - offset)
@@ -1045,6 +1045,7 @@ while True:
 
         elif not current.check_floor():
             touched_floor = False
+
         current.move(0, -1)
 
         # makes the piece fall by one
@@ -1074,7 +1075,7 @@ while True:
                         if not current.check_overlap():
                             spin_move = False
 
-                        current.move(*tuple(-1 * i for i in direction))
+                        current.move(*tuple(-i for i in direction))
 
                         if not spin_move:
                             break

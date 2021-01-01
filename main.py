@@ -67,7 +67,8 @@ def render_texts():
             original = text
 
             if isinstance(text, str):
-                text = text
+                #NOTE dont remove this comma, it converts it into a tuple
+                text = text,
 
             textElements = []
             for line in text:

@@ -1,5 +1,5 @@
 # Tetrium
-Code for the Online Tetrium.
+Code for Online Tetrium.
 
 
-Online Multliplayer Tetris made with pygame.
+Online Multliplayer Block stacking game made with pygame.

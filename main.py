@@ -296,6 +296,9 @@ def game_over(win: bool):
         elif opp_rematched:
             opp_rematch_text = "Rematching..."
 
+        else:
+            opp_rematch_text = "Deciding..."
+
         mouse = pygame.mouse.get_pos()
 
         # Game over loop
@@ -306,6 +309,7 @@ def game_over(win: bool):
                 stop()
 
             elif event.type == pygame.VIDEORESIZE or game.check_fullscreen(event):
+                
                 try:
                     game.width, game.height = event.w, event.h
                 except: pass
@@ -347,12 +351,28 @@ def game_over(win: bool):
                     game.chat_screen(send)
 
                 
-                elif rematch_button_rect.collidepoint(event.pos) and rematch_active and not opp_disconnected_after:
+                elif rematch_button_rect.collidepoint(event.pos) and not opp_disconnected_after:
 
                     if game.multiplayer:
-                        rematch_active = False
-                        self_rematch_text = "Rematching..."
-                        send("rematch")
+
+                        if rematch_active:
+                            self_rematch_text = "Rematching..."
+                            send("rematch")
+
+                            rematch_button_text = rematch_button_font.render('Cancel', True, game.background_color)
+                            rematch_button_dimensions = (100, 40)
+                        
+                        else:
+                            self_rematch_text = "Deciding..."
+                            send("unrematch")
+
+                            rematch_button_text = rematch_button_font.render('Rematch', True, game.background_color)
+                            rematch_button_dimensions = (120, 40)
+
+                        rematch_button_pos = (int(game.width/2 - rematch_button_dimensions[0]/2), int(game.height/2)+150)
+                        rematch_button_rect = pygame.Rect(rematch_button_pos, rematch_button_dimensions)
+
+                        rematch_active = not rematch_active
                         
                     else:
                         gameOver = False

@@ -106,6 +106,9 @@ def threaded_client(conn, player, game):
                                 if all(game.rematch):
                                     game._reset()
 
+                            elif special == "unrematch":
+                                game.rematch[player] = False
+
                             elif special.startswith("chat"):
                                 
                                 game._send_chat(player, special)

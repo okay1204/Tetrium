@@ -1,5 +1,6 @@
 # pylint: disable=no-member, unused-wildcard-import, no-name-in-module
 import pygame
+from pygame import mouse
 import pieces as pieces_lib
 import math
 import time
@@ -12,7 +13,6 @@ import _thread
 import asyncio
 import ntpath
 from webbrowser import open_new
-from colour import Color
 
 
 # these two lines saved my life
@@ -104,7 +104,7 @@ class Game:
 
 
         self.time_started = 0
-
+        self.game_over_rematched_bool = False
 
         self.fullscreen = False
 
@@ -121,6 +121,9 @@ class Game:
 
         self.rows_cleared = []
 
+        self.chat = []
+
+        
         self.small_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 15)
         self.medium_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 20)
         self.big_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 30)
@@ -711,6 +714,204 @@ class Game:
 
         return True
 
+    def game_over_rematched(self):
+        return not self.game_over_rematched_bool
+
+    def chat_screen(self, send_chat):
+
+        message_text = ''
+        message_text_width = 0
+        input_active = False
+
+        held_key = ""
+        held_unicode = ""
+        held_time = 0
+
+        input_box_width = 300
+        input_box_height = 50
+        input_box_x = (self.width - input_box_width)/2
+        input_box_y =  self.height - 100
+        input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
+        input_box_bkg = pygame.Rect((self.width - input_box_width)/2 , input_box_y, input_box_width, input_box_height)
+
+        def draw_messages(start):
+            last_y = 0
+
+            #it starts drawing from the start up 
+            for idx, msg in enumerate(reversed(self.chat)):
+                text_render = game.small_font.render(msg, True, self.foreground_color)
+                game.screen.blit(text_render, (self.width/2 - 100, start - 50 * (idx + 1)))
+                #returning top most y to know where to stop scrolling
+                if idx == len(self.chat) - 1:
+                    last_y = start - 50 * (idx + 1)
+
+
+            #draw a rectangle to cover the messages behind the message box if the user scrolls down
+            pygame.draw.rect(self.screen, self.background_color, (0, input_box_y - 15, self.width, self.height - input_box_y + 15))
+
+            return last_y
+
+
+        def send_text(text):
+            send_chat(f"chat {text}")
+            self.chat.append(f"You: {text}")
+            return ''
+
+        def draw_chat_box(message, active):
+            if active:
+                input_bkg_color = (0, 0, 255)
+
+            else:
+                input_bkg_color = (0, 0, 0)
+
+            pygame.draw.rect(game.screen, input_bkg_color, input_box, 10)
+            pygame.draw.rect(game.screen, (255,255,255), input_box_bkg)
+
+            message_render = game.medium_font.render(message, True, game.background_color) if message else game.small_font.render("send a message", True, game.foreground_color)
+            message_render_rect = message_render.get_rect()
+            game.screen.blit(message_render, (input_box.x + 5, input_box.y + message_render_rect.height/2))
+            return message_render_rect.width
+
+
+        def get_input(text: str, text_width: int):
+            if text_width < input_box.width - 15:
+                return text
+            
+            return ''
+
+
+        def scroll(bottom: int, top: int, dr: int) -> int:
+            """
+            -1 = up -> text comes down
+            1 = down -> text comes up
+            """
+            print(bottom, top)
+
+
+            #making sure its not off screen
+            if (dr == -1 and top < 30) or (dr == 1 and bottom > input_box_y):
+                return bottom + 30 * dr * -1
+
+            return bottom
+
+
+        message_bottom = input_box_y
+        message_top = 0
+
+        running = True
+        while running:
+
+            # NOTE in order to send a chat message
+            # used the send() and chat.append() functions where text is the message to send
+            # the list, chat, is a list of messages that start with "me" or "opp"
+            # if it starts with "me", then it is by this client, if its "opp" the message is by the opponent
+
+
+            #Makes sure that if game starts while were in this screen it goes back to game
+            running = self.game_over_rematched()
+            
+
+            game.update_presence(
+                details = "In chat screen",
+                state = "Chatting",
+                start = game.time_opened,
+                large_image = "tetrium"
+            )
+
+            mouse = pygame.mouse.get_pos() 
+            
+            self.screen.fill(self.background_color)
+
+            #Game over loop
+            for event in pygame.event.get():
+                        
+
+                if event.type == pygame.QUIT:
+
+                    if self.connected:
+                        game.n.disconnect()
+
+                    pygame.quit()
+                    sys.exit()
+
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        if input_box.collidepoint(event.pos):
+                            input_active = True
+                            
+                        else: 
+                            input_active = False
+
+                        if start_screen.back_button.collidepoint(mouse):
+                            running = False
+                    
+                    elif event.button == 4:
+                        message_bottom = scroll(message_bottom, message_top, -1)
+
+                    elif event.button == 5:
+                        message_bottom = scroll(message_bottom, message_top, 1)
+
+
+                elif event.type == pygame.KEYDOWN:
+   
+                    #sending message
+                    if message_text and event.key == pygame.K_RETURN:
+                        message_text = send_text(message_text)
+                        
+                    if input_active:
+                        if event.key == pygame.K_BACKSPACE:
+                            message_text = message_text[:-1]
+
+                        else:
+                            message_text += get_input(event.unicode, message_text_width)
+                        
+                        if held_key != pygame.key:
+                            held_time = time.time() + 0.5
+                        
+                            held_key = event.key
+                            
+                            if event.key == pygame.K_BACKSPACE:
+                                held_unicode = "backspace"
+
+                            else:
+                                held_unicode = event.unicode
+
+                elif event.type == pygame.KEYUP:
+
+                    held_time = time.time() + 0.5
+
+                    if event.key == held_key:
+                        held_key = ""
+                        held_unicode = ""
+
+                elif event.type == pygame.VIDEORESIZE or self.check_fullscreen(event):
+                    try:
+                        game.width, game.height = event.w, event.h
+                    except: pass
+                    self.resize_all_screens()
+                    input_box_x = (self.width - input_box_width)/2
+                    input_box_y =  self.height - 100
+                    input_box = pygame.Rect(input_box_x, input_box_y, input_box_width, input_box_height)
+                    input_box_bkg = pygame.Rect((self.width - input_box_width)/2 , input_box_y, input_box_width, input_box_height)
+
+
+            if held_key and time.time() >= held_time:
+
+                held_time = time.time() + 0.05
+
+                if held_unicode == "backspace":
+                    message_text = message_text[:-1]
+
+                else:
+                    message_text += get_input(held_unicode, message_text_width)
+
+            start_screen.draw_back_button(mouse)
+            message_top = draw_messages(message_bottom)
+            message_text_width = draw_chat_box(message_text, input_active)
+
+
+            pygame.display.update()
+
 
     async def connect_presence(self):
         try:
@@ -992,48 +1193,11 @@ class Game:
 
             _thread.start_new_thread(hard_drop_shake, (intensity, 0))
 
-
-
-            def draw_gradient_effect():
-                def get_piece_dimensions(blocks):
-                    x_s = []
-                    y_s = []
-                    for block in blocks:
-                        x_s.append((block.x -1) * block.size + self.playing_field_rect.x)
-                        y_s.append((block.y - 1) * block.size + self.playing_field_rect.y)
-
-                    return [min(x_s), max(x_s) + 30], int(max(y_s))
-
-                rgb_to_frac = lambda x: x/255
-                frac_to_rgb = lambda x: int(x * 255)
-
-                end = Color(rgb = tuple(rgb_to_frac(i) for i in piece.blocks[0].color))
-                start = Color(rgb = tuple(rgb_to_frac(i) for i in self.foreground_color))
-
-                gradient = [tuple(map(frac_to_rgb, i.rgb)) for i in list(start.range_to(end, 91))]
-
-                #hard drop gradient
-                x_range, y_start = get_piece_dimensions(piece.blocks)
-                start = time.time()
-                while True:
-                    i = 0
-                    for y in range(y_start - 90, y_start + 1):
-                        pygame.draw.line(self.screen, gradient[i], (x_range[0], y), (x_range[1], y))
-                        i += 1
-                    
-                    if time.time() - start >= 1:
-                        break
-
-            # _thread.start_new_thread(draw_gradient_effect, ())
- 
             
 game = Game()
 
-
 class VFX:
     hard_drop = 0
-
-
 
 class StartScreen(Game):
 
@@ -1284,8 +1448,7 @@ class StartScreen(Game):
         if game.n.p == "no connection":
             self.no_connection_screen()
             return            
-
-
+            
 
         self.input_text = self.input_text.strip()
         if not self.input_text:
@@ -1312,7 +1475,6 @@ class StartScreen(Game):
 
     def cycle_colors(self, rgb):
         r, g, b = rgb
-    
 
         if self.rgb_stage == 0:
             if g < 255 and r > 0:
@@ -1345,7 +1507,6 @@ class StartScreen(Game):
             if piece.y >= 28:
                 #Moves it back up
                 piece.move(0, -30)
-
 
             piece.render(False)
 
@@ -1437,6 +1598,7 @@ class StartScreen(Game):
         initial_presence = False
         held_time = 0
         held_key = ""
+        held_unicode = ""
 
         last_cycle = 0
 
@@ -1456,9 +1618,7 @@ class StartScreen(Game):
                     start = game.time_opened,
                     large_image = "tetrium"
                 )
-
                 initial_presence = True
-
 
             self.mouse = pygame.mouse.get_pos() 
             
@@ -1537,15 +1697,14 @@ class StartScreen(Game):
                         self.input_active = False
 
                 elif event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_RETURN:
+                        self.start()
+                        game.screen.fill((0, 0, 0))
                     
                     if self.input_active:
-                        
-                        if event.key == pygame.K_RETURN:
-                            self.start()
-                            game.screen.fill((0, 0, 0))
-                                
 
-                        elif event.key == pygame.K_BACKSPACE:
+                        if event.key == pygame.K_BACKSPACE:
                             self.input_text = self.input_text[:-1]
 
                         else:
@@ -1558,6 +1717,7 @@ class StartScreen(Game):
                             
                             if event.key == pygame.K_BACKSPACE:
                                 held_unicode = "backspace"
+
                             else:
                                 held_unicode = event.unicode
                 
@@ -1576,6 +1736,7 @@ class StartScreen(Game):
 
                 if held_unicode == "backspace":
                     self.input_text = self.input_text[:-1]
+
                 else:
                     self.get_input(held_unicode)
                 
@@ -1611,10 +1772,7 @@ class StartScreen(Game):
         game.time_started = time.time()
         game.running = True
         game.resize_screen_setup()
-
-
-
-
+    
 
 
 
@@ -2297,7 +2455,6 @@ class SettingsScreen(StartScreen):
                     new_right_arrow = right_arrow
                     new_right_arrow_rect = new_right_arrow.get_rect(center = (right_arrow_pos[0] + dimensions/2, right_arrow_pos[1] + dimensions/2))
                     new_right_arrow_rect_color = tuple(darken(i, 15) for i in game.foreground_color)
-                
                 
                 
                 else:

@@ -67,7 +67,7 @@ def render_texts():
             original = text
 
             if isinstance(text, str):
-                text = text,
+                text = text
 
             textElements = []
             for line in text:
@@ -93,8 +93,6 @@ def render_texts():
     removed_texts.clear()
 
 
-
-
 def pick_bag():
     global bag, next_bag
 
@@ -104,7 +102,7 @@ def pick_bag():
         next_bag = pieces.copy()
         random.shuffle(next_bag)
 
-    bag.append(next_bag.pop(0))
+    bag.append(next_bag.pop(0)) 
 
     return value
 
@@ -128,7 +126,6 @@ canSwitch = True
 
 gameOver = False
 
-chat = []
 
 
 def reset():
@@ -160,6 +157,9 @@ opp_rematched = False
 def game_over(win: bool):
 
     global gameOver, opp_disconnected_after
+    
+    #resetting
+    game.game_over_rematched_bool = False
 
     game_over_start = time.time()
 
@@ -199,7 +199,14 @@ def game_over(win: bool):
     text_font = pygame.font.Font(get_path('assets/fonts/arial.ttf'), 25)
     you_text = text_font.render("You", True, game.foreground_color)
     opponent_text = text_font.render(game.opp_name, True, game.foreground_color)
-    opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
+    opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2) + 100 + opponent_text.get_rect().height/2))
+    
+    chat_icon = pygame.transform.scale(pygame.image.load(get_path('./assets/images/chat_icon.png')), (75, 68))
+    offset = 20
+    chat_icon_height = chat_icon.get_height()
+    chat_icon_width = chat_icon.get_width()
+    chat_icon_pos = (game.width - chat_icon_width - offset, game.height - chat_icon_height - offset)
+    chat_icon_rect = chat_icon.get_rect(center = (chat_icon_pos[0] + chat_icon_width/2, chat_icon_pos[1] + chat_icon_height/2))
 
     if game.multiplayer:
         if not win:
@@ -273,6 +280,11 @@ def game_over(win: bool):
         game.screen.blit(lines_text, (game.width // 2 - lines_text.get_rect().width//2, 290))
         game.screen.blit(level_text, (game.width // 2 - level_text.get_rect().width//2, 340))
 
+
+    def draw_chat_icon():
+        game.screen.blit(chat_icon, chat_icon_pos)
+
+
     while gameOver:
 
         game.screen.fill(game.background_color)
@@ -280,25 +292,15 @@ def game_over(win: bool):
 
         if opp_disconnected_after:
             opp_rematch_text = "Disconnected"
+
         elif opp_rematched:
             opp_rematch_text = "Rematching..."
-
 
         mouse = pygame.mouse.get_pos()
 
         # Game over loop
 
         for event in pygame.event.get():
-
-
-            # NOTE this if statement is temporary, in order to send a chat message
-            # used the send() and chat.append() functions where text is the message to send
-            # the list, chat, is a list of messages that start with "me" or "opp"
-            # if it starts with "me", then it is by this client, if its "opp" the message is by the opponent
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-                text = "hello there"
-                send(f"chat {text}")
-                chat.append(f"me {text}")
 
             if event.type == pygame.QUIT:
                 stop()
@@ -318,10 +320,14 @@ def game_over(win: bool):
                 rematch_button_rect = pygame.Rect(rematch_button_pos, rematch_button_dimensions)
                 opponent_rect = opponent_text.get_rect(center=((game.width/4)*3, int(game.height/2)+100+opponent_text.get_rect().height/2))
                 textRect.center = (game.width // 2, 200)
-            
+                offset = 20
+                chat_icon_height = chat_icon.get_height()
+                chat_icon_width = chat_icon.get_width()
+                chat_icon_pos = (game.width - chat_icon_width - offset, game.height - chat_icon_height - offset)
+                chat_icon_rect = chat_icon.get_rect(center = (chat_icon_pos[0] + chat_icon_width/2, chat_icon_pos[1] + chat_icon_height/2))
+                        
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-
                 # find new match
                 if menu_button_rect.collidepoint(event.pos):
                     game.running = False
@@ -337,32 +343,30 @@ def game_over(win: bool):
                     gameOver = False
                     return False
 
+                elif chat_icon_rect.collidepoint(event.pos):
+                    game.chat_screen(send)
+
                 
-                if rematch_button_rect.collidepoint(event.pos) and rematch_active and not opp_disconnected_after:
+                elif rematch_button_rect.collidepoint(event.pos) and rematch_active and not opp_disconnected_after:
 
                     if game.multiplayer:
                         rematch_active = False
                         self_rematch_text = "Rematching..."
                         send("rematch")
+                        
                     else:
                         gameOver = False
                         return True
 
-        # for hover effects
-        if menu_button_rect.collidepoint(mouse):
-            menu_button_color = tuple(darken(i, 15) for i in game.foreground_color)
-        else:
-            menu_button_color = game.foreground_color
-        
 
-        if rematch_button_rect.collidepoint(mouse):
-            rematch_button_color = tuple(darken(i, 15) for i in game.foreground_color)
-        else:
-            rematch_button_color = game.foreground_color
+        menu_button_color = tuple(darken(i, 15) for i in game.foreground_color) if menu_button_rect.collidepoint(mouse) else game.foreground_color
+
+        rematch_button_color = tuple(darken(i, 15) for i in game.foreground_color) if rematch_button_rect.collidepoint(mouse) else game.foreground_color
 
         if game.multiplayer:
             draw_self_rematch_text()
             draw_texts()
+
         else:
             draw_stats()
 
@@ -371,14 +375,15 @@ def game_over(win: bool):
             return True
 
         game.screen.blit(game_over_text, textRect)
-
         draw_menu_button()
+        draw_chat_icon()
 
         if not opp_disconnected_after:
             draw_rematch_button()
 
         if (time.time() > game_over_start + 1 and won == False) or won == True:
             pygame.display.update()
+
         game.clock.tick(60)
 
 
@@ -486,6 +491,7 @@ def server_connection():
 
         # telling game over function that rematch has started
         elif data.winner == None and gameOver:
+            game.game_over_rematched_bool = True
             won = None
 
         
@@ -512,7 +518,7 @@ def server_connection():
             elif special.startswith('chat'):
                 special = special[5:]
 
-                chat.append(f"opp {special}")
+                game.chat.append(f"{game.opp_name}: {special}")
 
         if game.level != data.speed_level():
             display_until = time.time() + 3
@@ -633,7 +639,7 @@ while True:
 
     game.check_random_theme()
     start_screen.main()
-    chat = []
+    # game.chat = []
 
     if game.multiplayer:
         _thread.start_new_thread(server_connection, ())
@@ -1036,8 +1042,10 @@ while True:
         if current.check_floor() and not touched_floor:
             fall = time.time() + 0.5
             touched_floor = True
+
         elif not current.check_floor():
             touched_floor = False
+
         current.move(0, -1)
 
         # makes the piece fall by one
@@ -1067,7 +1075,7 @@ while True:
                         if not current.check_overlap():
                             spin_move = False
 
-                        current.move(*tuple(-1 * i for i in direction))
+                        current.move(*tuple(-i for i in direction))
 
                         if not spin_move:
                             break
